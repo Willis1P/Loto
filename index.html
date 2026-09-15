@@ -1146,7 +1146,7 @@ function limparBuscaAposta(){
 }
 function renderizarGrupos(){
   jogosGrid.innerHTML = "";
-  if (state.sorteados.size === 0 && !forcarExibirTodos){
+  if (false && state.sorteados.size === 0 && !forcarExibirTodos){ // desativado - mostra todos os jogos por padrão
     emptyState.style.display = "block";
     document.getElementById("emptyMsg").textContent = "Selecione os números sorteados acima para conferir seus jogos.";
     return;
