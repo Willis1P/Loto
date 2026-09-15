@@ -781,24 +781,20 @@ function C(n, k){
 }
 
 /**
- * Conta combinações premiadas de um jogo de N dezenas com H acertos e M erros.
- * Para jogos simples (N=15) há apenas 1 combinação.
- * quantidade(P) = C(H, P) × C(M, 15 − P)
+ * Regra pedida: se um jogo deu 11 acerto é R$3,50 dividido pela quantidade de gente da cota
+ * NÃO multiplica por combinações (15×3,50). Cada jogo premiado conta 1 prêmio fixo.
+ * Ex: 1 jogo com 11 = R$3,50 total → ÷32 cotas = R$0,11 por cota (1 cota sua)
  */
 function analisarFaixas(hits, misses, qtdDezenas){
   const faixas = {};
   let premioBruto = 0;
   let combinacoesPremiadas = 0;
-
-  const inicio = qtdDezenas === 15 ? Math.max(11, hits) : 11;
-  const fim = qtdDezenas === 15 ? hits : 15;
-
-  for (let pts = inicio; pts <= fim; pts++){
-    const q = qtdDezenas === 15 ? 1 : C(hits, pts) * C(misses, 15 - pts);
-    if (q > 0){
-      faixas[pts] = q;
-      combinacoesPremiadas += q;
-      premioBruto += q * valorFaixa(pts);
+  if (hits >= 11){
+    const v = valorFaixa(hits);
+    if (v > 0){
+      faixas[hits] = 1;
+      combinacoesPremiadas = 1;
+      premioBruto = v;
     }
   }
   return {
