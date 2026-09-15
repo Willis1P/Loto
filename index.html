@@ -466,6 +466,9 @@ footer.app-footer strong{color:var(--primary)}
       <button class="chip" data-filtro="14" role="tab" aria-selected="false">14 pts</button>
       <button class="chip" data-filtro="15" role="tab" aria-selected="false">15 pts</button>
     </div>
+    <button id="btnMostrarTodosJogos" onclick="mostrarTodosJogos()" style="margin-top:12px; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 14px; border:none; border-radius:12px; background:linear-gradient(145deg,var(--primary),var(--primary-dark)); color:#fff; font-weight:800; font-size:0.82rem; cursor:pointer; box-shadow:0 4px 14px rgba(147,0,137,0.28);">
+      📋 Mostrar todos os jogos apostados em conferência — 161 jogos
+    </button>
     <div class="jogos-grid" id="jogosGrid" aria-live="polite"></div>
     <div class="empty" id="emptyState" style="display:none">
       <div class="ico" aria-hidden="true">🎯</div>
@@ -1056,6 +1059,28 @@ function toggleParticipantes(){
     btn.textContent = "👁️ Mostrar Lista de Participantes";
     btn.classList.add("on");
   }
+}
+function mostrarTodosJogos(){
+  // Força filtro Todos e garante que todos os 161 jogos apareçam em conferência
+  state.filtro = "todos";
+  document.querySelectorAll("#filtros .chip").forEach(c=>{
+    const isTodos = c.dataset.filtro==="todos";
+    c.classList.toggle("on", isTodos);
+    c.setAttribute("aria-selected", isTodos ? "true" : "false");
+  });
+  // Se nenhum sorteio marcado, avisa mas ainda mostra estrutura
+  if (state.sorteados.size === 0){
+    toast("ℹ️ Selecione 15 números para conferir, mas exibindo todos os jogos apostados");
+    // cria resultados vazios para exibir (0 pts)
+    if (state.resultados.length===0 && state.grupos.length>0){
+      // força conferir com 0 sorteados para gerar cards
+      conferirTudo();
+    }
+  }
+  renderizarGrupos();
+  document.getElementById("jogosGrid").scrollIntoView({behavior:"smooth", block:"start"});
+  toast(`📋 Exibindo todos os ${state.grupos.reduce((s,g)=>s+g.jogos.length,0)} jogos apostados em conferência`);
+  try{ vibrar(14); }catch(_){}
 }
 
 /* Monta as bolas de um jogo */
