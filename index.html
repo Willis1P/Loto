@@ -420,6 +420,13 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </section>
 
+  <!-- Cronômetro regressivo até 21h — resultado -->
+  <section class="panel" id="panelCronometro" style="background:linear-gradient(135deg,rgba(147,0,137,0.08),rgba(26,0,51,0.04)); border:1.5px solid rgba(147,0,137,0.18); text-align:center; padding:14px 12px;">
+    <div style="font-size:0.68rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:1px;">⏰ Resultado às 21h — Cronômetro</div>
+    <div id="cronometro" style="font-size:1.65rem; font-weight:900; color:var(--primary); letter-spacing:1.5px; font-variant-numeric:tabular-nums; margin-top:6px; line-height:1;">--:--:--</div>
+    <div id="cronometroLegenda" style="font-size:0.68rem; color:var(--text-soft); margin-top:4px;">Calculando tempo restante...</div>
+  </section>
+
   <!-- Painel 39 cotas (geral) — topo -->
   <section class="panel" id="panel39" style="background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(255,235,59,0.06)); border:1px solid rgba(212,175,55,0.28); border-left:4px solid var(--gold);">
     <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
@@ -1056,6 +1063,28 @@ function atualizarDashboard(){
   if (elPor39) elPor39.textContent = fmtBRL.format(por39);
   if (elDet39) elDet39.textContent = fmtBRL.format(por39);
 }
+// ─── 10b. CRONÔMETRO 21h ───────────────────────────────────────────────
+function atualizarCronometro(){
+  const agora = new Date();
+  let alvo = new Date(agora);
+  alvo.setHours(21,0,0,0);
+  if (agora >= alvo) alvo.setDate(alvo.getDate()+1);
+  const diff = alvo - agora;
+  const el = document.getElementById("cronometro");
+  const leg = document.getElementById("cronometroLegenda");
+  if (!el) return;
+  if (diff <= 0){
+    el.textContent = "00:00:00";
+    if (leg) leg.textContent = "🔔 Resultado liberado!";
+    return;
+  }
+  const h = Math.floor(diff/3600000);
+  const m = Math.floor((diff%3600000)/60000);
+  const s = Math.floor((diff%60000)/1000);
+  el.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  if (leg) leg.textContent = `Faltam ${h}h ${m}min ${s}s para o sorteio das 21h`;
+}
+setInterval(atualizarCronometro, 1000);
 
 /* ─── 11. FILTROS E RENDER ───────────────────────────────────────────── */
 const jogosGrid = document.getElementById("jogosGrid");
@@ -1866,6 +1895,7 @@ function boot(){
     construirGridNumeros();
     restaurarHistorico();
     sincronizarUI();
+    atualizarCronometro();
 
     setTimeout(() => {
       if (state.sorteados.size === 0){
