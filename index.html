@@ -436,7 +436,7 @@ footer.app-footer strong{color:var(--primary)}
     <span style="font-size:1.05rem;flex:0 0 auto" aria-hidden="true">🧮</span>
     <div>
       <strong>Bolões são conferidos por cota, não por jogo.</strong>
-      O valor exibido em cada bolão é <em>a sua parte</em> (1 cota ÷ total de cotas, conforme planilha). Prêmios fixos: <b>11=R$3,50 12=R$7,00 13=R$17,50</b> — se fez 11, pega R$3,50 (×combinações se 16-20dz) e divide por totalCotas do grupo. 14 é variável.
+      O valor exibido em cada bolão é <em>a sua parte</em> (1 cota ÷ total de cotas). Prêmios fixos oficiais: <b>11=R$7,00 12=R$14,00 13=R$35,00</b> — cada jogo premiado com 11 pega R$7,00 ÷ totalCotas (ex: 32 cotas = R$0,21/cota). 14/15 rateio (62% p/15 e 13% p/14 após fixos).
     </div>
   </aside>
 
@@ -577,19 +577,19 @@ footer.app-footer strong{color:var(--primary)}
    Arquitetura por GRUPO (hash) com rateio de cotas para bolões.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ─── 1. PRÊMIOS — FIXOS CONFORME PEDIDO (11=3,50 12=7,00 13=17,50, 14 variável) ──
-   Se acertou 11 números, pega ganho fixo e divide pela quantidade de pessoas do grupo (totalCotas)
-   Ex: 11×1 cota em 32 cotas = 3,50/32 = 1,17/cota; 11×15 combos (17dz) = 52,50/32 = 1,64
+/* ─── 1. PRÊMIOS — OFICIAL CAIXA 43,79% (11=7 12=14 13=35, 14/15 rateio) ──
+   Bruto 43,79% - fixos 7/14/35, sobra 62% p/15 e 13% p/14 (10% final0, 15% Independência)
+   Bolão: 1× fixo ÷ totalCotas (ex: 11 em 32 cotas = 7,00/32 = 0,21/cota)
 */
 const PRIZES = Object.freeze({
-  15: 0,        // rateio (Independência)
+  15: 0,        // rateio
   14: 0,        // variável
-  13: 17.50,    // ✅ FIXO pedido
-  12: 7.00,     // ✅ FIXO
-  11: 3.50      // ✅ FIXO
+  13: 35.00,    // ✅ FIXO oficial
+  12: 14.00,    // ✅ FIXO oficial
+  11: 7.00      // ✅ FIXO oficial
 });
 const PRIZE_ESTIMADO_15 = 300000000.00; // ⚠️ R$300MI
-const PRIZE_ESTIMADO_14 = 0;           // 0 até oficial divulgar
+const PRIZE_ESTIMADO_14 = 1500.00;      // estimativa até oficial
 
 /**
  * Retorna o valor unitário de cada faixa.
