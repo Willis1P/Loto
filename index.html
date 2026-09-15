@@ -436,7 +436,7 @@ footer.app-footer strong{color:var(--primary)}
     <span style="font-size:1.05rem;flex:0 0 auto" aria-hidden="true">🧮</span>
     <div>
       <strong>Bolões são conferidos por cota, não por jogo.</strong>
-      O valor exibido em cada bolão é <em>a sua parte</em> (1 cota ÷ total de cotas, conforme planilha). Prêmios de 11, 12 e 13 pontos são fixos (R$ 3,50, R$ 7,00 e R$ 17,50) e também entram no rateio.
+      O valor exibido em cada bolão é <em>a sua parte</em> (1 cota ÷ total de cotas, regra Caixa). Prêmios fixos: <b>11=R$7,00 12=R$14,00 13=R$35,00</b> — cada dezena extra gera C(N,15) apostas: 16=16, 17=136, 18=816, 19=3876, 20=15504; prêmios por faixa = C(H,P)×C(M,15-P) × valor fixo, depois ÷ totalCotas.
     </div>
   </aside>
 
@@ -516,16 +516,19 @@ footer.app-footer strong{color:var(--primary)}
    Arquitetura por GRUPO (hash) com rateio de cotas para bolões.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ─── 1. PRÊMIOS — mantido cálculo correto anterior (fixo 11/12/13) ── */
+/* ─── 1. PRÊMIOS — REGRA OFICIAL CAIXA loterias.caixa.gov.br/Paginas/Lotofacil.aspx ──
+   Bruto 43,79% arrecadação - fixos 11/12/13 - sobra 62% p/15 e 13% p/14 (Independência 87% p/15 +13% p/14)
+   Bolão: prêmio do grupo / totalCotas (1 cota sua), combinatória C(N,15) e C(H,P)*C(M,15-P)
+*/
 const PRIZES = Object.freeze({
-  15: 0,        // rateio oficial (não acumula)
-  14: 0,        // rateio oficial — só conhecido após sorteio
-  13: 17.50,    // ✅ FIXO correto anterior
-  12: 7.00,     // ✅ FIXO
-  11: 3.50      // ✅ FIXO
+  15: 0,        // rateio Independência 87% (estimativa abaixo)
+  14: 0,        // rateio 13% (só após Caixa)
+  13: 35.00,    // ✅ FIXO oficial
+  12: 14.00,    // ✅ FIXO oficial
+  11: 7.00      // ✅ FIXO oficial
 });
-const PRIZE_ESTIMADO_15 = 300000000.00; // ⚠️ estimativa
-const PRIZE_ESTIMADO_14 = 0;           // 14 rateio variável (0 até oficial)
+const PRIZE_ESTIMADO_15 = 300000000.00; // ⚠️ R$300MI Independência
+const PRIZE_ESTIMADO_14 = 1500.00;      // ⚠️ estimativa até rateio oficial (exibe “rateio” se 0)
 
 /**
  * Retorna o valor unitário de cada faixa.
