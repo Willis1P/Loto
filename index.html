@@ -473,6 +473,64 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </section>
 
+  <!-- Lista de Participantes — 38 nomes / 39 cotas (1 dividida) -->
+  <section class="panel" id="panelParticipantes" style="margin-top:18px">
+    <div class="panel-title">
+      <h2 style="font-size:0.95rem;">👥 Participantes do Bolão</h2>
+      <span class="counter-pill" style="background:var(--primary); color:#fff;">39 cotas • 38 nomes • 1 dividida</span>
+    </div>
+    <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">
+      Grupo de participantes da conferência abaixo. Toque em <b>Mostrar Lista</b> para ver todos. <b style="color:var(--primary);">Joilson Bonomo possui 2 cotas</b> e <b>Marcio RC / Reinaldo</b> dividem 1 cota ao meio (0,5 cada).
+    </p>
+    <button class="chip on" id="btnToggleParticipantes" onclick="toggleParticipantes()" style="width:100%; justify-content:center; margin-bottom:12px;">👁️ Mostrar Lista de Participantes</button>
+    <div id="listaParticipantes" style="display:none;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:7px; font-size:0.74rem; line-height:1.45;">
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>01. Carlos Rodrigues</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>02. Edson Borghi</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>03. José Elias</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>04. Alexsandro Silva</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>05. Nelson UTGC</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>06. Sérgio Mendonça</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>07. Nilson Dias</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>08. Anderson Silva</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>09. Geilson Miranda</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>10. Wagner Divino</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>11. Marcus Vinícius</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>12. Izabete Silva</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,rgba(255,235,59,0.18),#fff); border-color:rgba(212,175,55,0.55);"><span>13. Joilson Bonomo <b style="color:#a67c00;">(2 cotas)</b></span><span style="font-size:0.62rem; background:var(--gold); color:#fff; padding:2px 6px; border-radius:999px; font-weight:800;">2 cotas</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>14. Wellington Capelini</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>15. Giovane Costa</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>16. Reginaldo Biancardi</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>17. Marcio RC</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>18. Elisio Neto</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>19. Gustavo CS Vix</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>20. Valdir Gonzaga</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>21. Adriano Kiko</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>22. Antonio de Jesus</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>23. Lidiana Rodrigues</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>24. Manoel Paulinho</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>25. Anderson Barros</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>26. Jarbas Baiôcco</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>27. Edgard Broca</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>28. Jocemar Augusto</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>29. Willis dos Anjos</span><span style="font-size:0.62rem; background:var(--primary); color:#fff; padding:2px 6px; border-radius:999px; font-weight:800;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>30. Elicassio dos Santos</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>31. Aldair Brunharas</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>32. Ana Lilia</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>33. Cristiane Coutinho</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>34. Jair Rodrigues</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:linear-gradient(135deg,rgba(147,0,137,0.08),rgba(46,204,113,0.08)); border:1px solid rgba(147,0,137,0.22); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>35. Marcio RC / Reinaldo <b style="color:var(--primary);">(dividida)</b></span><span style="font-size:0.62rem; background:linear-gradient(145deg,var(--primary),var(--secondary)); color:#fff; padding:2px 6px; border-radius:999px; font-weight:800;">0,5 + 0,5</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>36. Vantuil</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>37. David de Oliveira</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>38. Alessandro do TABR</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
+      </div>
+      <div style="margin-top:12px; background:linear-gradient(135deg,rgba(147,0,137,0.07),rgba(255,235,59,0.06)); border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:0.72rem; color:var(--text-soft); line-height:1.6; text-align:center;">
+        <b style="color:var(--primary);">Total: 38 nomes • 39 cotas • 1 cota dividida ao meio</b><br>
+        Joilson Bonomo = 2 cotas • Marcio RC/Reinaldo = 0,5 cada • Demais = 1 cota cada • Soma = 39 cotas
+      </div>
+    </div>
+  </section>
+
   <footer class="app-footer">
     <strong>Lotofácil Independência 2026</strong> · Conferidor Inteligente<br>
     Ferramenta independente. Não possui vínculo com a Caixa Econômica Federal.<br>
@@ -981,6 +1039,23 @@ function renderizarGrupos(){
   lista.forEach(g => frag.appendChild(criarCardGrupo(g)));
   jogosGrid.appendChild(frag);
   if (state.observer){ try{ state.observer.disconnect(); }catch(_){} }
+}
+function toggleParticipantes(){
+  const el = document.getElementById("listaParticipantes");
+  const btn = document.getElementById("btnToggleParticipantes");
+  if (!el || !btn) return;
+  const isHidden = el.style.display === "none" || !el.style.display || el.style.display === "";
+  // el initially has display:none inline, so first click shows
+  if (el.style.display === "none"){
+    el.style.display = "block";
+    btn.textContent = "🙈 Ocultar Lista de Participantes";
+    btn.classList.remove("on");
+    el.scrollIntoView({behavior:"smooth", block:"start"});
+  } else {
+    el.style.display = "none";
+    btn.textContent = "👁️ Mostrar Lista de Participantes";
+    btn.classList.add("on");
+  }
 }
 
 /* Monta as bolas de um jogo */
