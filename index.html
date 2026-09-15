@@ -1023,9 +1023,10 @@ function aplicarFiltro(lista){
   return lista.filter(g => g.jogos.some(j => j.hits === alvo));
 }
 
+let forcarExibirTodos = false;
 function renderizarGrupos(){
   jogosGrid.innerHTML = "";
-  if (state.sorteados.size === 0){
+  if (state.sorteados.size === 0 && !forcarExibirTodos){
     emptyState.style.display = "block";
     document.getElementById("emptyMsg").textContent = "Selecione os números sorteados acima para conferir seus jogos.";
     return;
@@ -1061,23 +1062,21 @@ function toggleParticipantes(){
   }
 }
 function mostrarTodosJogos(){
-  // Força filtro Todos e garante que todos os 161 jogos apareçam em conferência
+  // Força filtro Todos e garante que todos os 161 jogos apareçam em conferência mesmo sem sorteio
+  forcarExibirTodos = true;
   state.filtro = "todos";
   document.querySelectorAll("#filtros .chip").forEach(c=>{
     const isTodos = c.dataset.filtro==="todos";
     c.classList.toggle("on", isTodos);
     c.setAttribute("aria-selected", isTodos ? "true" : "false");
   });
-  // Se nenhum sorteio marcado, avisa mas ainda mostra estrutura
-  if (state.sorteados.size === 0){
-    toast("ℹ️ Selecione 15 números para conferir, mas exibindo todos os jogos apostados");
-    // cria resultados vazios para exibir (0 pts)
-    if (state.resultados.length===0 && state.grupos.length>0){
-      // força conferir com 0 sorteados para gerar cards
-      conferirTudo();
-    }
+  // Garante resultados (0 pts) mesmo sem sorteio
+  if (state.grupos.length>0){
+    conferirTudo();
   }
   renderizarGrupos();
+  // after render, allow normal empty behavior again after 100ms (keep showing)
+  setTimeout(()=>{ forcarExibirTodos = false; }, 200);
   document.getElementById("jogosGrid").scrollIntoView({behavior:"smooth", block:"start"});
   toast(`📋 Exibindo todos os ${state.grupos.reduce((s,g)=>s+g.jogos.length,0)} jogos apostados em conferência`);
   try{ vibrar(14); }catch(_){}
