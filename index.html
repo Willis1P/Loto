@@ -104,7 +104,11 @@
         .game-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-blue), transparent); opacity: 0; transition: opacity 0.3s; }
         .game-card:hover::before { opacity: 1; }
         .game-card.winner { border-left-color: var(--accent); background: linear-gradient(135deg, rgba(255,193,7,0.08) 0%, var(--card-bg) 100%); box-shadow: 0 4px 25px rgba(255,193,7,0.2); animation: borderPulse 2s ease infinite; }
-        .game-card.bolao { border-left-color: #b8860b; background: linear-gradient(135deg, rgba(255,193,7,0.06) 0%, var(--card-bg) 100%); }
+        .game-card.bolao { border-left-color: #d4007a; background: #fff8fd; border: 1.5px solid rgba(212,0,122,0.22); border-left-width:6px; box-shadow: 0 6px 22px rgba(212,0,122,0.12), 0 2px 8px rgba(0,0,0,0.06); opacity:1; }
+        .game-card.bolao .card-header strong { color:#7a0060; }
+        .game-card.bolao .bolao-info { background:#fff0f8 !important; border-color: rgba(212,0,122,0.18) !important; }
+        .game-card.bolao .ball { background:#fff; border-color: rgba(212,0,122,0.22); color:#4a0058; opacity:1; }
+        .game-card.bolao.winner { background: linear-gradient(135deg, #fff7e0 0%, #ffffff 100%); border-left-color:#ff2fa0; box-shadow: 0 8px 28px rgba(255,47,160,0.22), 0 0 0 1px rgba(255,47,160,0.12); }
         .game-card.bolao.winner { border-left-color: var(--accent); }
         .game-card.hidden { display: none; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 6px; gap: 8px; flex-wrap: wrap; }
@@ -157,7 +161,7 @@
         <div class="header-badge">🎯 Conferidor Inteligente</div>
     </div>
     <div class="container">
-        <div class="warning-box">Valores de 11, 12 e 13 pontos são fixos (R$ 3,50 / 7,00 / 17,50). Bolões têm prêmio <b>dividido entre as cotas</b> — ajuste o nº de pessoas no card. 14 e 15 pts são rateio estimado da Caixa. Ao acertar 15: 🎉 MILIONÁRIO! 🎆</div>
+        <div class="warning-box">Valores de 11, 12 e 13 pontos são fixos (R$ 3,50 / 7,00 / 17,50). Bolões têm prêmio <b>dividido pelo Total de cotas da planilha</b> — ajustável no card. Mostra também o valor das suas cotas. 14 e 15 pts são rateio estimado da Caixa. Ao acertar 15: 🎉 MILIONÁRIO! 🎆</div>
         <div class="dashboard">
             <div class="stat-box"><h2 id="totalGamesDisplay">0</h2><p>Jogos</p></div>
             <div class="stat-box"><h2 id="bolaoCountDisplay" style="color:#b8860b">0</h2><p>Bolões</p></div>
@@ -188,7 +192,7 @@
 
 <script>
 // ============================================
-// DADOS DOS JOGOS (142 jogos do Concurso 3780)
+// DADOS DOS JOGOS (161 jogos do Concurso 3780 - planilha Extracao_Lotofacil_3780.xlsx)
 // ============================================
 const rawGamesData = `
 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25
@@ -199,7 +203,7 @@ const rawGamesData = `
 01 02 03 05 06 07 08 09 10 11 13 15 20 21 23
 01 02 03 04 08 09 10 12 13 18 19 20 22 24 25
 01 02 04 06 08 09 12 14 15 18 19 20 22 23 24
-01 02 03 04 05 06 07 08 09 10 11 13 15 20 21 23
+01 02 03 04 05 06 07 10 13 14 16 18 21 22 23
 01 02 05 07 08 09 10 13 15 17 19 21 22 24 25
 02 04 06 07 09 10 11 13 15 17 18 19 20 21 24
 01 02 04 06 09 12 14 15 16 18 19 20 22 23 24
@@ -223,7 +227,7 @@ const rawGamesData = `
 01 03 04 06 08 09 12 14 16 18 19 20 22 23 24
 01 04 06 09 12 14 15 16 18 19 20 22 23 24 25
 01 04 06 09 12 13 14 15 18 19 20 22 23 24 25
-01 03 04 06 09 12 14 15 18 19 20 22 23 24
+01 03 04 06 09 12 14 15 18 19 20 22 23 24 25
 01 03 04 06 09 12 14 15 17 18 19 20 22 23 24
 01 04 06 07 08 09 11 12 13 15 18 21 22 23 24 25
 01 02 05 06 07 08 09 10 13 15 16 17 19 21 22 23
@@ -243,7 +247,7 @@ const rawGamesData = `
 02 03 04 05 07 09 10 12 14 15 16 18 19 20 21 24 25
 01 02 03 04 05 06 08 10 11 12 14 15 16 20 22 23 25
 01 04 05 06 07 08 09 10 12 15 17 18 19 20 23 24 25
-02 04 05 07 09 10 11 12 14 15 16 17 18 19 20 23 24
+02 04 05 07 09 10 11 12 14 15 16 17 18 19 20 23 25
 01 03 04 05 07 09 11 13 14 15 16 17 19 20 22 23 24
 01 04 07 08 09 11 12 14 15 16 17 19 20 21 22 24 25
 01 02 03 04 07 08 10 11 12 13 14 15 18 19 20 24 25
@@ -273,25 +277,44 @@ const rawGamesData = `
 04 05 09 10 15 16 17 18 19 20 21 22 23 24 25
 02 03 04 07 08 09 11 13 15 17 18 19 22 23 24
 02 03 04 05 06 07 11 12 13 15 16 17 21 22 25
+01 02 03 04 05 06 08 10 11 12 20 21 22 23 24 25
+01 03 04 05 06 08 10 11 12 16 19 21 22 23 24 25
+02 03 04 08 09 10 11 13 14 15 16 17 18 20 22 25
+01 02 03 04 05 06 12 14 15 17 18 19 21 23 24 25
+02 04 05 06 07 08 09 11 13 14 16 17 18 19 21 24
+01 02 03 04 07 10 12 13 14 15 16 17 18 20 23 24
+02 04 06 09 10 13 14 15 17 18 20 21 22 23 24 25
+02 03 07 08 09 10 11 16 17 19 20 21 22 23 24 25
+01 02 03 08 09 10 12 14 15 18 19 20 21 23 24 25
+01 02 03 04 05 07 09 11 13 14 17 18 20 21 22 24
 01 03 04 06 09 12 14 15 16 18 19 20 22 23 24
 03 04 05 08 09 12 14 15 17 18 20 21 22 24 25
 01 02 03 04 06 07 08 09 10 11 13 15 17 18 19 21 23 24 25
 01 02 03 05 07 08 09 10 11 13 14 15 16 18 20 21 23 24 25
-02 04 06 08 10 11 12 13 14 15 17 18 19 20 21 23 25
-02 06 07 09 10 11 12 13 15 16 17 19 20 21 23 24 25
-01 04 06 08 09 10 12 14 15 16 19 20 21 22 23 24 25
-02 04 05 07 08 09 10 11 13 15 16 17 19 20 21 22 23
-01 03 04 05 07 08 09 10 11 12 13 14 16 19 21 22 23
-01 04 06 07 08 09 13 14 16 17 18 19 20 23 24
-01 02 03 04 05 09 11 12 14 15 16 18 22 23 25
-02 03 04 05 06 07 10 11 12 15 16 21 22 23 25
-01 03 04 05 10 11 12 13 14 16 18 20 22 24 25
-03 04 05 06 08 09 11 12 18 19 20 21 22 23 25
-02 04 05 07 08 09 12 14 16 17 18 19 21 22 23
-02 03 04 05 11 14 15 16 17 18 19 20 23 24 25
-01 02 03 05 06 07 09 10 13 14 15 19 22 23 24
-01 03 04 06 07 08 09 10 12 16 17 19 21 22 24
-03 04 05 07 08 09 10 11 12 14 16 19 20 21 24
+01 02 04 05 07 08 09 13 14 16 17 19 20 21 22 23 25
+01 02 03 05 07 08 10 11 12 14 16 18 20 22 23 24 25
+01 02 04 05 06 07 08 09 10 11 13 15 19 20 21 24 25
+01 03 04 05 07 08 09 10 11 12 13 16 19 20 22 24 25
+01 02 03 04 06 07 08 12 13 14 15 16 17 20 22 24 25
+03 04 05 06 10 11 13 15 16 17 18 19 20 21 23 24 25
+04 05 06 07 08 11 12 13 14 15 16 17 19 20 22 23 24
+01 02 05 06 07 11 13 14 16 17 20 21 23 24 25
+01 02 03 05 06 07 09 11 12 13 14 15 22 24 25
+03 04 05 06 09 10 11 12 13 15 18 20 22 23 25
+01 02 06 09 10 11 13 14 15 16 17 18 19 21 23
+03 04 06 08 09 11 12 14 15 18 21 22 23 24 25
+01 02 06 07 08 10 11 13 15 18 20 21 22 23 25
+02 03 04 06 09 10 12 14 17 18 20 21 22 23 24
+01 02 03 05 06 08 10 11 12 13 14 15 20 21 23 24
+01 02 04 09 11 12 13 14 15 16 17 18 19 20 23 25
+02 03 04 05 06 07 10 11 12 15 17 18 21 22 23 25
+01 02 04 05 08 09 10 12 13 15 16 17 18 19 21 22
+01 04 05 06 07 08 09 10 12 13 17 18 19 20 23 24
+02 03 04 07 10 12 13 14 15 16 18 19 20 23 24 25
+01 02 03 04 06 07 09 13 14 15 17 20 21 22 23 25
+01 02 03 04 06 09 10 11 12 15 18 20 21 22 23 24
+02 03 06 07 08 09 10 13 14 16 18 21 22 23 24 25
+04 05 06 07 08 11 12 13 16 18 19 20 22 23 24 25
 03 05 07 09 11 13 15 16 17 19 20 21 22 23 24 25
 01 03 05 08 10 12 14 16 17 18 19 20 21 22 24 25
 01 02 04 06 08 10 12 13 14 16 18 19 20 21 23 25
@@ -334,6 +357,7 @@ const rawGamesData = `
 03 04 05 06 08 09 12 13 14 17 18 20 22 23 25
 01 04 06 09 10 11 12 14 15 18 19 20 22 23 24
 `;
+const gamesMetaExcel = [{"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 1}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 2}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 3}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 4}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 5}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 6}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 7}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 8}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 9}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 10}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 11}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 12}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 13}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 14}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 15}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 16}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 17}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 18}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 19}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 20}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 21}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 22}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 23}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 24}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 25}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 26}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 27}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 28}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 29}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 30}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 31}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 32}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 33}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 34}, {"total": 15, "owned": 12, "isBolao": 1, "dezenas": 16, "pagina": 35}, {"total": 15, "owned": 12, "isBolao": 1, "dezenas": 16, "pagina": 35}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 36}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 37}, {"total": 32, "owned": 22, "isBolao": 1, "dezenas": 17, "pagina": 38}, {"total": 32, "owned": 22, "isBolao": 1, "dezenas": 17, "pagina": 38}, {"total": 32, "owned": 22, "isBolao": 1, "dezenas": 17, "pagina": 38}, {"total": 32, "owned": 22, "isBolao": 1, "dezenas": 17, "pagina": 38}, {"total": 32, "owned": 22, "isBolao": 1, "dezenas": 17, "pagina": 38}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 39}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 40}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 41}, {"total": 33, "owned": 16, "isBolao": 1, "dezenas": 17, "pagina": 42}, {"total": 33, "owned": 16, "isBolao": 1, "dezenas": 17, "pagina": 42}, {"total": 33, "owned": 16, "isBolao": 1, "dezenas": 17, "pagina": 42}, {"total": 33, "owned": 16, "isBolao": 1, "dezenas": 17, "pagina": 42}, {"total": 33, "owned": 16, "isBolao": 1, "dezenas": 17, "pagina": 42}, {"total": 33, "owned": 16, "isBolao": 1, "dezenas": 17, "pagina": 42}, {"total": 33, "owned": 16, "isBolao": 1, "dezenas": 17, "pagina": 42}, {"total": 33, "owned": 16, "isBolao": 1, "dezenas": 17, "pagina": 42}, {"total": 33, "owned": 16, "isBolao": 1, "dezenas": 17, "pagina": 42}, {"total": 33, "owned": 16, "isBolao": 1, "dezenas": 17, "pagina": 42}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 43}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 44}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 45}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 46}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 47}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 48}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 49}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 50}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 51}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 52}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 53}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 54}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 55}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 56}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 57}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 58}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 59}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 60}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 61}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 62}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 63}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 64}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 65}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 66}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 67}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 68}, {"total": 12, "owned": 1, "isBolao": 1, "dezenas": 16, "pagina": 69}, {"total": 12, "owned": 1, "isBolao": 1, "dezenas": 16, "pagina": 69}, {"total": 12, "owned": 1, "isBolao": 1, "dezenas": 16, "pagina": 69}, {"total": 12, "owned": 1, "isBolao": 1, "dezenas": 16, "pagina": 69}, {"total": 12, "owned": 1, "isBolao": 1, "dezenas": 16, "pagina": 69}, {"total": 12, "owned": 1, "isBolao": 1, "dezenas": 16, "pagina": 69}, {"total": 12, "owned": 1, "isBolao": 1, "dezenas": 16, "pagina": 69}, {"total": 12, "owned": 1, "isBolao": 1, "dezenas": 16, "pagina": 69}, {"total": 12, "owned": 1, "isBolao": 1, "dezenas": 16, "pagina": 69}, {"total": 12, "owned": 1, "isBolao": 1, "dezenas": 16, "pagina": 69}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 70}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 71}, {"total": 85, "owned": 50, "isBolao": 1, "dezenas": 19, "pagina": 72}, {"total": 74, "owned": 42, "isBolao": 1, "dezenas": 19, "pagina": 73}, {"total": 35, "owned": 18, "isBolao": 1, "dezenas": 17, "pagina": 74}, {"total": 35, "owned": 18, "isBolao": 1, "dezenas": 17, "pagina": 74}, {"total": 35, "owned": 18, "isBolao": 1, "dezenas": 17, "pagina": 74}, {"total": 35, "owned": 18, "isBolao": 1, "dezenas": 17, "pagina": 74}, {"total": 35, "owned": 18, "isBolao": 1, "dezenas": 17, "pagina": 74}, {"total": 35, "owned": 18, "isBolao": 1, "dezenas": 17, "pagina": 74}, {"total": 35, "owned": 18, "isBolao": 1, "dezenas": 17, "pagina": 74}, {"total": 3, "owned": 1, "isBolao": 1, "dezenas": 15, "pagina": 77}, {"total": 3, "owned": 1, "isBolao": 1, "dezenas": 15, "pagina": 77}, {"total": 3, "owned": 1, "isBolao": 1, "dezenas": 15, "pagina": 77}, {"total": 3, "owned": 1, "isBolao": 1, "dezenas": 15, "pagina": 77}, {"total": 3, "owned": 1, "isBolao": 1, "dezenas": 15, "pagina": 77}, {"total": 3, "owned": 1, "isBolao": 1, "dezenas": 15, "pagina": 77}, {"total": 3, "owned": 1, "isBolao": 1, "dezenas": 15, "pagina": 77}, {"total": 10, "owned": 9, "isBolao": 1, "dezenas": 16, "pagina": 78}, {"total": 10, "owned": 9, "isBolao": 1, "dezenas": 16, "pagina": 78}, {"total": 10, "owned": 9, "isBolao": 1, "dezenas": 16, "pagina": 78}, {"total": 10, "owned": 9, "isBolao": 1, "dezenas": 16, "pagina": 78}, {"total": 10, "owned": 9, "isBolao": 1, "dezenas": 16, "pagina": 78}, {"total": 10, "owned": 9, "isBolao": 1, "dezenas": 16, "pagina": 78}, {"total": 10, "owned": 9, "isBolao": 1, "dezenas": 16, "pagina": 78}, {"total": 10, "owned": 9, "isBolao": 1, "dezenas": 16, "pagina": 78}, {"total": 10, "owned": 9, "isBolao": 1, "dezenas": 16, "pagina": 78}, {"total": 10, "owned": 9, "isBolao": 1, "dezenas": 16, "pagina": 78}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 16, "pagina": 1}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 16, "pagina": 2}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 16, "pagina": 3}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 16, "pagina": 4}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 16, "pagina": 5}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 6}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 7}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 8}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 9}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 10}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 11}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 12}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 13}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 14}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 15}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 16}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 17}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 18}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 19}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 20}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 21}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 22}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 23}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 24}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 25}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 26}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 27}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 28}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 29}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 30}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 31}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 32}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 33}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 34}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 35}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 36}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 37}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 38}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 39}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 40}, {"total": 1, "owned": 1, "isBolao": 0, "dezenas": 15, "pagina": 41}];
 
 // ============================================
 // CONSTANTES & TABELA DE PRÊMIOS
@@ -361,7 +385,7 @@ function combinations(n, k) {
 // ============================================
 // ESTADO GLOBAL
 // ============================================
-let games = []; // array de objetos {nums:[], isBolao, cotas, id}
+let games = []; // array de objetos {nums:[], isBolao, totalCotas, ownedCotas, id, dezenas, pagina, hash}
 let drawnNumbers = new Set();
 let deferredPrompt = null;
 let filteredGames = [];
@@ -375,7 +399,6 @@ function defaultCotasForSize(n){ return DEFAULT_COTAS_BY_SIZE[n] || 10; }
 function parseGames() {
     try {
         const rawLines = rawGamesData.trim().split('\n');
-        // tentativa de extrair cotas da planilha via hashes (se houver), por enquanto usa default
         games = rawLines.map((line, idx) => {
             const nums = line.match(/\d+/g);
             if (!nums) return null;
@@ -384,14 +407,18 @@ function parseGames() {
             if (new Set(p).size !== p.length) return null;
             if (p.some(n => n < 1 || n > 25)) return null;
             p.sort((a, b) => a - b);
-            const isBolao = p.length > 15;
-            // tenta recuperar cotas salvas no localStorage
-            let savedCotas = null;
-            try { const s = localStorage.getItem('cotas-'+idx); if(s) savedCotas = parseInt(s,10); } catch(e){}
-            const cotas = isBolao ? (savedCotas && savedCotas>0 ? savedCotas : defaultCotasForSize(p.length)) : 1;
-            return { id: idx, nums: p, isBolao, cotas };
-        }).filter(g => g !== null);
-        filteredGames = [...games];
+            const meta = (typeof gamesMetaExcel !== 'undefined' && gamesMetaExcel[idx]) ? gamesMetaExcel[idx] : null;
+            const isBolao = meta ? !!meta.isBolao : p.length > 15;
+            // Usa Total de cotas da planilha (coluna Total de cotas) como divisor
+            let totalCotas = meta ? meta.total : (isBolao ? defaultCotasForSize(p.length) : 1);
+            let ownedCotas = meta ? meta.owned : 1;
+            // permite edição via localStorage (usuário pode ajustar total)
+            try { const s = localStorage.getItem('cotas-'+idx); if(s) { const v=parseInt(s,10); if(v>0) totalCotas=v; } } catch(e){}
+            // garante sane
+            totalCotas = Math.max(1, Math.min(100, parseInt(totalCotas,10)||1));
+            ownedCotas = Math.max(1, Math.min(totalCotas, parseInt(ownedCotas,10)||1));
+            return { id: idx, nums: p, isBolao, cotas: totalCotas, totalCotas, ownedCotas, dezenas: p.length, pagina: meta?meta.pagina:null };
+        }).filter(g => g !== null);filteredGames = [...games];
         const el = document.getElementById('totalGamesDisplay');
         if (el) el.innerText = games.length;
     } catch (e) {
@@ -402,7 +429,7 @@ function setGameCotas(gameId, cotas){
     const g = games.find(x=>x.id===gameId);
     if(!g) return;
     cotas = Math.max(1, Math.min(100, parseInt(cotas,10)||1));
-    g.cotas = cotas;
+    g.cotas = g.totalCotas = cotas;
     try{ localStorage.setItem('cotas-'+gameId, cotas); }catch(e){}
     updateDashboard();
 }
@@ -456,29 +483,26 @@ function toggleNumber(num) {
 // CÁLCULO DE PRÊMIOS COM PRECISÃO
 // ============================================
 function calculateGamePrizes(gameObj, drawn) {
-    // compat: gameObj pode ser array ou objeto {nums,...}
     const nums = Array.isArray(gameObj) ? gameObj : gameObj.nums;
-    const meta = Array.isArray(gameObj) ? {isBolao: nums.length>15, cotas:1} : gameObj;
+    const meta = Array.isArray(gameObj) ? {isBolao: nums.length>15, cotas:1, totalCotas:1, ownedCotas:1} : gameObj;
     const hits = nums.filter(n => drawn.has(n)).length;
-    // prize base fixo para 11-13, 14/15 são estimativas/rateio
     const basePrize = hits >= 11 ? (PRIZES[hits] || 0) : 0;
     const isBolao = !!meta.isBolao;
-    const cotas = Math.max(1, meta.cotas || 1);
+    const totalCotas = Math.max(1, meta.totalCotas || meta.cotas || 1);
+    const ownedCotas = Math.max(1, Math.min(totalCotas, meta.ownedCotas || 1));
     let prizeTotal = basePrize;
     let prizePerCota = basePrize;
+    let prizeOwned = basePrize;
     let divideApplied = false;
-    // Regra solicitada: se bolão e 11/12/13, divide entre participantes
-    // Para 14/15 também dividimos (pois prêmio também é dividido), mas sinalizamos
-    if(isBolao && hits >= 11 && cotas > 1){
-        // Para apostas com mais dezenas, o prêmio total pode ser multiplicado por combos?
-        // Simplificação: prizeTotal = basePrize (valor por cota premiada = 1 cota)
-        // Valor por pessoa = basePrize / cotas
-        // Se quiser considerar combos: combos = combinations(nums.length, 15) / combinations(hits,15) etc. Mantemos simples conforme pedido.
-        prizePerCota = basePrize / cotas;
+    if(isBolao && hits >= 11 && totalCotas > 1){
+        prizePerCota = basePrize / totalCotas;
+        prizeOwned = prizePerCota * ownedCotas;
         divideApplied = true;
-        // Se 14/15, Prize é estimado; também divide
+    } else if(isBolao && hits >= 11){
+        prizeOwned = prizePerCota = basePrize;
     }
-    return { hits, prize: prizePerCota, prizeTotal, prizePerCota, divideApplied, isBolao, cotas, basePrize };
+    // prize = valor que VOCÊ recebe (owned), prizePerCota = por cota
+    return { hits, prize: prizeOwned, prizePerCota, prizeTotal, prizeOwned, divideApplied, isBolao, cotas: totalCotas, totalCotas, ownedCotas, basePrize, dezenas: meta.dezenas || nums.length };
 }
 
 // ============================================
@@ -502,13 +526,17 @@ function renderGames() {
             ballsHtml += `<div class="ball" id="ball-${index}-${num}">${num.toString().padStart(2, '0')}</div>`;
         });
         const isBolao = gameObj.isBolao;
+        const total = gameObj.totalCotas || gameObj.cotas;
+        const owned = gameObj.ownedCotas || 1;
         const bolaoControl = isBolao ? `
-            <div class="bolao-info" style="margin-top:8px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; background:rgba(255,193,7,0.08); border:1px solid rgba(255,193,7,0.25); border-radius:8px; padding:6px 8px;">
-                <span style="font-size:0.75em; font-weight:700; color:#b8860b;">🎲 BOLÃO ${nums.length}D</span>
-                <label style="font-size:0.72em; color:var(--text-secondary);">Cotas / Pessoas:
-                    <input type="number" min="1" max="100" value="${gameObj.cotas}" id="cotas-${index}" style="width:55px; padding:4px 6px; border-radius:6px; border:1px solid var(--border); text-align:center; font-weight:700; margin-left:4px;" onchange="handleCotasChange(${index}, this.value)" oninput="handleCotasChange(${index}, this.value)">
+            <div class="bolao-info" style="margin-top:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:#fff0f8; border:1.5px solid rgba(212,0,122,0.22); border-radius:10px; padding:8px 10px; box-shadow:0 2px 8px rgba(212,0,122,0.06);">
+                <span style="font-size:0.78em; font-weight:800; color:#a6005b; background: rgba(255,0,160,0.07); padding:3px 8px; border-radius:6px; border:1px solid rgba(255,0,160,0.14);">🎲 BOLÃO ${nums.length}D</span>
+                <span style="font-size:0.72em; color:#5a2a4d; font-weight:600;">${total} cotas totais</span>
+                <span style="font-size:0.70em; color:#7a3d6e; background:#fff; border:1px solid rgba(212,0,122,0.15); padding:2px 6px; border-radius:6px;">você tem <b>${owned}</b> ${owned>1?'cotas':'cota'}</span>
+                <label style="font-size:0.68em; color:#6b3a5e; display:flex; align-items:center; gap:4px;">Ajustar total:
+                    <input type="number" min="1" max="100" value="${total}" id="cotas-${index}" style="width:56px; padding:4px 6px; border-radius:8px; border:1.5px solid rgba(212,0,122,0.25); text-align:center; font-weight:800; color:#a6005b; background:#fff; margin-left:2px;" onchange="handleCotasChange(${index}, this.value)" oninput="handleCotasChange(${index}, this.value)">
                 </label>
-                <span style="font-size:0.65em; color:var(--text-secondary);" id="cotas-info-${index}">÷ ${gameObj.cotas}</span>
+                <span style="font-size:0.64em; color:#a6005b; font-weight:600; opacity:0.8;" id="cotas-info-${index}">÷ ${total}</span>
             </div>` : '';
         card.innerHTML = `
             <div class="card-header">
@@ -535,10 +563,12 @@ function handleCotasChange(filteredIndex, val){
     let v = parseInt(val,10);
     if(isNaN(v) || v<1) v=1;
     if(v>100) v=100;
-    gameObj.cotas = v;
-    // sync to original games array
+    // atualiza total de cotas (divisor)
+    gameObj.cotas = gameObj.totalCotas = v;
+    // mantém owned <= total
+    if(gameObj.ownedCotas > v) gameObj.ownedCotas = v;
     const orig = games.find(g=>g.id===gameObj.id);
-    if(orig) orig.cotas = v;
+    if(orig){ orig.cotas = orig.totalCotas = v; if(orig.ownedCotas > v) orig.ownedCotas = v; }
     try{ localStorage.setItem('cotas-'+gameObj.id, v); }catch(e){}
     const info = document.getElementById(`cotas-info-${filteredIndex}`);
     if(info) info.innerText = `÷ ${v}`;
@@ -570,8 +600,17 @@ function updateCard(cardEl, index) {
             let detalhe = '';
             if(result.isBolao){
                 if(result.divideApplied){
-                    detalhe = `<br><small style="opacity:0.7">Bolão ${nums.length}D • ${result.cotas} cotas • Total ${formatCurrency(result.basePrize)} → <b>${formatCurrency(result.prize)} por cota</b></small>`;
-                    if(result.hits>=11 && result.hits<=13) detalhe += `<br><small style="color:#b8860b; font-weight:700;">↳ Prêmio fixo dividido entre ${result.cotas} pessoas</small>`;
+                    const perCota = result.prizePerCota;
+                    const owned = result.ownedCotas;
+                    const total = result.totalCotas;
+                    // mostra divisão por total e o que você recebe
+                    if(owned === 1){
+                        detalhe = `<br><small style="color:#5a2a4d; font-weight:600; background:#fff0f8; padding:3px 6px; border-radius:6px; border:1px solid rgba(212,0,122,0.12); display:inline-block; margin-top:4px;">Bolão ${nums.length}D • ${total} cotas • Prêmio total ${formatCurrency(result.basePrize)} → <b style="color:#a6005b;">${formatCurrency(perCota)}/cota</b> • Você recebe <b>${formatCurrency(result.prize)}</b> (1 cota)</small>`;
+                    } else {
+                        detalhe = `<br><small style="color:#5a2a4d; font-weight:600; background:#fff0f8; padding:3px 6px; border-radius:6px; border:1px solid rgba(212,0,122,0.12); display:inline-block; margin-top:4px;">Bolão ${nums.length}D • ${total} cotas • Prêmio total ${formatCurrency(result.basePrize)} → ${formatCurrency(perCota)}/cota • Você (${owned} cotas) recebe <b style="color:#a6005b;">${formatCurrency(result.prize)}</b></small>`;
+                    }
+                    if(result.hits>=11 && result.hits<=13) detalhe += `<br><small style="color:#a6005b; font-weight:700;">↳ Prêmio fixo dividido pelo Total de cotas da planilha (coluna Total de cotas)</small>`;
+                    else if(result.hits>=14) detalhe += `<br><small style="color:#6b3a5e; font-size:0.68em;">↳ 14/15 pts: rateio dividido igualmente</small>`;
                 } else {
                     detalhe = `<br><small style="opacity:0.6">Bolão ${nums.length}D • ${result.hits} acertos</small>`;
                 }
