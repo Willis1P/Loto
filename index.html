@@ -976,26 +976,11 @@ function renderizarGrupos(){
     return;
   }
   emptyState.style.display = "none";
-
-  // Placeholders leves → materializados via IntersectionObserver
+  // Mostra TODOS os jogos de uma vez (sem skeleton/lazy) — Grupo de participantes com todos visíveis
   const frag = document.createDocumentFragment();
-  lista.forEach((g, idx) => {
-    const ph = document.createElement("div");
-    ph.className = "skeleton"; ph.dataset.idx = String(idx);
-    frag.appendChild(ph);
-  });
+  lista.forEach(g => frag.appendChild(criarCardGrupo(g)));
   jogosGrid.appendChild(frag);
-
-  if (state.observer) state.observer.disconnect();
-  state.observer = new IntersectionObserver((entries, obs) => {
-    for (const e of entries){
-      if (!e.isIntersecting) continue;
-      const idx = Number(e.target.dataset.idx);
-      e.target.replaceWith(criarCardGrupo(lista[idx]));
-      obs.unobserve(e.target);
-    }
-  }, { rootMargin: "280px 0px", threshold: 0.01 });
-  jogosGrid.querySelectorAll(".skeleton").forEach(el => state.observer.observe(el));
+  if (state.observer){ try{ state.observer.disconnect(); }catch(_){} }
 }
 
 /* Monta as bolas de um jogo */
@@ -1176,9 +1161,19 @@ function criarCardGrupo(g){
     rv.appendChild(sm);
     rat.appendChild(rv);
     card.appendChild(rat);
+    // Retorno dos Participantes — Grupo (todos visíveis)
+    const retPart = document.createElement("div");
+    retPart.style.cssText="background:linear-gradient(135deg,rgba(46,204,113,0.07),rgba(255,255,255,0.9)); border:1px solid rgba(46,204,113,0.22); border-left:4px solid var(--success); border-radius:10px; padding:10px 14px; margin:0 15px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;";
+    const rpL = document.createElement("div");
+    rpL.innerHTML = `<div style="font-size:0.68rem; font-weight:800; color:var(--success-dark); text-transform:uppercase; letter-spacing:0.5px;">Retorno dos Participantes</div><div style="font-size:0.72rem; color:var(--text-soft);">Grupo de <b>${g.totalCotas} participantes</b> • cada um com 1 cota • <span style="color:var(--text); font-weight:700;">${premiados.length} jogo${premiados.length>1?'s':''} premiado${premiados.length>1?'s':''}</span></div>`;
+    const rpR = document.createElement("div");
+    rpR.style.cssText="text-align:right;";
+    rpR.innerHTML = `<div style="font-size:0.62rem; font-weight:700; text-transform:uppercase; color:var(--text-soft); letter-spacing:0.4px;">Por participante</div><div style="font-size:1.15rem; font-weight:900; color:var(--success-dark);">${fmtBRL.format(g.premioCota)}</div><div style="font-size:0.6rem; color:var(--text-soft);">Retorno das Cotas: total ${fmtBRL.format(g.premioBrutoGrupo)} ÷ ${g.totalCotas}</div>`;
+    retPart.append(rpL, rpR);
+    card.appendChild(retPart);
   }
 
-  // Jogos internos
+  // Jogos internos — TODOS visíveis
   const box = document.createElement("div");
   box.className = "jogos-internos";
   g.jogos.forEach(j => box.appendChild(montarLinhaJogo(j, g.ordem, g.jogos.length)));
