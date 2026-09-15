@@ -1196,6 +1196,12 @@ function mostrarTodosJogos(){
     try{ vibrar(10); }catch(_){}
     return;
   }
+  // Limpa busca colada que pode estar filtrando para 0
+  buscaApostaNumeros = [];
+  const elBusca = document.getElementById("buscaAposta");
+  const infoBusca = document.getElementById("buscaInfo");
+  if (elBusca) elBusca.value = "";
+  if (infoBusca) infoBusca.textContent = "";
   // Força filtro Todos e garante que todos os 176 jogos apareçam em conferência mesmo sem sorteio
   forcarExibirTodos = true;
   state.filtro = "todos";
@@ -1209,9 +1215,9 @@ function mostrarTodosJogos(){
     conferirTudo();
   }
   renderizarGrupos();
-  // after render, allow normal empty behavior again after 100ms (keep showing)
-  setTimeout(()=>{ forcarExibirTodos = false; }, 200);
-  grid.scrollIntoView({behavior:"smooth", block:"start"});
+  // Mantém forçado para que Todos continue mostrando mesmo com 0 sorteados
+  // Não reseta para false imediatamente — deixa true até próxima interação de filtro
+  if (grid) grid.scrollIntoView({behavior:"smooth", block:"start"});
   if (btn) btn.innerHTML = "🙈 Ocultar conferência — 176 jogos";
   toast(`📋 Exibindo todos os 176 jogos apostados em conferência`);
   try{ vibrar(14); }catch(_){}
@@ -1816,13 +1822,20 @@ document.getElementById("filtros").addEventListener("click", e => {
   });
   chip.classList.add("on"); chip.setAttribute("aria-selected", "true");
   state.filtro = chip.dataset.filtro;
-  // Quando clicar em Todos, mostra todos os jogos igual ao botão Mostrar todos (mesmo sem sorteio)
+  // Quando clicar em Todos, limpa busca colada e mostra todos os jogos igual ao botão Mostrar todos (mesmo sem sorteio)
   if (state.filtro === "todos"){
+    buscaApostaNumeros = [];
+    const elBusca = document.getElementById("buscaAposta");
+    const infoBusca = document.getElementById("buscaInfo");
+    if (elBusca) elBusca.value = "";
+    if (infoBusca) infoBusca.textContent = "";
     forcarExibirTodos = true;
-    if (state.grupos.length>0 && state.resultados.length===0) conferirTudo();
-    setTimeout(()=>{ forcarExibirTodos = false; }, 300);
+    if (state.grupos.length>0) conferirTudo();
   }
   renderizarGrupos();
+  if (state.filtro === "todos"){
+    setTimeout(()=>{ forcarExibirTodos = false; }, 400);
+  }
   vibrar(10);
 });
 
