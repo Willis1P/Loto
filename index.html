@@ -429,14 +429,14 @@ footer.app-footer strong{color:var(--primary)}
       <span class="counter-pill" id="counter" aria-live="polite">0 / 15 selecionados</span>
     </div>
     <div class="numbers-grid" id="numbersGrid" role="group" aria-label="Selecione os 15 números sorteados"></div>
-    <span class="hint" id="hintTexto">Toque nos números sorteados. Os 149 jogos e 13 bolões são conferidos automaticamente.</span>
+    <span class="hint" id="hintTexto">Toque nos números sorteados. Os 161 jogos (53 em bolões) são conferidos automaticamente — bolão dividido por Total de cotas da planilha, 1 cota sua.</span>
   </section>
 
   <aside class="alerta info" role="note">
     <span style="font-size:1.05rem;flex:0 0 auto" aria-hidden="true">🧮</span>
     <div>
       <strong>Bolões são conferidos por cota, não por jogo.</strong>
-      O valor exibido em cada bolão é <em>a sua parte</em> (cota ÷ total de cotas). Prêmios de 11, 12 e 13 pontos são fixos (R$ 6, R$ 12 e R$ 30) e também entram no rateio.
+      O valor exibido em cada bolão é <em>a sua parte</em> (1 cota ÷ total de cotas, conforme planilha). Prêmios de 11, 12 e 13 pontos são fixos (R$ 3,50, R$ 7,00 e R$ 17,50) e também entram no rateio.
     </div>
   </aside>
 
@@ -516,16 +516,16 @@ footer.app-footer strong{color:var(--primary)}
    Arquitetura por GRUPO (hash) com rateio de cotas para bolões.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ─── 1. PRÊMIOS ─────────────────────────────────────────────────────── */
+/* ─── 1. PRÊMIOS — mantido cálculo correto anterior (fixo 11/12/13) ── */
 const PRIZES = Object.freeze({
-  15: 0,        // rateio oficial (não acumula neste concurso)
-  14: 0,        // rateio oficial — só conhecido após o sorteio
-  13: 30.00,    // ✅ FIXO
-  12: 12.00,    // ✅ FIXO
-  11: 6.00      // ✅ FIXO
+  15: 0,        // rateio oficial (não acumula)
+  14: 0,        // rateio oficial — só conhecido após sorteio
+  13: 17.50,    // ✅ FIXO correto anterior
+  12: 7.00,     // ✅ FIXO
+  11: 3.50      // ✅ FIXO
 });
-const PRIZE_ESTIMADO_15 = 300000000.00; // ⚠️ estimativa (rateio principal)
-const PRIZE_ESTIMADO_14 = 1500.00;      // ⚠️ estimativa (rateio variável)
+const PRIZE_ESTIMADO_15 = 300000000.00; // ⚠️ estimativa
+const PRIZE_ESTIMADO_14 = 0;           // 14 rateio variável (0 até oficial)
 
 /**
  * Retorna o valor unitário de cada faixa.
