@@ -248,7 +248,7 @@ header.app-header::after{
   font-size:.7rem;font-weight:800;font-variant-numeric:tabular-nums;flex:0 0 auto;
 }
 .bola.hit{background:linear-gradient(145deg,var(--success),var(--success-dark));color:#fff;box-shadow:0 3px 8px rgba(46,204,113,.35)}
-.bola.miss{background:var(--bg);color:#9e9e9e;text-decoration:line-through;text-decoration-thickness:2px;border:1px solid var(--border)}
+.bola.miss{background:var(--bg);color:#9e9e9e;border:1px solid var(--border); opacity:0.92;}
 
 .premio{border-top:1px dashed var(--border);padding-top:9px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .premio-info{min-width:0}
@@ -913,7 +913,7 @@ let rafPendente = null;
 function toggleNumero(n){
   if (state.sorteados.has(n)) state.sorteados.delete(n);
   else {
-    if (state.sorteados.size >= 15){ toast("⚠️ Limite de 15 números atingido"); vibrar(60); return; }
+    if (state.sorteados.size >= 15){ vibrar(20); return; }
     state.sorteados.add(n);
   }
   if (rafPendente) cancelAnimationFrame(rafPendente);
@@ -1681,6 +1681,12 @@ document.getElementById("filtros").addEventListener("click", e => {
   });
   chip.classList.add("on"); chip.setAttribute("aria-selected", "true");
   state.filtro = chip.dataset.filtro;
+  // Quando clicar em Todos, mostra todos os jogos igual ao botão Mostrar todos (mesmo sem sorteio)
+  if (state.filtro === "todos"){
+    forcarExibirTodos = true;
+    if (state.grupos.length>0 && state.resultados.length===0) conferirTudo();
+    setTimeout(()=>{ forcarExibirTodos = false; }, 300);
+  }
   renderizarGrupos();
   vibrar(10);
 });
