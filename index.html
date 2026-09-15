@@ -1080,6 +1080,20 @@ function toggleParticipantes(){
   }
 }
 function mostrarTodosJogos(){
+  const grid = document.getElementById("jogosGrid");
+  const btn = document.getElementById("btnMostrarTodosJogos");
+  const jaVisivel = grid && grid.children.length > 0 && document.getElementById("emptyState").style.display === "none";
+  if (jaVisivel){
+    // Oculta conferência ao clicar novamente
+    grid.innerHTML = "";
+    document.getElementById("emptyState").style.display = "block";
+    document.getElementById("emptyMsg").textContent = "Conferência ocultada. Clique em Mostrar todos novamente para exibir.";
+    forcarExibirTodos = false;
+    if (btn) btn.innerHTML = "📋 Mostrar todos os jogos apostados em conferência — 176 jogos";
+    toast("🙈 Conferência ocultada");
+    try{ vibrar(10); }catch(_){}
+    return;
+  }
   // Força filtro Todos e garante que todos os 176 jogos apareçam em conferência mesmo sem sorteio
   forcarExibirTodos = true;
   state.filtro = "todos";
@@ -1095,7 +1109,8 @@ function mostrarTodosJogos(){
   renderizarGrupos();
   // after render, allow normal empty behavior again after 100ms (keep showing)
   setTimeout(()=>{ forcarExibirTodos = false; }, 200);
-  document.getElementById("jogosGrid").scrollIntoView({behavior:"smooth", block:"start"});
+  grid.scrollIntoView({behavior:"smooth", block:"start"});
+  if (btn) btn.innerHTML = "🙈 Ocultar conferência — 176 jogos";
   toast(`📋 Exibindo todos os 176 jogos apostados em conferência`);
   try{ vibrar(14); }catch(_){}
 }
