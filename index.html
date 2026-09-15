@@ -1151,21 +1151,29 @@ function criarCardGrupo(g){
   head.appendChild(tot);
   card.appendChild(head);
 
-  // Faixa de rateio (só quando há prêmio)
+  // Faixa de rateio (só quando há prêmio) — detalha quantos jogos premiados para transparência (ex: 2×11pts = 30 combos)
   if (g.premioCota > 0){
     const rat = document.createElement("div");
     rat.className = "rateio";
     const rl = document.createElement("div");
     rl.className = "rateio-l";
     const brl = document.createElement("strong");
+    const premiados = g.jogos.filter(j=>j.premiado);
+    const totComb = premiados.reduce((s,j)=>s+j.combinacoesPremiadas,0);
+    const detalheJogos = premiados.length===1
+      ? `1 jogo premiado: ${Object.entries(premiados[0].faixas).map(([p,q])=>`${q}×${p}pts`).join(" · ")}`
+      : `${premiados.length} jogos premiados: ${premiados.map(j=>Object.entries(j.faixas).map(([p,q])=>`${q}×${p}pts`).join("+")).join(" | ")} • ${totComb} combinações`;
     brl.textContent = `Prêmio bruto do bolão: ${fmtBRL.format(g.premioBrutoGrupo)}`;
-    rl.append(brl, document.createTextNode(`⤸ dividido por ${g.divisor} cotas`));
+    const det = document.createElement("span");
+    det.style.cssText="display:block; font-size:0.62rem; color:var(--text-soft); margin-top:2px; line-height:1.4;";
+    det.textContent = detalheJogos;
+    rl.append(brl, det, document.createTextNode(`⤸ dividido por ${g.divisor} cotas (sua cota = 1/${g.totalCotas})`));
     rat.appendChild(rl);
     const rv = document.createElement("div");
     rv.className = "rateio-val";
     rv.textContent = fmtBRL.format(g.premioCota);
     const sm = document.createElement("small");
-    sm.textContent = `sua cota (${COTA_PESSOAL} de ${g.totalCotas})`;
+    sm.textContent = `sua cota (1 de ${g.totalCotas})`;
     rv.appendChild(sm);
     rat.appendChild(rv);
     card.appendChild(rat);
