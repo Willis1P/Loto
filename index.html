@@ -90,6 +90,8 @@
         .game-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-blue), transparent); opacity: 0; transition: opacity 0.3s; }
         .game-card:hover::before { opacity: 1; }
         .game-card.winner { border-left-color: var(--accent); background: linear-gradient(135deg, rgba(255,193,7,0.08) 0%, var(--card-bg) 100%); box-shadow: 0 4px 25px rgba(255,193,7,0.2); animation: borderPulse 2s ease infinite; }
+        .game-card.bolao { border-left-color: #b8860b; background: linear-gradient(135deg, rgba(255,193,7,0.06) 0%, var(--card-bg) 100%); }
+        .game-card.bolao.winner { border-left-color: var(--accent); }
         .game-card.hidden { display: none; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 6px; gap: 8px; flex-wrap: wrap; }
         .card-header strong { font-size: 0.85em; color: var(--text); }
@@ -125,16 +127,20 @@
         <div class="header-badge">🎯 Conferidor Inteligente</div>
     </div>
     <div class="container">
-        <div class="warning-box">Valores de 11, 12 e 13 pontos são fixos. Valores de 14 e 15 pontos são estimativas (rateio oficial da Caixa). Ao acertar 15: 🎉 VOCÊ SE TORNA MILIONÁRIO! 🎆</div>
+        <div class="warning-box">Valores de 11, 12 e 13 pontos são fixos (R$ 3,50 / 7,00 / 17,50). Bolões têm prêmio <b>dividido entre as cotas</b> — ajuste o nº de pessoas no card. 14 e 15 pts são rateio estimado da Caixa. Ao acertar 15: 🎉 MILIONÁRIO! 🎆</div>
         <div class="dashboard">
             <div class="stat-box"><h2 id="totalGamesDisplay">0</h2><p>Jogos</p></div>
+            <div class="stat-box"><h2 id="bolaoCountDisplay" style="color:#b8860b">0</h2><p>Bolões</p></div>
             <div class="stat-box"><h2 id="hitsCountDisplay">0</h2><p>Sorteados</p></div>
             <div class="stat-box"><h2 id="hits14Display" style="color:#e67e22">0</h2><p>14 pts</p></div>
-            <div class="stat-box"><h2 id="winningsDisplay">R$ 0</h2><p>Ganhos</p></div>
+            <div class="stat-box"><h2 id="winningsDisplay">R$ 0</h2><p>Ganhos (por cota)</p></div>
         </div>
         <div class="toolbar">
-            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Buscar jogo..." aria-label="Buscar jogo">
-            <div class="toolbar-right">
+            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Buscar jogo (ex: 01 05 10)..." aria-label="Buscar jogo">
+            <div class="toolbar-right" style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn" style="background:linear-gradient(135deg,#6c757d,#495057); color:white; padding:8px 12px; font-size:0.8em;" onclick="filterBolao('all')" id="btnFilterAll">Todos</button>
+                <button class="btn" style="background:linear-gradient(135deg,#ffc107,#ff9800); color:#333; padding:8px 12px; font-size:0.8em;" onclick="filterBolao('bolao')" id="btnFilterBolao">🎲 Bolões</button>
+                <button class="btn" style="background:linear-gradient(135deg,#1a73e8,#0d47a1); color:white; padding:8px 12px; font-size:0.8em;" onclick="filterBolao('simples')" id="btnFilterSimples">Simples</button>
                 <button class="btn btn-share" id="btnShare" onclick="shareResult()">📤 Compartilhar</button>
             </div>
         </div>
@@ -325,25 +331,35 @@ function combinations(n, k) {
 // ============================================
 // ESTADO GLOBAL
 // ============================================
-let games = [];
+let games = []; // array de objetos {nums:[], isBolao, cotas, id}
 let drawnNumbers = new Set();
 let deferredPrompt = null;
 let filteredGames = [];
 let rafId = null;
+const DEFAULT_COTAS_BY_SIZE = {16: 12, 17: 22, 18: 32, 19: 50, 20: 80};
+function defaultCotasForSize(n){ return DEFAULT_COTAS_BY_SIZE[n] || 10; }
 
 // ============================================
 // PARSER ROBUSTO
 // ============================================
 function parseGames() {
     try {
-        games = rawGamesData.trim().split('\n').map(line => {
+        const rawLines = rawGamesData.trim().split('\n');
+        // tentativa de extrair cotas da planilha via hashes (se houver), por enquanto usa default
+        games = rawLines.map((line, idx) => {
             const nums = line.match(/\d+/g);
             if (!nums) return null;
             const p = nums.map(n => parseInt(n, 10));
             if (p.length < 11 || p.length > 25) return null;
             if (new Set(p).size !== p.length) return null;
             if (p.some(n => n < 1 || n > 25)) return null;
-            return p.sort((a, b) => a - b);
+            p.sort((a, b) => a - b);
+            const isBolao = p.length > 15;
+            // tenta recuperar cotas salvas no localStorage
+            let savedCotas = null;
+            try { const s = localStorage.getItem('cotas-'+idx); if(s) savedCotas = parseInt(s,10); } catch(e){}
+            const cotas = isBolao ? (savedCotas && savedCotas>0 ? savedCotas : defaultCotasForSize(p.length)) : 1;
+            return { id: idx, nums: p, isBolao, cotas };
         }).filter(g => g !== null);
         filteredGames = [...games];
         const el = document.getElementById('totalGamesDisplay');
@@ -352,6 +368,15 @@ function parseGames() {
         console.error('Erro ao parser jogos:', e);
     }
 }
+function setGameCotas(gameId, cotas){
+    const g = games.find(x=>x.id===gameId);
+    if(!g) return;
+    cotas = Math.max(1, Math.min(100, parseInt(cotas,10)||1));
+    g.cotas = cotas;
+    try{ localStorage.setItem('cotas-'+gameId, cotas); }catch(e){}
+    updateDashboard();
+}
+function getGameByFilteredIndex(idx){ return filteredGames[idx]; }
 
 // ============================================
 // CRIAÇÃO DO SELETOR DE NÚMEROS
@@ -400,13 +425,30 @@ function toggleNumber(num) {
 // ============================================
 // CÁLCULO DE PRÊMIOS COM PRECISÃO
 // ============================================
-function calculateGamePrizes(game, drawn) {
-    const hits = game.filter(n => drawn.has(n)).length;
-    const effectiveHits = hits === 14 ? 13 : hits;
-    const prize = hits >= 11 ? (PRIZES[effectiveHits] || 0) : 0;
-    const isBolao = gameSize > 15;
-    const breakdown = isBolao ? { [hits]: gameSize - 14 } : {};
-    return { hits, prize, breakdown };
+function calculateGamePrizes(gameObj, drawn) {
+    // compat: gameObj pode ser array ou objeto {nums,...}
+    const nums = Array.isArray(gameObj) ? gameObj : gameObj.nums;
+    const meta = Array.isArray(gameObj) ? {isBolao: nums.length>15, cotas:1} : gameObj;
+    const hits = nums.filter(n => drawn.has(n)).length;
+    // prize base fixo para 11-13, 14/15 são estimativas/rateio
+    const basePrize = hits >= 11 ? (PRIZES[hits] || 0) : 0;
+    const isBolao = !!meta.isBolao;
+    const cotas = Math.max(1, meta.cotas || 1);
+    let prizeTotal = basePrize;
+    let prizePerCota = basePrize;
+    let divideApplied = false;
+    // Regra solicitada: se bolão e 11/12/13, divide entre participantes
+    // Para 14/15 também dividimos (pois prêmio também é dividido), mas sinalizamos
+    if(isBolao && hits >= 11 && cotas > 1){
+        // Para apostas com mais dezenas, o prêmio total pode ser multiplicado por combos?
+        // Simplificação: prizeTotal = basePrize (valor por cota premiada = 1 cota)
+        // Valor por pessoa = basePrize / cotas
+        // Se quiser considerar combos: combos = combinations(nums.length, 15) / combinations(hits,15) etc. Mantemos simples conforme pedido.
+        prizePerCota = basePrize / cotas;
+        divideApplied = true;
+        // Se 14/15, Prize é estimado; também divide
+    }
+    return { hits, prize: prizePerCota, prizeTotal, prizePerCota, divideApplied, isBolao, cotas, basePrize };
 }
 
 // ============================================
@@ -418,22 +460,33 @@ function renderGames() {
     container.innerHTML = '';
     const fragment = document.createDocumentFragment();
 
-    filteredGames.forEach((game, index) => {
+    filteredGames.forEach((gameObj, index) => {
+        const nums = gameObj.nums;
         const card = document.createElement('div');
         card.className = 'game-card';
         card.id = `card-${index}`;
         card.setAttribute('data-index', index);
+        if(gameObj.isBolao) card.classList.add('bolao');
         let ballsHtml = '';
-        game.forEach(num => {
+        nums.forEach(num => {
             ballsHtml += `<div class="ball" id="ball-${index}-${num}">${num.toString().padStart(2, '0')}</div>`;
         });
-        const isBolao = game.length > 15;
+        const isBolao = gameObj.isBolao;
+        const bolaoControl = isBolao ? `
+            <div class="bolao-info" style="margin-top:8px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; background:rgba(255,193,7,0.08); border:1px solid rgba(255,193,7,0.25); border-radius:8px; padding:6px 8px;">
+                <span style="font-size:0.75em; font-weight:700; color:#b8860b;">🎲 BOLÃO ${nums.length}D</span>
+                <label style="font-size:0.72em; color:var(--text-secondary);">Cotas / Pessoas:
+                    <input type="number" min="1" max="100" value="${gameObj.cotas}" id="cotas-${index}" style="width:55px; padding:4px 6px; border-radius:6px; border:1px solid var(--border); text-align:center; font-weight:700; margin-left:4px;" onchange="handleCotasChange(${index}, this.value)" oninput="handleCotasChange(${index}, this.value)">
+                </label>
+                <span style="font-size:0.65em; color:var(--text-secondary);" id="cotas-info-${index}">÷ ${gameObj.cotas}</span>
+            </div>` : '';
         card.innerHTML = `
             <div class="card-header">
-                <strong>#${index + 1} ${isBolao ? `(${game.length}d)` : ''}</strong>
+                <strong>#${gameObj.id + 1} ${isBolao ? `• BOLÃO ${nums.length}D` : '• Jogo simples'}</strong>
                 <span class="points-badge" id="pts-${index}">0 pts</span>
             </div>
             <div class="balls-row">${ballsHtml}</div>
+            ${bolaoControl}
             <div class="prize-text" id="prize-${index}"></div>
         `;
         fragment.appendChild(card);
@@ -446,13 +499,30 @@ function renderGames() {
     });
 }
 
+function handleCotasChange(filteredIndex, val){
+    const gameObj = filteredGames[filteredIndex];
+    if(!gameObj) return;
+    let v = parseInt(val,10);
+    if(isNaN(v) || v<1) v=1;
+    if(v>100) v=100;
+    gameObj.cotas = v;
+    // sync to original games array
+    const orig = games.find(g=>g.id===gameObj.id);
+    if(orig) orig.cotas = v;
+    try{ localStorage.setItem('cotas-'+gameObj.id, v); }catch(e){}
+    const info = document.getElementById(`cotas-info-${filteredIndex}`);
+    if(info) info.innerText = `÷ ${v}`;
+    updateDashboard();
+}
+
 function updateCard(cardEl, index) {
     if (!cardEl) return;
-    const game = filteredGames[index];
-    if (!game) return;
-    const result = calculateGamePrizes(game, drawnNumbers);
+    const gameObj = filteredGames[index];
+    if (!gameObj) return;
+    const nums = gameObj.nums;
+    const result = calculateGamePrizes(gameObj, drawnNumbers);
 
-    game.forEach(num => {
+    nums.forEach(num => {
         const ballEl = document.getElementById(`ball-${index}-${num}`);
         if (ballEl) {
             if (drawnNumbers.has(num)) ballEl.className = 'ball hit';
@@ -467,13 +537,29 @@ function updateCard(cardEl, index) {
     const prizeEl = document.getElementById(`prize-${index}`);
     if (prizeEl) {
         if (result.prize > 0) {
-            const isBolao = game.length > 15;
-            const detalhe = isBolao ? `<br><small style="opacity:0.6">Bolão ${game.length}d</small>` : `<br><small style="opacity:0.6">${result.hits} acertos</small>`;
+            let detalhe = '';
+            if(result.isBolao){
+                if(result.divideApplied){
+                    detalhe = `<br><small style="opacity:0.7">Bolão ${nums.length}D • ${result.cotas} cotas • Total ${formatCurrency(result.basePrize)} → <b>${formatCurrency(result.prize)} por cota</b></small>`;
+                    if(result.hits>=11 && result.hits<=13) detalhe += `<br><small style="color:#b8860b; font-weight:700;">↳ Prêmio fixo dividido entre ${result.cotas} pessoas</small>`;
+                } else {
+                    detalhe = `<br><small style="opacity:0.6">Bolão ${nums.length}D • ${result.hits} acertos</small>`;
+                }
+            } else {
+                detalhe = `<br><small style="opacity:0.6">${result.hits} acertos • Prêmio individual</small>`;
+            }
             prizeEl.innerHTML = `+ ${formatCurrency(result.prize)}${detalhe}`;
             cardEl.classList.add('winner');
         } else {
-            prizeEl.innerText = '';
-            cardEl.classList.remove('winner');
+            if(result.hits>=11){
+                // 14/15 com prize 0 (rateio) - mostra aviso
+                if(result.hits===14) prizeEl.innerHTML = `<small style="color:#e67e22; font-weight:700;">14 acertos — rateio variável da Caixa (estimativa)</small>`;
+                else if(result.hits===15) prizeEl.innerHTML = `<small style="color:#e67e22; font-weight:700;">🎉 15 ACERTOS — R$ 300 MI (rateio)</small>`;
+                else prizeEl.innerText='';
+            } else {
+                prizeEl.innerText = '';
+            }
+            if(result.hits>=11) cardEl.classList.add('winner'); else cardEl.classList.remove('winner');
         }
     }
 }
@@ -501,8 +587,14 @@ function updateDashboard() {
     const hits14El = document.getElementById('hits14Display');
     if (hits14El) hits14El.innerText = hits14Count;
 
+    const bolaoEl = document.getElementById('bolaoCountDisplay');
+    if (bolaoEl) bolaoEl.innerText = games.filter(g=>g.isBolao).length;
+
     if (drawnNumbers.size === MAX_SELECT && totalWinnings > 0) {
-        const has15 = filteredGames.some(g => g.every(n => drawnNumbers.has(n)));
+        const has15 = filteredGames.some(g => {
+            const nums = Array.isArray(g) ? g : g.nums;
+            return nums.every(n => drawnNumbers.has(n));
+        });
         if (has15) triggerFireworks();
     }
 }
@@ -750,21 +842,34 @@ function formatCurrency(v) {
 // ============================================
 // BUSCA / FILTRO (busca exata por combinação)
 // ============================================
+let currentFilter = 'all';
+function filterBolao(type){
+    currentFilter = type;
+    applyFilters();
+}
+function applyFilters(){
+    const searchBox = document.getElementById('searchBox');
+    const query = searchBox ? searchBox.value.trim() : '';
+    let base = [...games];
+    if(currentFilter==='bolao') base = base.filter(g=>g.isBolao);
+    else if(currentFilter==='simples') base = base.filter(g=>!g.isBolao);
+    if(query){
+        const nums = query.replace(/[^0-9]/g, ' ').split(/\s+/).filter(n => n.length >= 2).map(n => parseInt(n, 10));
+        if (nums.length >= 2) {
+            base = base.filter(g => nums.every(num => g.nums.includes(num)));
+        }
+    }
+    filteredGames = base;
+    renderGames();
+    const el = document.getElementById('totalGamesDisplay');
+    if (el) el.innerText = filteredGames.length;
+    updateDashboard();
+}
 function setupSearch() {
     const searchBox = document.getElementById('searchBox');
     if (!searchBox) return;
     searchBox.addEventListener('input', () => {
-        const query = searchBox.value.trim();
-        if (!query) { filteredGames = [...games]; }
-        else {
-            const nums = query.replace(/[^0-9]/g, ' ').split(/\s+/).filter(n => n.length >= 2).map(n => parseInt(n, 10));
-            if (nums.length >= 2) {
-                filteredGames = games.filter(g => nums.every(num => g.includes(num)));
-            } else { filteredGames = [...games]; }
-        }
-        renderGames();
-        const el = document.getElementById('totalGamesDisplay');
-        if (el) el.innerText = filteredGames.length;
+        applyFilters();
     });
 }
 
