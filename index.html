@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Lotofácil 2026">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23930089'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>LF</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23930089'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>LF</text></svg>">
+    <title>Lotofácil Independência 2026</title>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #0d47a1;
+            --bg: #f0f4f8;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-secondary: #666666;
+            --border: rgba(26, 115, 232, 0.2);
+            --hit: #00c853;
+            --miss: #e53935;
+            --accent: #ffc107;
+            --shadow: rgba(0,0,0,0.1);
+            --glass: rgba(255,255,255,0.7);
+            --gradient-start: #1a73e8;
+            --gradient-end: #6c1d95;
+            --neon-blue: rgba(26, 115, 232, 0.3);
+            --neon-gold: rgba(255, 193, 7, 0.4);
+        }
+        @keyframes shimmer { 0%,100% { transform: translate(0,0); } 50% { transform: translate(5%,5%); } }
+        @keyframes glow-pulse { 0%,100% { box-shadow: 0 0 5px var(--neon-blue); } 50% { box-shadow: 0 0 25px var(--neon-blue); } }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes borderPulse { 0%,100% { border-color: var(--border); } 50% { border-color: var(--neon-blue); } }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg); color: var(--text); padding-bottom: env(safe-area-inset-bottom);
+            transition: background 0.5s, color 0.5s; min-height: 100vh;
+            background-image: radial-gradient(ellipse at 20% 50%, rgba(26,115,232,0.04) 0%, transparent 50%),
+                              radial-gradient(ellipse at 80% 50%, rgba(108,29,149,0.04) 0%, transparent 50%);
+        }
+        .header-banner {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            padding: 28px 15px 35px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: white;
+            position: relative; overflow: hidden; box-shadow: 0 4px 30px rgba(26,115,232,0.5);
+            border-bottom: 4px solid var(--accent); animation: glow-pulse 4s ease-in-out infinite;
+        }
+        .header-banner::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            animation: shimmer 6s ease-in-out infinite;
+        }
+        .header-title { font-size: 2.2em; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 20px rgba(255,255,255,0.4), 2px 2px 8px rgba(0,0,0,0.5); position: relative; z-index: 1; animation: float 3s ease-in-out infinite; }
+        .header-subtitle { font-size: 0.85em; margin-top: 6px; color: var(--accent); font-weight: 600; letter-spacing: 2px; text-align: center; position: relative; z-index: 1; text-shadow: 0 0 10px rgba(255,193,7,0.3); }
+        .header-badge { font-size: 0.7em; background: rgba(255,255,255,0.2); padding: 3px 16px; border-radius: 20px; margin-top: 8px; position: relative; z-index: 1; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 12px; }
+        .dashboard {
+            background: var(--card-bg); padding: 16px; border-radius: 20px;
+            box-shadow: 0 8px 32px var(--shadow), 0 0 1px var(--neon-blue);
+            display: flex; justify-content: space-around; align-items: center;
+            margin-bottom: 16px; flex-wrap: wrap; gap: 8px; text-align: center;
+            border: 1px solid var(--border); backdrop-filter: blur(20px);
+            animation: slideUp 0.6s ease; position: relative; overflow: hidden;
+        }
+        .dashboard::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-blue), transparent); animation: borderPulse 3s linear infinite; }
+        .stat-box { flex: 1; min-width: 80px; padding: 4px; }
+        .stat-box h2 { margin: 0; font-size: 1.4em; font-weight: 800; color: var(--primary); text-shadow: 0 0 10px var(--neon-blue); transition: all 0.3s; }
+        .stat-box p { margin: 2px 0 0; opacity: 0.7; font-size: 0.65em; text-transform: uppercase; letter-spacing: 1px; }
+        .actions { text-align: center; margin-bottom: 12px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .btn { border: none; padding: 12px 18px; font-size: 0.85em; border-radius: 12px; cursor: pointer; font-weight: 700; transition: transform 0.15s, box-shadow 0.15s; will-change: transform; touch-action: manipulation; min-height: 44px; position: relative; overflow: hidden; }
+        .btn:active { transform: scale(0.94); }
+        .btn-clear { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; box-shadow: 0 4px 15px rgba(231,76,60,0.4); }
+        .btn-install { background: linear-gradient(135deg, #27ae60, #219a52); color: white; box-shadow: 0 4px 15px rgba(39,174,96,0.4); }
+        .btn-share { background: linear-gradient(135deg, #e67e22, #d35400); color: white; box-shadow: 0 4px 15px rgba(230,126,34,0.4); }
+        .selector-container { background: var(--card-bg); padding: 16px; border-radius: 20px; box-shadow: 0 8px 32px var(--shadow), 0 0 1px var(--neon-blue); margin: 0 auto 16px auto; text-align: center; border: 1px solid var(--border); backdrop-filter: blur(20px); animation: slideUp 0.8s ease; }
+        .selector-container h3 { margin: 0 0 10px; font-size: 0.95em; color: var(--text); }
+        .number-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 380px; margin: 0 auto; }
+        .num-btn { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--border); background: var(--card-bg); font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.9em; padding: 0; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px var(--shadow); animation: borderPulse 4s ease infinite; }
+        .num-btn:hover { box-shadow: 0 0 15px var(--neon-blue); transform: scale(1.05); }
+        .num-btn:active { background: var(--border); }
+        .num-btn.selected { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.1); box-shadow: 0 0 20px var(--neon-blue), 0 2px 8px rgba(147,0,137,0.5); }
+        .games-wrapper { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; position: relative; }
+        .game-card { background: var(--card-bg); padding: 14px; border-radius: 16px; border-left: 5px solid rgba(100,100,150,0.3); box-shadow: 0 4px 20px var(--shadow); transition: transform 0.3s, box-shadow 0.3s; will-change: transform; border: 1px solid var(--border); backdrop-filter: blur(20px); animation: slideUp 0.6s ease; position: relative; overflow: hidden; }
+        .game-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(26,115,232,0.25); }
+        .game-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-blue), transparent); opacity: 0; transition: opacity 0.3s; }
+        .game-card:hover::before { opacity: 1; }
+        .game-card.winner { border-left-color: var(--accent); background: linear-gradient(135deg, rgba(255,193,7,0.08) 0%, var(--card-bg) 100%); box-shadow: 0 4px 25px rgba(255,193,7,0.2); animation: borderPulse 2s ease infinite; }
+        .game-card.hidden { display: none; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 6px; gap: 8px; flex-wrap: wrap; }
+        .card-header strong { font-size: 0.85em; color: var(--text); }
+        .points-badge { background: linear-gradient(135deg, rgba(26,115,232,0.15), rgba(108,29,149,0.15)); padding: 3px 12px; border-radius: 12px; font-size: 0.72em; font-weight: 700; white-space: nowrap; color: var(--text); border: 1px solid var(--border); }
+        .prize-text { color: var(--hit); font-weight: 700; font-size: 0.85em; margin-top: 6px; text-shadow: 0 0 8px rgba(0,200,83,0.3); }
+        .balls-row { display: flex; flex-wrap: wrap; gap: 4px; }
+        .ball { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.68em; border: 1.5px solid var(--border); color: var(--text-secondary); font-weight: 600; transition: all 0.2s; will-change: transform; background: rgba(0,0,0,0.05); }
+        .ball.hit { background: var(--hit); color: white; border-color: var(--hit); animation: popIn 0.3s ease, glowHit 1s ease infinite alternate; }
+        .ball.miss { background: var(--miss); color: white; border-color: var(--miss); opacity: 0.6; text-decoration: line-through; }
+        @keyframes popIn { 0% { transform: scale(0.5); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes glowHit { from { box-shadow: 0 0 5px var(--hit); } to { box-shadow: 0 0 15px var(--hit); } }
+        .warning-box { background: linear-gradient(135deg, rgba(255,193,7,0.1), rgba(255,193,7,0.05)); border: 1px solid rgba(255,193,7,0.3); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.78em; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 8px; backdrop-filter: blur(10px); }
+        .warning-box::before { content: '⚠️'; flex-shrink: 0; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+        .toolbar-right { display: flex; gap: 6px; }
+        .search-box { padding: 10px 14px; border-radius: 12px; border: 2px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 0.85em; width: 100%; max-width: 300px; min-height: 44px; backdrop-filter: blur(10px); transition: border-color 0.3s, box-shadow 0.3s; }
+        .search-box:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px var(--neon-blue); }
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: none; }
+        .footer { text-align: center; padding: 16px; color: var(--text-secondary); font-size: 0.75em; opacity: 0.6; backdrop-filter: blur(10px); }
+        @media (max-width: 480px) {
+            .header-title { font-size: 1.6em; letter-spacing: 1px; }
+            .ball { width: 22px; height: 22px; font-size: 0.62em; }
+            .games-wrapper { grid-template-columns: 1fr; }
+            .number-grid { gap: 6px; max-width: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confetti-canvas"></canvas>
+    <div class="header-banner">
+        <div class="header-title">LOTOFÁCIL</div>
+        <div class="header-subtitle">INDEPENDÊNCIA 2026 • CONCURSO 3780 • R$ 300 MILHÕES</div>
+        <div class="header-badge">🎯 Conferidor Inteligente</div>
+    </div>
+    <div class="container">
+        <div class="warning-box">Valores de 11, 12 e 13 pontos são fixos. Valores de 14 e 15 pontos são estimativas (rateio oficial da Caixa). Ao acertar 15: 🎉 VOCÊ SE TORNA MILIONÁRIO! 🎆</div>
+        <div class="dashboard">
+            <div class="stat-box"><h2 id="totalGamesDisplay">0</h2><p>Jogos</p></div>
+            <div class="stat-box"><h2 id="hitsCountDisplay">0</h2><p>Sorteados</p></div>
+            <div class="stat-box"><h2 id="hits14Display" style="color:#e67e22">0</h2><p>14 pts</p></div>
+            <div class="stat-box"><h2 id="winningsDisplay">R$ 0</h2><p>Ganhos</p></div>
+        </div>
+        <div class="toolbar">
+            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Buscar jogo..." aria-label="Buscar jogo">
+            <div class="toolbar-right">
+                <button class="btn btn-share" id="btnShare" onclick="shareResult()">📤 Compartilhar</button>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn btn-clear" onclick="resetDrawnNumbers()">🔄 Limpar</button>
+            <button class="btn btn-install" id="btnInstall" onclick="installApp()">📲 Instalar</button>
+        </div>
+        <div class="selector-container">
+            <h3>Marque os Números Sorteados</h3>
+            <div class="number-grid" id="selectorGrid"></div>
+        </div>
+        <div class="games-wrapper" id="virtualContainer"></div>
+        <div class="footer">Lotofácil Independência 2026 — Conferidor Inteligente v2.0</div>
+    </div>
+
+<script>
+// ============================================
+// DADOS DOS JOGOS (142 jogos do Concurso 3780)
+// ============================================
+const rawGamesData = `
+01 03 04 05 07 09 12 14 15 18 20 21 23 24 25
+02 05 07 10 11 12 13 14 15 16 17 20 21 24 25
+01 04 06 08 09 12 13 14 15 18 19 20 22 23 24
+02 03 04 06 07 10 13 14 15 18 19 21 23 24 25
+01 04 06 08 09 10 12 14 15 18 19 20 22 23 24
+01 02 03 05 06 07 08 09 10 11 13 15 20 21 23
+01 02 03 04 08 09 10 12 13 18 19 20 22 24 25
+01 02 04 06 08 09 12 14 15 18 19 20 22 23 24
+01 02 03 04 05 06 07 08 09 10 11 13 15 20 21 23
+01 02 05 07 08 09 10 13 15 17 19 21 22 24 25
+02 04 06 07 09 10 11 13 15 17 18 19 20 21 24
+01 02 04 06 09 12 14 15 16 18 19 20 22 23 24
+01 02 03 06 08 10 11 13 14 17 19 20 22 23 25
+02 04 05 07 09 12 13 15 18 20 21 22 23 24 25
+01 02 03 04 05 09 10 13 15 17 19 20 22 24 25
+01 03 04 08 09 10 12 14 16 17 19 21 22 23 24
+03 05 06 07 08 09 11 12 13 15 17 18 20 22 24
+01 03 04 07 09 10 11 12 13 14 17 18 21 23 24
+03 04 05 07 08 10 13 14 15 16 17 19 20 23 24
+01 04 06 07 09 11 12 14 15 18 19 20 22 23 24
+01 04 06 07 09 12 13 14 15 18 19 20 22 23 24
+01 03 06 07 08 09 10 13 15 17 19 20 21 22 24
+01 04 06 09 12 13 14 15 16 18 19 20 22 23 24
+01 04 06 08 09 12 14 15 18 19 20 22 23 24 25
+01 04 06 07 09 12 14 15 18 19 20 22 23 24 25
+03 04 05 07 08 11 12 13 14 15 19 20 22 23 25
+01 04 05 06 07 12 13 15 18 20 21 22 23 24 25
+02 03 05 06 08 11 13 14 17 19 21 22 23 24 25
+01 04 06 07 09 10 12 14 15 18 19 20 22 23 24
+01 03 04 06 08 09 12 14 16 18 19 20 22 23 24
+01 04 06 09 12 14 15 16 18 19 20 22 23 24 25
+01 04 06 09 12 13 14 15 18 19 20 22 23 24 25
+01 03 04 06 09 12 14 15 18 19 20 22 23 24
+01 03 04 06 09 12 14 15 17 18 19 20 22 23 24
+01 04 06 07 08 09 11 12 13 15 18 21 22 23 24 25
+01 02 05 06 07 08 09 10 13 15 16 17 19 21 22 23
+01 02 03 04 05 07 08 11 12 14 19 20 22 24 25
+01 02 03 04 05 10 11 12 13 14 18 20 22 24 25
+01 02 03 05 06 07 08 09 11 13 14 16 18 19 20 22 23
+01 03 04 06 08 09 10 11 12 14 15 16 19 20 23 24 25
+01 02 05 06 07 08 10 15 16 17 18 20 21 22 23 24 25
+02 03 05 06 10 11 14 15 16 17 18 19 20 22 23 24 25
+02 04 06 07 08 09 10 11 13 15 17 18 19 21 22 24 25
+01 02 03 05 06 07 08 09 10 11 14 16 17 19 24
+01 04 05 06 09 12 14 15 17 18 19 20 22 23 24
+01 03 04 05 06 09 12 14 15 18 19 20 22 23 24
+01 04 05 06 07 08 09 11 12 13 15 18 19 21 23 24 25
+03 05 06 07 08 09 12 13 15 16 17 18 20 21 23 24 25
+01 02 03 04 06 07 08 09 10 13 14 16 18 19 22 24 25
+02 03 04 05 07 09 10 12 14 15 16 18 19 20 21 24 25
+01 02 03 04 05 06 08 10 11 12 14 15 16 20 22 23 25
+01 04 05 06 07 08 09 10 12 15 17 18 19 20 23 24 25
+02 04 05 07 09 10 11 12 14 15 16 17 18 19 20 23 24
+01 03 04 05 07 09 11 13 14 15 16 17 19 20 22 23 24
+01 04 07 08 09 11 12 14 15 16 17 19 20 21 22 24 25
+01 02 03 04 07 08 10 11 12 13 14 15 18 19 20 24 25
+01 04 06 09 12 14 15 18 19 20 21 22 23 24 25
+01 03 04 06 07 09 12 14 15 18 19 20 21 23 24
+01 03 04 06 09 10 12 14 15 18 19 20 22 23 24
+01 03 04 06 09 12 14 15 18 19 20 21 22 23 24
+02 03 04 06 07 08 10 12 13 14 16 18 22 23 24
+01 03 04 06 09 12 13 14 15 18 19 20 22 23 24
+03 04 05 06 07 10 13 15 16 17 18 19 20 21 24
+01 04 06 09 11 12 14 15 17 18 19 20 22 23 24
+02 07 08 10 11 13 15 16 17 18 21 22 23 24 25
+01 03 04 06 09 11 12 14 15 18 19 20 22 23 24
+01 02 03 04 06 09 12 14 15 18 19 20 22 23 24
+01 02 05 08 09 10 11 13 14 15 17 18 21 22 24
+01 04 05 06 09 11 12 14 15 18 19 20 22 23 24
+01 04 06 09 12 14 15 16 17 18 19 20 22 23 24
+01 04 06 09 12 13 14 15 17 18 19 20 22 23 24
+01 04 06 09 12 14 15 17 18 19 20 22 23 24 25
+01 02 03 04 05 07 08 09 11 12 19 20 21 24 25
+01 04 06 08 09 12 14 15 17 18 19 20 22 23 24
+01 04 05 06 09 12 14 15 18 19 20 22 23 24 25
+01 04 06 07 09 12 14 15 17 18 19 20 22 23 24
+01 04 05 06 07 09 12 14 15 18 19 20 22 23 24
+02 03 05 08 09 11 12 14 17 19 21 22 23 24 25
+01 03 05 07 08 10 11 14 15 17 18 20 23 24 25
+04 05 09 10 15 16 17 18 19 20 21 22 23 24 25
+02 03 04 07 08 09 11 13 15 17 18 19 22 23 24
+02 03 04 05 06 07 11 12 13 15 16 17 21 22 25
+01 03 04 06 09 12 14 15 16 18 19 20 22 23 24
+03 04 05 08 09 12 14 15 17 18 20 21 22 24 25
+01 02 03 04 06 07 08 09 10 11 13 15 17 18 19 21 23 24 25
+01 02 03 05 07 08 09 10 11 13 14 15 16 18 20 21 23 24 25
+02 04 06 08 10 11 12 13 14 15 17 18 19 20 21 23 25
+02 06 07 09 10 11 12 13 15 16 17 19 20 21 23 24 25
+01 04 06 08 09 10 12 14 15 16 19 20 21 22 23 24 25
+02 04 05 07 08 09 10 11 13 15 16 17 19 20 21 22 23
+01 03 04 05 07 08 09 10 11 12 13 14 16 19 21 22 23
+01 04 06 07 08 09 13 14 16 17 18 19 20 23 24
+01 02 03 04 05 09 11 12 14 15 16 18 22 23 25
+02 03 04 05 06 07 10 11 12 15 16 21 22 23 25
+01 03 04 05 10 11 12 13 14 16 18 20 22 24 25
+03 04 05 06 08 09 11 12 18 19 20 21 22 23 25
+02 04 05 07 08 09 12 14 16 17 18 19 21 22 23
+02 03 04 05 11 14 15 16 17 18 19 20 23 24 25
+01 02 03 05 06 07 09 10 13 14 15 19 22 23 24
+01 03 04 06 07 08 09 10 12 16 17 19 21 22 24
+03 04 05 07 08 09 10 11 12 14 16 19 20 21 24
+03 05 07 09 11 13 15 16 17 19 20 21 22 23 24 25
+01 03 05 08 10 12 14 16 17 18 19 20 21 22 24 25
+01 02 04 06 08 10 12 13 14 16 18 19 20 21 23 25
+02 04 06 08 10 12 14 16 17 18 20 21 22 23 24 25
+01 03 05 07 09 11 13 15 16 17 19 21 22 23 24 25
+04 05 06 07 08 09 10 12 14 19 20 22 23 24 25
+01 02 04 07 09 11 12 13 14 15 17 18 22 24 25
+01 04 06 07 08 09 12 14 15 18 19 20 22 23 24
+01 04 06 09 10 12 14 15 16 18 19 20 22 23 24
+01 03 04 05 07 08 13 14 15 17 18 20 23 24 25
+01 03 04 05 06 08 12 14 19 20 21 22 23 24 25
+01 02 03 07 08 10 11 13 14 17 18 19 22 23 25
+01 04 06 08 09 12 14 15 16 18 19 20 22 23 24
+01 04 05 08 09 13 14 15 17 19 21 22 23 24 25
+01 04 06 09 11 12 14 15 18 19 20 21 22 23 24
+02 03 04 07 08 09 10 12 14 16 20 22 23 24 25
+01 04 06 09 11 12 14 15 16 18 19 20 22 23 24
+01 04 06 08 09 12 14 15 18 19 20 21 22 23 24
+02 03 05 07 08 10 12 14 15 17 18 21 22 24 25
+01 04 06 09 10 12 14 15 18 19 20 22 23 24 25
+01 04 06 09 12 14 15 16 18 19 20 21 22 23 24
+01 02 03 05 08 10 12 14 15 17 19 21 22 24 25
+01 02 03 04 05 08 10 13 14 15 17 19 20 22 24
+01 02 03 04 05 08 09 12 13 15 16 19 20 21 22
+01 04 06 08 09 11 12 14 15 18 19 20 22 23 24
+01 04 06 07 09 12 14 15 18 19 20 21 22 23 24
+01 02 04 07 09 13 14 15 18 20 21 22 23 24 25
+01 02 04 06 09 12 14 15 18 19 20 22 23 24 25
+01 03 05 06 07 08 10 11 12 14 15 19 20 24 25
+01 04 06 09 11 12 13 14 15 18 19 20 22 23 24
+03 04 05 08 10 11 12 13 14 15 17 19 22 24 25
+02 03 04 05 06 07 08 09 11 12 14 16 19 20 25
+01 04 06 09 11 12 14 15 18 19 20 22 23 24 25
+02 04 05 07 08 10 13 15 16 17 18 21 23 24 25
+01 02 04 06 07 09 12 14 15 18 19 20 22 23 24
+01 02 04 05 07 08 10 12 14 18 19 20 22 23 24
+01 02 04 06 09 11 12 14 15 18 19 20 22 23 24
+01 03 04 05 08 09 10 11 16 17 19 22 23 24 25
+01 04 06 07 09 12 14 15 16 18 19 20 22 23 24
+03 04 05 06 08 09 12 13 14 17 18 20 22 23 25
+01 04 06 09 10 11 12 14 15 18 19 20 22 23 24
+`;
+
+// ============================================
+// CONSTANTES & TABELA DE PRÊMIOS
+// ============================================
+const PRIZES = { 15: 300_000_000.00, 14: 0, 13: 17.50, 12: 7.00, 11: 3.50 };
+const MIN_NUMBERS = 11, MAX_NUMBERS = 25;
+const MAX_SELECT = 15;
+
+// ============================================
+// CACHE COMBINATÓRIO (Memoização)
+// ============================================
+const comboCache = new Map();
+function combinations(n, k) {
+    if (k > n || k < 0 || n < 0) return 0;
+    if (k === 0 || k === n) return 1;
+    const key = `${n},${k}`;
+    if (comboCache.has(key)) return comboCache.get(key);
+    let r = 1;
+    for (let i = 1; i <= k; i++) r = r * (n - k + i) / i;
+    const result = Math.round(r);
+    comboCache.set(key, result);
+    return result;
+}
+
+// ============================================
+// ESTADO GLOBAL
+// ============================================
+let games = [];
+let drawnNumbers = new Set();
+let deferredPrompt = null;
+let filteredGames = [];
+let rafId = null;
+
+// ============================================
+// PARSER ROBUSTO
+// ============================================
+function parseGames() {
+    try {
+        games = rawGamesData.trim().split('\n').map(line => {
+            const nums = line.match(/\d+/g);
+            if (!nums) return null;
+            const p = nums.map(n => parseInt(n, 10));
+            if (p.length < 11 || p.length > 25) return null;
+            if (new Set(p).size !== p.length) return null;
+            if (p.some(n => n < 1 || n > 25)) return null;
+            return p.sort((a, b) => a - b);
+        }).filter(g => g !== null);
+        filteredGames = [...games];
+        const el = document.getElementById('totalGamesDisplay');
+        if (el) el.innerText = games.length;
+    } catch (e) {
+        console.error('Erro ao parser jogos:', e);
+    }
+}
+
+// ============================================
+// CRIAÇÃO DO SELETOR DE NÚMEROS
+// ============================================
+function createSelector() {
+    const grid = document.getElementById('selectorGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    for (let i = 1; i <= 25; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'num-btn';
+        btn.innerText = i.toString().padStart(2, '0');
+        btn.id = `sel-${i}`;
+        btn.setAttribute('aria-label', `Número ${i}`);
+        btn.onclick = () => debounceToggle(i);
+        grid.appendChild(btn);
+    }
+}
+
+// ============================================
+// DEBOUNCE COM requestAnimationFrame
+// ============================================
+function debounceToggle(num) {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+        toggleNumber(num);
+        rafId = null;
+    });
+}
+
+function toggleNumber(num) {
+    const btn = document.getElementById(`sel-${num}`);
+    if (!btn) return;
+    if (drawnNumbers.has(num)) {
+        drawnNumbers.delete(num);
+        btn.classList.remove('selected');
+    } else {
+        if (drawnNumbers.size >= MAX_SELECT) { alert(`Limite de ${MAX_SELECT} números!`); return; }
+        drawnNumbers.add(num);
+        btn.classList.add('selected');
+        if (navigator.vibrate) navigator.vibrate(10);
+    }
+    updateDashboard();
+}
+
+// ============================================
+// CÁLCULO DE PRÊMIOS COM PRECISÃO
+// ============================================
+function calculateGamePrizes(game, drawn) {
+    const hits = game.filter(n => drawn.has(n)).length;
+    const effectiveHits = hits === 14 ? 13 : hits;
+    const prize = hits >= 11 ? (PRIZES[effectiveHits] || 0) : 0;
+    const isBolao = gameSize > 15;
+    const breakdown = isBolao ? { [hits]: gameSize - 14 } : {};
+    return { hits, prize, breakdown };
+}
+
+// ============================================
+// RENDERIZAÇÃO VIRTUALIZADA (IntersectionObserver)
+// ============================================
+function renderGames() {
+    const container = document.getElementById('virtualContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
+    filteredGames.forEach((game, index) => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.id = `card-${index}`;
+        card.setAttribute('data-index', index);
+        let ballsHtml = '';
+        game.forEach(num => {
+            ballsHtml += `<div class="ball" id="ball-${index}-${num}">${num.toString().padStart(2, '0')}</div>`;
+        });
+        const isBolao = game.length > 15;
+        card.innerHTML = `
+            <div class="card-header">
+                <strong>#${index + 1} ${isBolao ? `(${game.length}d)` : ''}</strong>
+                <span class="points-badge" id="pts-${index}">0 pts</span>
+            </div>
+            <div class="balls-row">${ballsHtml}</div>
+            <div class="prize-text" id="prize-${index}"></div>
+        `;
+        fragment.appendChild(card);
+    });
+    container.appendChild(fragment);
+
+    // IntersectionObserver para lazy rendering
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const idx = parseInt(entry.target.dataset.index);
+                    if (!isNaN(idx)) updateCard(entry.target, idx);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '100px', threshold: 0.1 });
+        container.querySelectorAll('.game-card').forEach(card => observer.observe(card));
+    } else {
+        // Fallback: atualiza todos imediatamente
+        filteredGames.forEach((_, i) => updateCard(document.getElementById(`card-${i}`), i));
+    }
+}
+
+function updateCard(cardEl, index) {
+    if (!cardEl) return;
+    const game = filteredGames[index];
+    if (!game) return;
+    const result = calculateGamePrizes(game, drawnNumbers);
+
+    game.forEach(num => {
+        const ballEl = document.getElementById(`ball-${index}-${num}`);
+        if (ballEl) {
+            if (drawnNumbers.has(num)) ballEl.className = 'ball hit';
+            else if (drawnNumbers.size === MAX_SELECT) ballEl.className = 'ball miss';
+            else ballEl.className = 'ball';
+        }
+    });
+
+    const ptsEl = document.getElementById(`pts-${index}`);
+    if (ptsEl) ptsEl.innerText = `${result.hits} pts`;
+
+    const prizeEl = document.getElementById(`prize-${index}`);
+    if (prizeEl) {
+        if (result.prize > 0) {
+            const isBolao = game.length > 15;
+            const detalhe = isBolao ? `<br><small style="opacity:0.6">Bolão ${game.length}d</small>` : `<br><small style="opacity:0.6">${result.hits} acertos</small>`;
+            prizeEl.innerHTML = `+ ${formatCurrency(result.prize)}${detalhe}`;
+            cardEl.classList.add('winner');
+        } else {
+            prizeEl.innerText = '';
+            cardEl.classList.remove('winner');
+        }
+    }
+}
+
+// ============================================
+// DASHBOARD EM TEMPO REAL
+// ============================================
+function updateDashboard() {
+    let totalWinnings = 0;
+    let hits14Count = 0;
+    const hitsEl = document.getElementById('hitsCountDisplay');
+    if (hitsEl) hitsEl.innerText = drawnNumbers.size;
+
+    // Atualizar apenas cards visíveis
+    filteredGames.forEach((game, index) => {
+        const cardEl = document.getElementById(`card-${index}`);
+        if (cardEl && cardEl.getBoundingClientRect().top < window.innerHeight + 100) {
+            updateCard(cardEl, index);
+        }
+        const result = calculateGamePrizes(game, drawnNumbers);
+        if (result.hits === 14) hits14Count++;
+        if (result.prize > 0) totalWinnings += result.prize;
+    });
+
+    const winEl = document.getElementById('winningsDisplay');
+    if (winEl) winEl.innerText = formatCurrency(totalWinnings);
+
+    // 14 acertos — counter
+    const hits14El = document.getElementById('hits14Display');
+    if (hits14El) hits14El.innerText = hits14Count;
+
+    // Confetti/Fogos se todos os 15 números foram sorteados e há ganhador
+    if (drawnNumbers.size === MAX_SELECT && totalWinnings > 0) {
+        const has15 = filteredGames.some(g => g.every(n => drawnNumbers.has(n)));
+        if (has15) triggerFireworks();
+    }
+}
+
+// ============================================
+// FOGOS DE ARTIFÍCIO + MILIONÁRIO (R$100 + OURO)
+// ============================================
+function triggerFireworks() {
+    const canvas = document.getElementById('confetti-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    canvas.style.display = 'block';
+
+    // Fundo escuro futurista
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    bgGrad.addColorStop(0, '#0a001a');
+    bgGrad.addColorStop(0.5, '#1a0033');
+    bgGrad.addColorStop(1, '#0d0d2b');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const items = [];
+
+    // Notas de R$100 (verde)
+    for (let i = 0; i < 60; i++) {
+        items.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            w: 30 + Math.random() * 15,
+            h: 20 + Math.random() * 10,
+            type: 'bill',
+            vx: (Math.random() - 0.5) * 3,
+            vy: 2 + Math.random() * 4,
+            rotation: Math.random() * 360,
+            rv: (Math.random() - 0.5) * 2,
+            opacity: 1,
+            glow: Math.random()
+        });
+    }
+
+    // Barras de ouro (amarelo/dourado)
+    for (let i = 0; i < 30; i++) {
+        items.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            w: 35 + Math.random() * 25,
+            h: 15 + Math.random() * 10,
+            type: 'gold',
+            vx: (Math.random() - 0.5) * 1,
+            vy: 1 + Math.random() * 2,
+            rotation: Math.random() * 360,
+            rv: (Math.random() - 0.5) * 0.5,
+            opacity: 1,
+            glow: Math.random()
+        });
+    }
+
+    // Partículas brilhantes
+    for (let i = 0; i < 100; i++) {
+        items.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            w: 2 + Math.random() * 4,
+            h: 2 + Math.random() * 4,
+            type: 'spark',
+            vx: (Math.random() - 0.5) * 6,
+            vy: -1 - Math.random() * 5,
+            rotation: 0, rv: 0,
+            opacity: 1,
+            glow: Math.random()
+        });
+    }
+
+    let frame = 0;
+    function animate() {
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Aurora borealis no fundo
+        const auroraY = canvas.height * 0.3;
+        const auroraGrad = ctx.createLinearGradient(0, auroraY - 50, 0, auroraY + 50);
+        auroraGrad.addColorStop(0, 'rgba(100,0,200,0.1)');
+        auroraGrad.addColorStop(0.5, 'rgba(200,0,100,0.05)');
+        auroraGrad.addColorStop(1, 'rgba(0,100,200,0.1)');
+        ctx.fillStyle = auroraGrad;
+        ctx.fillRect(0, auroraY - 50, canvas.width, 100);
+
+        let alive = false;
+        items.forEach(item => {
+            if (item.opacity <= 0) return;
+            alive = true;
+
+            if (item.type === 'spark') {
+                item.vy += 0.05;
+                item.x += item.vx + Math.sin(frame * 0.1 + item.x) * 0.5;
+                item.y += item.vy;
+                if (item.y > canvas.height + 50) item.opacity = 0;
+            } else {
+                item.x += item.vx;
+                item.y += item.vy;
+                item.vy += item.type === 'gold' ? 0.1 : 0.15;
+                item.rotation += item.rv;
+                item.vx *= 0.99;
+                if (item.y > canvas.height + 100) item.opacity = 0;
+                if (item.x < -50) item.x = canvas.width + 50;
+                if (item.x > canvas.width + 50) item.x = -50;
+            }
+
+            ctx.save();
+            ctx.translate(item.x, item.y);
+            ctx.rotate(item.rotation * Math.PI / 180);
+            ctx.globalAlpha = Math.max(0, item.opacity);
+
+            if (item.type === 'bill') {
+                const g = ctx.createLinearGradient(-item.w/2, 0, item.w/2, 0);
+                g.addColorStop(0, '#006400');
+                g.addColorStop(0.5, '#228B22');
+                g.addColorStop(1, '#006400');
+                ctx.fillStyle = g;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#00ff00';
+                ctx.fillRect(-item.w/2, -item.h/2, item.w, item.h);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = `bold ${Math.max(6, item.h * 0.6)}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText('R$100', 0, item.h * 0.35);
+                ctx.shadowBlur = 0;
+            } else if (item.type === 'gold') {
+                const g = ctx.createLinearGradient(-item.w/2, -item.h/2, item.w/2, item.h/2);
+                g.addColorStop(0, '#FFD700');
+                g.addColorStop(0.5, '#FFA500');
+                g.addColorStop(1, '#FFD700');
+                ctx.fillStyle = g;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#FFD700';
+                ctx.fillRect(-item.w/2, -item.h/2, item.w, item.h);
+                ctx.fillStyle = '#B8860B';
+                ctx.font = `bold ${Math.max(6, item.h * 0.5)}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText('◆', 0, item.h * 0.35);
+                ctx.shadowBlur = 0;
+            } else if (item.type === 'spark') {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(0, 0, Math.max(0.5, item.w/2), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+            ctx.restore();
+        });
+
+        // Texto Milionário com efeito holográfico
+        const alpha = Math.min(1, frame / 20) * (frame < 350 ? 1 : 1 - (frame - 350) / 50);
+        if (alpha > 0) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+
+            // Fundo do painel
+            const panelW = Math.min(700, canvas.width * 0.8);
+            const panelH = 140;
+            const panelX = (canvas.width - panelW) / 2;
+            const panelY = canvas.height / 2 - panelH / 2;
+            const panelGrad = ctx.createLinearGradient(panelX, panelY, panelX + panelW, panelY + panelH);
+            panelGrad.addColorStop(0, 'rgba(100,0,200,0.3)');
+            panelGrad.addColorStop(0.5, 'rgba(200,0,100,0.2)');
+            panelGrad.addColorStop(1, 'rgba(0,100,200,0.3)');
+            ctx.fillStyle = panelGrad;
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = '#930089';
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 3;
+            roundRect(ctx, panelX, panelY, panelW, panelH, 20);
+            ctx.fill();
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Título
+            ctx.font = 'bold 42px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            const titleGrad = ctx.createLinearGradient(panelX, 0, panelX + panelW, 0);
+            titleGrad.addColorStop(0, '#FFD700');
+            titleGrad.addColorStop(0.3, '#FFFFFF');
+            titleGrad.addColorStop(0.5, '#FFD700');
+            titleGrad.addColorStop(0.7, '#FFFFFF');
+            titleGrad.addColorStop(1, '#FFD700');
+            ctx.fillStyle = titleGrad;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#FFD700';
+            ctx.fillText('🏆 VOCÊ É O NOVO MILIONÁRIO! 🏆', canvas.width / 2, panelY + 50);
+            ctx.shadowBlur = 0;
+
+            // Subtítulo
+            ctx.font = 'bold 24px -apple-system, sans-serif';
+            ctx.fillStyle = '#FFD700';
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#FF6600';
+            ctx.fillText('🎆 PARABÉNS! 🎆', canvas.width / 2, panelY + 95);
+            ctx.shadowBlur = 0;
+
+            ctx.restore();
+        }
+
+        frame++;
+        if (alive && frame < 500) requestAnimationFrame(animate);
+        else canvas.style.display = 'none';
+    }
+    animate();
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 100, 50, 200]);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+}
+
+// ============================================
+// RESET & FORMATAÇÃO
+// ============================================
+function resetDrawnNumbers() {
+    drawnNumbers.clear();
+    document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
+    updateDashboard();
+    if (navigator.vibrate) navigator.vibrate(20);
+}
+
+function formatCurrency(v) {
+    if (v >= 1_000_000) return 'R$ ' + (v / 1_000_000).toFixed(1).replace('.', ',') + ' mi';
+    if (v >= 1_000) return 'R$ ' + (v / 1_000).toFixed(1).replace('.', ',') + ' mil';
+    return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// ============================================
+// BUSCA / FILTRO (busca exata por combinação)
+// ============================================
+function setupSearch() {
+    const searchBox = document.getElementById('searchBox');
+    if (!searchBox) return;
+    searchBox.addEventListener('input', () => {
+        const query = searchBox.value.trim();
+        if (!query) { filteredGames = [...games]; }
+        else {
+            const nums = query.replace(/[^0-9]/g, ' ').split(/\s+/).filter(n => n.length >= 2).map(n => parseInt(n, 10));
+            if (nums.length >= 2) {
+                filteredGames = games.filter(g => nums.every(num => g.includes(num)));
+            } else { filteredGames = [...games]; }
+        }
+        renderGames();
+        const el = document.getElementById('totalGamesDisplay');
+        if (el) el.innerText = filteredGames.length;
+    });
+}
+
+// ============================================
+// COMPARTILHAMENTO (Web Share API)
+// ============================================
+function shareResult() {
+    if (!navigator.share) { alert('Compartilhamento não disponível neste dispositivo.'); return; }
+    const totalWinnings = filteredGames.reduce((sum, g) => sum + calculateGamePrizes(g, drawnNumbers).prize, 0);
+    navigator.share({
+        title: 'Lotofácil 2026 — Resultados',
+        text: `Conferi ${filteredGames.length} jogos da Lotofácil. Ganhos: ${formatCurrency(totalWinnings)}`,
+        url: window.location.href
+    }).catch(() => {});
+}
+
+// ============================================
+// TEMA ESCURO / CLARO
+// ============================================
+// PWA: SERVICE WORKER & INSTALL
+// ============================================
+function registerSW() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW erro:', err));
+    }
+}
+
+function setupInstallPrompt() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('btnInstall').style.display = 'inline-block';
+    });
+    window.addEventListener('appinstalled', () => {
+        document.getElementById('btnInstall').style.display = 'none';
+        deferredPrompt = null;
+    });
+}
+
+function installApp() {
+    if (!deferredPrompt) { alert('Para instalar: use o menu do navegador > "Adicionar à tela inicial"'); return; }
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+}
+
+// ============================================
+// INITIALIZAÇÃO
+// ============================================
+function init() {
+    parseGames();
+    createSelector();
+    renderGames();
+    setupSearch();
+    updateDashboard();
+    registerSW();
+    setupInstallPrompt();
+
+    // Verificar suporte a Web Share
+    if (!navigator.share) {
+        const shareBtn = document.getElementById('btnShare');
+        if (shareBtn) shareBtn.style.display = 'none';
+    }
+}
+
+init();
+</script>
+</body>
+</html>
