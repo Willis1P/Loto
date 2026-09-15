@@ -440,22 +440,10 @@ function renderGames() {
     });
     container.appendChild(fragment);
 
-    // IntersectionObserver para lazy rendering
-    if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const idx = parseInt(entry.target.dataset.index);
-                    if (!isNaN(idx)) updateCard(entry.target, idx);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { rootMargin: '100px', threshold: 0.1 });
-        container.querySelectorAll('.game-card').forEach(card => observer.observe(card));
-    } else {
-        // Fallback: atualiza todos imediatamente
-        filteredGames.forEach((_, i) => updateCard(document.getElementById(`card-${i}`), i));
-    }
+    filteredGames.forEach((_, i) => {
+        const cardEl = document.getElementById(`card-${i}`);
+        if (cardEl) updateCard(cardEl, i);
+    });
 }
 
 function updateCard(cardEl, index) {
@@ -499,12 +487,9 @@ function updateDashboard() {
     const hitsEl = document.getElementById('hitsCountDisplay');
     if (hitsEl) hitsEl.innerText = drawnNumbers.size;
 
-    // Atualizar apenas cards visíveis
     filteredGames.forEach((game, index) => {
         const cardEl = document.getElementById(`card-${index}`);
-        if (cardEl && cardEl.getBoundingClientRect().top < window.innerHeight + 100) {
-            updateCard(cardEl, index);
-        }
+        if (cardEl) updateCard(cardEl, index);
         const result = calculateGamePrizes(game, drawnNumbers);
         if (result.hits === 14) hits14Count++;
         if (result.prize > 0) totalWinnings += result.prize;
@@ -513,11 +498,9 @@ function updateDashboard() {
     const winEl = document.getElementById('winningsDisplay');
     if (winEl) winEl.innerText = formatCurrency(totalWinnings);
 
-    // 14 acertos — counter
     const hits14El = document.getElementById('hits14Display');
     if (hits14El) hits14El.innerText = hits14Count;
 
-    // Confetti/Fogos se todos os 15 números foram sorteados e há ganhador
     if (drawnNumbers.size === MAX_SELECT && totalWinnings > 0) {
         const has15 = filteredGames.some(g => g.every(n => drawnNumbers.has(n)));
         if (has15) triggerFireworks();
