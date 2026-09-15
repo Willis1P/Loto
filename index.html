@@ -999,10 +999,13 @@ function conferirTudo(){
 /* ─── 10. DASHBOARD ──────────────────────────────────────────────────── */
 function atualizarDashboard(){
   const totalJogos = state.grupos.reduce((s, g) => s + g.jogos.length, 0);
+  const qtdBolaoGrupos = state.grupos.filter(g=>g.ehBolao).length;
+  const qtdBolaoJogos = state.grupos.filter(g=>g.ehBolao).reduce((s,g)=>s+g.jogos.length,0);
+  const qtdSimples = totalJogos - qtdBolaoJogos;
   document.getElementById("statJogos").textContent =
     `${fmtNum.format(totalJogos)}`;
   document.getElementById("statJogos").nextElementSibling.textContent =
-    `${state.grupos.length} grupos (${state.grupos.filter(g=>g.ehBolao).length} bolões)`;
+    `${fmtNum.format(qtdSimples)} simples • ${qtdBolaoGrupos} bolões (${fmtNum.format(qtdBolaoJogos)} jogos)`;
   document.getElementById("statSorteados").textContent = `${state.sorteados.size}/15`;
   document.getElementById("statVencedores").textContent = fmtNum.format(state.resumo.premiados);
 
@@ -1022,7 +1025,7 @@ function atualizarDashboard(){
   document.getElementById("counterPremiadas").classList.toggle("full", state.resumo.premiados > 0);
 
   document.getElementById("badgeInfo").textContent =
-    `Concurso 3780 · ${fmtNum.format(totalJogos)} jogos · ${state.grupos.length} grupos`;
+    `Concurso 3780 · ${fmtNum.format(qtdSimples)} simples · ${qtdBolaoGrupos} bolões`;
 }
 
 /* ─── 11. FILTROS E RENDER ───────────────────────────────────────────── */
