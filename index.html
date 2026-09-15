@@ -1356,6 +1356,12 @@ function criarCardGrupo(g){
     rpR.innerHTML = `<div style="font-size:0.62rem; font-weight:700; text-transform:uppercase; color:var(--text-soft); letter-spacing:0.4px;">Por participante</div><div style="font-size:1.15rem; font-weight:900; color:var(--success-dark);">${fmtBRL.format(g.premioCota)}</div><div style="font-size:0.6rem; color:var(--text-soft);">Retorno das Cotas: total ${fmtBRL.format(g.premioBrutoGrupo)} ÷ ${g.totalCotas}</div>`;
     retPart.append(rpL, rpR);
     card.appendChild(retPart);
+    // Outro retorno dividido por 39 cotas (geral) — mantendo ganho principal
+    const ret39 = document.createElement("div");
+    ret39.style.cssText="background:linear-gradient(135deg,rgba(255,235,59,0.12),rgba(255,255,255,0.95)); border:1px solid rgba(212,175,55,0.28); border-left:4px solid var(--gold); border-radius:10px; padding:10px 14px; margin:0 15px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;";
+    const premioPor39 = g.premioBrutoGrupo / 39;
+    ret39.innerHTML = `<div><div style="font-size:0.68rem; font-weight:800; color:#a67c00; text-transform:uppercase; letter-spacing:0.5px;">Dividido por 39 cotas (geral)</div><div style="font-size:0.72rem; color:var(--text-soft);">Mantendo ganho principal <b style="color:var(--text);">${fmtBRL.format(g.premioBrutoGrupo)}</b> ÷39</div></div><div style="text-align:right;"><div style="font-size:0.62rem; font-weight:700; text-transform:uppercase; color:var(--text-soft);">Por cota (39)</div><div style="font-size:1.1rem; font-weight:900; color:#a67c00;">${fmtBRL.format(premioPor39)}</div><div style="font-size:0.6rem; color:var(--text-soft);">39 participantes × ${fmtBRL.format(premioPor39)}</div></div>`;
+    card.appendChild(ret39);
   }
 
   // Jogos internos — TODOS visíveis
