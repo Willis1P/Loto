@@ -420,11 +420,12 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </section>
 
-  <!-- Cronômetro regressivo até 21h — resultado -->
+  <!-- Próximo Sorteio e Cronômetro — dados oficiais Caixa -->
   <section class="panel" id="panelCronometro" style="background:linear-gradient(135deg,rgba(147,0,137,0.08),rgba(26,0,51,0.04)); border:1.5px solid rgba(147,0,137,0.18); text-align:center; padding:14px 12px;">
-    <div style="font-size:0.68rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:1px;">⏰ Resultado às 21h — Cronômetro</div>
+    <div style="font-size:0.68rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:1px;" id="cronometroTitulo">⏰ Próximo Sorteio — Concurso 3781 — 16/09/2026 — 21h</div>
     <div id="cronometro" style="font-size:1.65rem; font-weight:900; color:var(--primary); letter-spacing:1.5px; font-variant-numeric:tabular-nums; margin-top:6px; line-height:1;">--:--:--</div>
     <div id="cronometroLegenda" style="font-size:0.68rem; color:var(--text-soft); margin-top:4px;">Calculando tempo restante...</div>
+    <div id="proximoInfo" style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); font-size:0.70rem; color:var(--text-soft); line-height:1.5;"></div>
   </section>
 
   <section class="panel" aria-labelledby="tituloSorteio">
@@ -1098,12 +1099,15 @@ function atualizarDashboard(){
   if (elBruto39) elBruto39.textContent = fmtBRL.format(totalBruto39);
   if (elPor39) elPor39.textContent = fmtBRL.format(por39);
   if (elDet39) elDet39.textContent = fmtBRL.format(por39);}
-// ─── 10b. CRONÔMETRO 21h ───────────────────────────────────────────────
+// ─── 10b. CRONÔMETRO 21h — ajustado para próximo sorteio oficial Caixa ──
+let proximoAlvo = null; // Date do próximo sorteio às 21h
 function atualizarCronometro(){
   const agora = new Date();
-  let alvo = new Date(agora);
-  alvo.setHours(21,0,0,0);
-  if (agora >= alvo) alvo.setDate(alvo.getDate()+1);
+  let alvo = proximoAlvo ? new Date(proximoAlvo) : new Date(agora);
+  if (!proximoAlvo){
+    alvo.setHours(21,0,0,0);
+    if (agora >= alvo) alvo.setDate(alvo.getDate()+1);
+  }
   const diff = alvo - agora;
   const el = document.getElementById("cronometro");
   const leg = document.getElementById("cronometroLegenda");
@@ -1120,6 +1124,34 @@ function atualizarCronometro(){
   if (leg) leg.textContent = `Faltam ${h}h ${m}min ${s}s para o sorteio das 21h`;
 }
 setInterval(atualizarCronometro, 1000);
+async function carregarProximoSorteio(){
+  const titulo = document.getElementById("cronometroTitulo");
+  const info = document.getElementById("proximoInfo");
+  try{
+    const r = await fetch("https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil", {cache:"no-store"});
+    if (!r.ok) throw new Error("HTTP "+r.status);
+    const j = await r.json();
+    // j.numero = 3780 (Independência), j.numeroConcursoProximo = 3781, j.dataProximoConcurso = 16/09/2026, j.valorEstimadoProximoConcurso = 2000000
+    const proxNum = j.numeroConcursoProximo || 3781;
+    const proxDataStr = j.dataProximoConcurso || "16/09/2026";
+    const estimativa = j.valorEstimadoProximoConcurso || 2000000;
+    const local = j.localSorteio || "ESPAÇO DA SORTE";
+    // Parse data dd/mm/yyyy -> Date 21h
+    const [d,m,y] = proxDataStr.split("/").map(Number);
+    const dt = new Date(y, m-1, d, 21,0,0);
+    proximoAlvo = dt;
+    if (titulo) titulo.textContent = `⏰ Próximo Sorteio — Concurso ${proxNum} — ${proxDataStr} — 21h`;
+    if (info) info.innerHTML = `Concurso <b>${j.numero}</b> em ${j.dataApuracao} — <b>${(j.listaDezenas||[]).join(" ")}</b> • Próximo <b>${proxNum}</b> em ${proxDataStr} • Estimativa <b>${fmtBRL.format(estimativa)}</b> • ${local}`;
+    atualizarCronometro();
+  }catch(e){
+    console.warn("Falha ao buscar próximo sorteio Caixa", e);
+    if (info) info.textContent = "Próximo sorteio: Concurso 3781 em 16/09/2026 às 21h — Estimativa R$2.000.000,00 (dados locais)";
+    // Fallback para 3781 16/09/2026 21h
+    const [d,m,y] = [16,9,2026];
+    proximoAlvo = new Date(y, m-1, d, 21,0,0);
+    if (titulo) titulo.textContent = "⏰ Próximo Sorteio — Concurso 3781 — 16/09/2026 — 21h";
+  }
+}
 
 /* ─── 11. FILTROS E RENDER ───────────────────────────────────────────── */
 const jogosGrid = document.getElementById("jogosGrid");
@@ -1952,6 +1984,7 @@ function boot(){
     restaurarHistorico();
     sincronizarUI();
     atualizarCronometro();
+    carregarProximoSorteio();
 
     setTimeout(() => {
       if (state.sorteados.size === 0){
