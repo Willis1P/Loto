@@ -1311,7 +1311,7 @@ function montarBolas(jogo){
 }
 
 /* Linha de um jogo (usada dentro de card de bolão e em jogos simples) */
-function montarLinhaJogo(jogo, idx, qtdGrupo){
+function montarLinhaJogo(jogo, idx, qtdGrupo, totalCotasGrupo){
   const linha = document.createElement("div");
   linha.className = "jogo-linha" + (jogo.premiado ? " premiado" : "");
 
@@ -1343,9 +1343,15 @@ function montarLinhaJogo(jogo, idx, qtdGrupo){
   const lbl = document.createElement("span");
   lbl.className = "premio-label";
   lbl.textContent = jogo.premiado ? "Prêmio bruto" : "Resultado";
+  const isBolaoJogo = totalCotasGrupo && totalCotasGrupo > 1;
+  const valorExibido = jogo.premiado ? (isBolaoJogo ? (jogo.premioBruto / totalCotasGrupo) : jogo.premioBruto) : 0;
   const val = document.createElement("span");
   val.className = "premio-val" + (jogo.premiado ? "" : " zero");
-  val.textContent = jogo.premiado ? fmtBRL.format(jogo.premioBruto) : "Não premiado";
+  if (jogo.premiado && isBolaoJogo){
+    val.innerHTML = `${fmtBRL.format(valorExibido)}<span style="font-size:0.62rem; color:var(--text-soft); font-weight:600;"> ÷${totalCotasGrupo} cotas</span>`;
+  } else {
+    val.textContent = jogo.premiado ? fmtBRL.format(valorExibido) : "Não premiado";
+  }
   info.append(lbl, val);
   prem.appendChild(info);
 
@@ -1486,7 +1492,7 @@ function criarCardGrupo(g){
   // Jogos internos — TODOS visíveis
   const box = document.createElement("div");
   box.className = "jogos-internos";
-  g.jogos.forEach(j => box.appendChild(montarLinhaJogo(j, g.ordem, g.jogos.length)));
+  g.jogos.forEach(j => box.appendChild(montarLinhaJogo(j, g.ordem, g.jogos.length, g.totalCotas)));
   card.appendChild(box);
 
   if (g.tem15){
