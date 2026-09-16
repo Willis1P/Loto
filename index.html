@@ -420,14 +420,19 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </section>
 
-  
+  <!-- Cronômetro regressivo até 21h — resultado -->
+  <section class="panel" id="panelCronometro" style="background:linear-gradient(135deg,rgba(147,0,137,0.08),rgba(26,0,51,0.04)); border:1.5px solid rgba(147,0,137,0.18); text-align:center; padding:14px 12px;">
+    <div style="font-size:0.68rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:1px;">⏰ Resultado às 21h — Cronômetro</div>
+    <div id="cronometro" style="font-size:1.65rem; font-weight:900; color:var(--primary); letter-spacing:1.5px; font-variant-numeric:tabular-nums; margin-top:6px; line-height:1;">--:--:--</div>
+    <div id="cronometroLegenda" style="font-size:0.68rem; color:var(--text-soft); margin-top:4px;">Calculando tempo restante...</div>
+  </section>
 
   <!-- Painel 39 cotas (geral) — topo -->
   <section class="panel" id="panel39" style="background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(255,235,59,0.06)); border:1px solid rgba(212,175,55,0.28); border-left:4px solid var(--gold);">
     <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
       <div>
         <div style="font-size:0.72rem; font-weight:800; color:#a67c00; text-transform:uppercase; letter-spacing:0.6px;">Dividido por 39 cotas (geral) — mantendo ganho principal</div>
-        <div style="font-size:0.72rem; color:var(--text-soft); margin-top:4px;">Retorno do grupo <b id="totalGrupo39" style="color:var(--text);">R$ 0,00</b> ÷39 participantes (38 nomes, 1 dividida)</div>
+        <div style="font-size:0.72rem; color:var(--text-soft); margin-top:4px;">Ganho principal <b id="totalBruto39" style="color:var(--text);">R$ 0,00</b> ÷39 participantes (38 nomes, 1 dividida)</div>
       </div>
       <div style="text-align:right;">
         <div style="font-size:0.62rem; font-weight:700; text-transform:uppercase; color:var(--text-soft); letter-spacing:0.4px;">Por cota (39)</div>
@@ -1083,9 +1088,9 @@ function atualizarDashboard(){
   const elL = document.getElementById("statGanhosLbl");
   elG.textContent = fmtBRL.format(state.resumo.liquido);
 
-  // Detalha o rateio quando há bolões no meio
+  // Detalha o bruto quando há bolões no meio
   if (state.resumo.bruto > state.resumo.liquido + 0.01){
-    elL.textContent = "Sua parte (rateio de cotas)";
+    elL.textContent = `Sua parte · bruto ${fmtBRL.format(state.resumo.bruto)} rateado`;
   } else {
     elL.textContent = "Retorno das suas cotas";
   }
@@ -1096,13 +1101,13 @@ function atualizarDashboard(){
 
   document.getElementById("badgeInfo").textContent =
     `Concurso 3780 · ${fmtNum.format(qtdSimples)} simples · ${qtdBolaoGrupos} bolões`;
-  // Painel 39 cotas no topo — divide o valor que sobra para o grupo (líquido), não o bruto
-  const totalGrupo39 = state.resumo.liquido;
-  const por39 = totalGrupo39 / 39;
-  const elBruto39 = document.getElementById("totalGrupo39");
+  // Painel 39 cotas no topo — dividido mantendo ganho principal
+  const totalBruto39 = state.resumo.bruto;
+  const por39 = totalBruto39 / 39;
+  const elBruto39 = document.getElementById("totalBruto39");
   const elPor39 = document.getElementById("valorPor39");
   const elDet39 = document.getElementById("valorPor39detalhe");
-  if (elBruto39) elBruto39.textContent = fmtBRL.format(totalGrupo39);
+  if (elBruto39) elBruto39.textContent = fmtBRL.format(totalBruto39);
   if (elPor39) elPor39.textContent = fmtBRL.format(por39);
   if (elDet39) elDet39.textContent = fmtBRL.format(por39);
 }
