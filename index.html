@@ -1105,7 +1105,7 @@ function atualizarDashboard(){
   document.getElementById("badgeInfo").textContent =
     `Concurso 3780 · ${fmtNum.format(qtdSimples)} simples · ${qtdBolaoGrupos} bolões`;
   // Painel 39 cotas no topo — dividido mantendo ganho principal
-  const totalBruto39 = state.resumo.bruto;
+  const totalBruto39 = state.resumo.liquido; // corrigido: divide o liquido (o que os 39 realmente recebem), nao o bruto 1183
   const por39 = totalBruto39 / 39;
   const elBruto39 = document.getElementById("totalBruto39");
   const elPor39 = document.getElementById("valorPor39");
