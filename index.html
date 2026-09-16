@@ -604,19 +604,20 @@ footer.app-footer strong{color:var(--primary)}
    Arquitetura por GRUPO (hash) com rateio de cotas para bolões.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ─── 1. PRÊMIOS — OFICIAL CAIXA 43,79% (11=7 12=14 13=35, 14/15 rateio) ──
-   Bruto 43,79% - fixos 7/14/35, sobra 62% p/15 e 13% p/14 (10% final0, 15% Independência)
-   Bolão: 1× fixo ÷ totalCotas (ex: 11 em 32 cotas = 7,00/32 = 0,21/cota)
+/* ─── 1. PRÊMIOS — FIXOS DO RELATÓRIO 176 (11=3,50 12=7,00 13=17,50, 14/15 rateio) ──
+   Conforme seu relatório completo 176 jogos com sorteio 01 02 03 04 05 06 07 12 15 16 17 19 21 22 23
+   Mantém 3,50/7/17,50 para bater com comprovantes (ex: Grupo A 10,50 = 7+3,5)
+   Bolão: C(H,P)×C(M,15-P) ÷ totalCotas — ex: 17dz 11pts =15×3,50=52,50/32=1,64
 */
 const PRIZES = Object.freeze({
   15: 0,        // rateio
   14: 0,        // variável
-  13: 35.00,    // ✅ FIXO oficial
-  12: 14.00,    // ✅ FIXO oficial
-  11: 7.00      // ✅ FIXO oficial
+  13: 17.50,    // ✅ FIXO relatório
+  12: 7.00,     // ✅ FIXO
+  11: 3.50      // ✅ FIXO
 });
 const PRIZE_ESTIMADO_15 = 300000000.00; // ⚠️ R$300MI
-const PRIZE_ESTIMADO_14 = 1500.00;      // estimativa até oficial
+const PRIZE_ESTIMADO_14 = 0;           // 0 até oficial divulgar
 
 /**
  * Retorna o valor unitário de cada faixa.
@@ -884,20 +885,22 @@ function C(n, k){
 }
 
 /**
- * Regra pedida: se um jogo deu 11 acerto é R$3,50 dividido pela quantidade de gente da cota
- * NÃO multiplica por combinações (15×3,50). Cada jogo premiado conta 1 prêmio fixo.
- * Ex: 1 jogo com 11 = R$3,50 total → ÷32 cotas = R$0,11 por cota (1 cota sua)
+ * Regra oficial combinatória para 16-20 dezenas: quantidade(P)=C(H,P)×C(M,15-P)
+ * Ex: 17dz com 11 acertos e 6 erros → 15×11pts = 52,50 → ÷32 cotas = 1,64 por cota
+ * Mantém fixos do relatório 3,50/7/17,50 para bater com comprovantes
  */
 function analisarFaixas(hits, misses, qtdDezenas){
   const faixas = {};
   let premioBruto = 0;
   let combinacoesPremiadas = 0;
-  if (hits >= 11){
-    const v = valorFaixa(hits);
-    if (v > 0){
-      faixas[hits] = 1;
-      combinacoesPremiadas = 1;
-      premioBruto = v;
+  const inicio = qtdDezenas === 15 ? Math.max(11, hits) : 11;
+  const fim = qtdDezenas === 15 ? hits : 15;
+  for (let pts = inicio; pts <= fim; pts++){
+    const q = qtdDezenas === 15 ? 1 : C(hits, pts) * C(misses, 15 - pts);
+    if (q > 0){
+      faixas[pts] = q;
+      combinacoesPremiadas += q;
+      premioBruto += q * valorFaixa(pts);
     }
   }
   return {
