@@ -445,8 +445,12 @@ footer.app-footer strong{color:var(--primary)}
       </h2>
       <span class="counter-pill" id="counter" aria-live="polite">0 / 15 selecionados</span>
     </div>
+    <button id="btnResultado" onclick="buscarResultadoCaixa()" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 14px; margin-bottom:10px; border:none; border-radius:12px; background:linear-gradient(145deg,#930089,#6d0066); color:#fff; font-weight:800; font-size:0.84rem; cursor:pointer; box-shadow:0 4px 14px rgba(147,0,137,0.28);">
+      🎯 Resultado — Buscar Oficial Caixa (auto)
+    </button>
+    <div id="resultadoInfo" style="font-size:0.72rem; color:var(--text-soft); text-align:center; margin-bottom:10px; min-height:1.1em;"></div>
     <div class="numbers-grid" id="numbersGrid" role="group" aria-label="Selecione os 15 números sorteados"></div>
-    <span class="hint" id="hintTexto">Toque nos números sorteados. Os 176 jogos (53 em bolões) são conferidos automaticamente — bolão dividido por Total de cotas da planilha, 1 cota sua.</span>
+    <span class="hint" id="hintTexto">Toque nos números sorteados ou clique em <b>Resultado</b> para buscar automaticamente do site da Caixa. Os 176 jogos são conferidos com rateio por cota.</span>
   </section>
 
   <aside class="alerta info" role="note">
@@ -967,6 +971,54 @@ function sincronizarUI(){
     ? "✅ Sorteio completo! Resultados calculados com rateio de cotas."
     : `Faltam ${15 - qtd} número(s) para completar o sorteio.`;
   conferirTudo();
+}
+async function buscarResultadoCaixa(){
+  const btn = document.getElementById("btnResultado");
+  const info = document.getElementById("resultadoInfo");
+  if (btn){ btn.disabled=true; btn.textContent="⏳ Buscando no site da Caixa..."; }
+  if (info) info.textContent="Consultando https://servicebus2.caixa.gov.br ... (Concurso 3780)";
+  const urls = [
+    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3780",
+    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil"
+  ];
+  let dados=null;
+  for (const url of urls){
+    try{
+      const r = await fetch(url, {cache:"no-store"});
+      if (!r.ok) throw new Error("HTTP "+r.status);
+      const j = await r.json();
+      const cand = Array.isArray(j) ? j[0] : j;
+      if (cand && cand.listaDezenas && cand.listaDezenas.length===15){ dados=cand; break; }
+    }catch(e){ console.warn("Caixa fetch falhou", url, e); }
+  }
+  if (!dados){
+    try{
+      const proxy = "https://api.allorigins.win/get?url="+encodeURIComponent("https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3780");
+      const r2 = await fetch(proxy);
+      const j2 = await r2.json();
+      const cand2 = JSON.parse(j2.contents);
+      if (cand2 && cand2.listaDezenas) dados=cand2;
+    }catch(e){ console.warn("proxy falhou", e); }
+  }
+  if (!dados || !dados.listaDezenas){
+    if (info) info.textContent="⚠️ Resultado ainda não disponível ou erro de conexão. Tente novamente ou marque manualmente.";
+    if (btn){ btn.disabled=false; btn.innerHTML="🎯 Resultado — Buscar Oficial Caixa (auto)"; }
+    toast("⚠️ Não foi possível buscar o resultado da Caixa.");
+    return;
+  }
+  const dezenas = dados.listaDezenas.map(s=>parseInt(s,10));
+  const concurso = dados.numero || dados.numeroConcurso || "3780";
+  const data = dados.dataApuracao || "";
+  state.sorteados.clear();
+  dezenas.forEach(n=> state.sorteados.add(n));
+  forcarExibirTodos = true;
+  sincronizarUI();
+  salvarHistorico();
+  if (info) info.innerHTML=`✅ <b>Concurso ${concurso}</b> em ${data} — <b>${dezenas.map(n=>String(n).padStart(2,"0")).join(" ")}</b> — conferido!`;
+  toast(`✅ Resultado ${concurso} carregado!`);
+  if (btn){ btn.disabled=false; btn.innerHTML="🎯 Resultado Oficial ✔"; setTimeout(()=>{btn.innerHTML="🎯 Resultado — Buscar Oficial Caixa (auto)";},3500); }
+  document.getElementById("jogosGrid").scrollIntoView({behavior:"smooth"});
+  vibrar([30,20,30]);
 }
 
 /* ─── 9. CONFERÊNCIA COM RATEIO DE COTAS ─────────────────────────────── */
