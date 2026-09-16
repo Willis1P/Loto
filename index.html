@@ -1099,14 +1099,33 @@ function atualizarDashboard(){
   if (elBruto39) elBruto39.textContent = fmtBRL.format(totalBruto39);
   if (elPor39) elPor39.textContent = fmtBRL.format(por39);
   if (elDet39) elDet39.textContent = fmtBRL.format(por39);}
-// ─── 10b. CRONÔMETRO 21h — ajustado para próximo sorteio oficial Caixa ──
-let proximoAlvo = null; // Date do próximo sorteio às 21h
+// ─── 10b. CRONÔMETRO 21h — ajustado para próximo sorteio oficial Caixa (bate com dia do sorteio) ──
+let proximoAlvo = null;
+function proximoDiaLotofacil(base){
+  // Lotofácil: seg(1), qua(3), sex(5) às 21h
+  const dias = [1,3,5];
+  let d = new Date(base);
+  d.setHours(21,0,0,0);
+  if (d <= base) d.setDate(d.getDate()+1);
+  while (!dias.includes(d.getDay())){
+    d.setDate(d.getDate()+1);
+  }
+  return d;
+}
 function atualizarCronometro(){
   const agora = new Date();
-  let alvo = proximoAlvo ? new Date(proximoAlvo) : new Date(agora);
-  if (!proximoAlvo){
-    alvo.setHours(21,0,0,0);
-    if (agora >= alvo) alvo.setDate(alvo.getDate()+1);
+  let alvo = proximoAlvo ? new Date(proximoAlvo) : proximoDiaLotofacil(agora);
+  // Se alvo já passou (ex: API retornou 16/09 e hoje é 17/09), avança para próximo dia de sorteio
+  if (alvo <= agora){
+    alvo = proximoDiaLotofacil(new Date(alvo.getTime()+60000));
+    proximoAlvo = alvo;
+    const titulo = document.getElementById("cronometroTitulo");
+    if (titulo){
+      const dd = String(alvo.getDate()).padStart(2,"0");
+      const mm = String(alvo.getMonth()+1).padStart(2,"0");
+      const yyyy = alvo.getFullYear();
+      titulo.textContent = `⏰ Próximo Sorteio — ${dd}/${mm}/${yyyy} — 21h`;
+    }
   }
   const diff = alvo - agora;
   const el = document.getElementById("cronometro");
@@ -1120,8 +1139,15 @@ function atualizarCronometro(){
   const h = Math.floor(diff/3600000);
   const m = Math.floor((diff%3600000)/60000);
   const s = Math.floor((diff%60000)/1000);
-  el.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-  if (leg) leg.textContent = `Faltam ${h}h ${m}min ${s}s para o sorteio das 21h`;
+  const dias = Math.floor(h/24);
+  const hm = h % 24;
+  if (dias>0){
+    el.textContent = `${dias}d ${String(hm).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    if (leg) leg.textContent = `Faltam ${dias} dia${dias>1?'s':''}, ${hm}h ${m}min para o sorteio das 21h`;
+  } else {
+    el.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    if (leg) leg.textContent = `Faltam ${h}h ${m}min ${s}s para o sorteio das 21h`;
+  }
 }
 setInterval(atualizarCronometro, 1000);
 async function carregarProximoSorteio(){
@@ -1136,19 +1162,30 @@ async function carregarProximoSorteio(){
     const proxDataStr = j.dataProximoConcurso || "16/09/2026";
     const estimativa = j.valorEstimadoProximoConcurso || 2000000;
     const local = j.localSorteio || "ESPAÇO DA SORTE";
-    // Parse data dd/mm/yyyy -> Date 21h
+    // Parse data dd/mm/yyyy -> Date 21h e corrige se já passou (bate com dia do sorteio)
     const [d,m,y] = proxDataStr.split("/").map(Number);
-    const dt = new Date(y, m-1, d, 21,0,0);
+    let dt = new Date(y, m-1, d, 21,0,0);
+    if (dt <= new Date()){
+      dt = proximoDiaLotofacil(dt);
+      const dd2 = String(dt.getDate()).padStart(2,"0");
+      const mm2 = String(dt.getMonth()+1).padStart(2,"0");
+      const yyyy2 = dt.getFullYear();
+      proxDataStr = `${dd2}/${mm2}/${yyyy2}`;
+    }
     proximoAlvo = dt;
     if (titulo) titulo.textContent = `⏰ Próximo Sorteio — Concurso ${proxNum} — ${proxDataStr} — 21h`;
     if (info) info.innerHTML = `Concurso <b>${j.numero}</b> em ${j.dataApuracao} — <b>${(j.listaDezenas||[]).join(" ")}</b> • Próximo <b>${proxNum}</b> em ${proxDataStr} • Estimativa <b>${fmtBRL.format(estimativa)}</b> • ${local}`;
     atualizarCronometro();
   }catch(e){
     console.warn("Falha ao buscar próximo sorteio Caixa", e);
-    if (info) info.textContent = "Próximo sorteio: Concurso 3781 em 16/09/2026 às 21h — Estimativa R$2.000.000,00 (dados locais)";
-    // Fallback para 3781 16/09/2026 21h
-    const [d,m,y] = [16,9,2026];
-    proximoAlvo = new Date(y, m-1, d, 21,0,0);
+    // Fallback usa próximo dia Lotofácil a partir de agora
+    let dt2 = proximoDiaLotofacil(new Date());
+    proximoAlvo = dt2;
+    const ddF = String(dt2.getDate()).padStart(2,"0");
+    const mmF = String(dt2.getMonth()+1).padStart(2,"0");
+    const yyyyF = dt2.getFullYear();
+    if (info) info.textContent = `Próximo sorteio: ${ddF}/${mmF}/${yyyyF} às 21h — Estimativa R$2.000.000,00 (dados locais)`;
+    if (titulo) titulo.textContent = `⏰ Próximo Sorteio — ${ddF}/${mmF}/${yyyyF} — 21h`;
     if (titulo) titulo.textContent = "⏰ Próximo Sorteio — Concurso 3781 — 16/09/2026 — 21h";
   }
 }
