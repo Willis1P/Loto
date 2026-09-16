@@ -1109,26 +1109,7 @@ function atualizarDashboard(){
   const elDet39 = document.getElementById("valorPor39detalhe");
   if (elBruto39) elBruto39.textContent = fmtBRL.format(totalBruto39);
   if (elPor39) elPor39.textContent = fmtBRL.format(por39);
-  if (elDet39) elDet39.textContent = fmtBRL.format(por39);
-  // Correção com base no resultado apurado para concurso 3780 sorteio 01 02 03 04 05 06 07 12 15 16 17 19 21 22 23
-  // Saldo real R$66,14 vs apurado app — calibrado para bater com comprovantes (diferença de duplicidade pág 14/94)
-  const sorteio3780 = [1,2,3,4,5,6,7,12,15,16,17,19,21,22,23].sort((a,b)=>a-b).join(",");
-  const atual = [...state.sorteados].sort((a,b)=>a-b).join(",");
-  if (atual === sorteio3780 && state.sorteados.size===15){
-    // Corrige para bater com valor ganhado (66,14) mantendo ganho principal (69,64 com duplicidade)
-    // Usa fixos 11=7/12=14/13=35 mas ajusta total para saldo real quando sorteio oficial
-    state.resumo.liquido = 66.14;
-    state.resumo.bruto = 69.64;
-    const elG2 = document.getElementById("statGanhos");
-    const elL2 = document.getElementById("statGanhosLbl");
-    if (elG2) elG2.textContent = fmtBRL.format(66.14);
-    if (elL2) elL2.textContent = "Saldo apurado (calibrado p/ extrato)";
-    if (elBruto39) elBruto39.textContent = fmtBRL.format(69.64);
-    if (elPor39) elPor39.textContent = fmtBRL.format(69.64/39);
-    if (elDet39) elDet39.textContent = fmtBRL.format(69.64/39);
-    console.info("[Calibragem 3780] Sorteio oficial detectado, calibrado para saldo real 66,14 (bruto 69,64)");
-  }
-}
+  if (elDet39) elDet39.textContent = fmtBRL.format(por39);}
 // ─── 10b. CRONÔMETRO 21h ───────────────────────────────────────────────
 function atualizarCronometro(){
   const agora = new Date();
