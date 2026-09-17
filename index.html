@@ -605,7 +605,7 @@ function faixaEhEstimativa(pts){ return pts === 15 || pts === 14; }
 
 /* ─── 2. BASE DE DADOS — 119 grupos / 0 jogos ───────────────────────── */
 /* Formato por linha: PAGINA|TIPO|HASH|JOGO|DEZENAS|DEZENAS_QTD|VALOR|COTA|TOTAL_COTAS|VALOR_COTA */
-const rawGamesData = `; // todas apostas removidas - 0 jogos
+const rawGamesData = ``; // todas apostas removidas - 0 jogos
 
 /* ─── 3. PARSER — agrupa por hash ────────────────────────────────────── */
 function numBR(s){ return parseFloat(String(s).replace(/\./g, "").replace(",", ".")) || 0; }
