@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#930089">
-<meta name="description" content="Conferidor Inteligente da Lotofácil da Independência 2026 — Concurso 3780. Confira 176 jogos e 13 bolões com rateio por cota. Funciona offline.">
+<meta name="description" content="Conferidor Inteligente da Lotofácil da Independência 2026 — Concurso 3780. Confira 0 jogos e 13 bolões com rateio por cota. Funciona offline.">
 <title>Lotofácil Independência 2026 — Conferidor Inteligente</title>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -403,7 +403,7 @@ footer.app-footer strong{color:var(--primary)}
 
   <section class="dashboard" aria-label="Painel de resultados">
     <div class="stat-box">
-      <span class="stat-val" id="statJogos">176</span>
+      <span class="stat-val" id="statJogos">0</span>
       <span class="stat-lbl">Jogos / Grupos</span>
     </div>
     <div class="stat-box">
@@ -441,7 +441,7 @@ footer.app-footer strong{color:var(--primary)}
     </button>
     <div id="resultadoInfo" style="font-size:0.72rem; color:var(--text-soft); text-align:center; margin-bottom:10px; min-height:1.1em;"></div>
     <div class="numbers-grid" id="numbersGrid" role="group" aria-label="Selecione os 15 números sorteados"></div>
-    <span class="hint" id="hintTexto">Toque nos números sorteados ou clique em <b>Resultado</b> para buscar automaticamente do site da Caixa. Os 176 jogos são conferidos com rateio por cota.</span>
+    <span class="hint" id="hintTexto">Toque nos números sorteados ou clique em <b>Resultado</b> para buscar automaticamente do site da Caixa. Os jogos são conferidos com rateio por cota.</span>
   </section>
 
   <aside class="alerta info" role="note">
@@ -484,7 +484,7 @@ footer.app-footer strong{color:var(--primary)}
     </div>
     <div id="buscaInfo" style="margin-top:6px; font-size:0.68rem; color:var(--text-soft); min-height:1.2em;"></div>
     <button id="btnMostrarTodosJogos" onclick="mostrarTodosJogos()" style="margin-top:12px; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 14px; border:none; border-radius:12px; background:linear-gradient(145deg,var(--primary),var(--primary-dark)); color:#fff; font-weight:800; font-size:0.82rem; cursor:pointer; box-shadow:0 4px 14px rgba(147,0,137,0.28);">
-      📋 Mostrar todos os jogos apostados em conferência — 176 jogos
+      📋 Mostrar todos os jogos apostados em conferência — 0 jogos
     </button>
     <div class="jogos-grid" id="jogosGrid" aria-live="polite"></div>
     <div class="empty" id="emptyState" style="display:none">
@@ -619,7 +619,7 @@ function valorFaixa(pts){
 }
 function faixaEhEstimativa(pts){ return pts === 15 || pts === 14; }
 
-/* ─── 2. BASE DE DADOS — 119 grupos / 176 jogos ───────────────────────── */
+/* ─── 2. BASE DE DADOS — 119 grupos / 0 jogos ───────────────────────── */
 /* Formato por linha: PAGINA|TIPO|HASH|JOGO|DEZENAS|DEZENAS_QTD|VALOR|COTA|TOTAL_COTAS|VALOR_COTA */
 const rawGamesData = `; // todas apostas removidas - 0 jogos
 
@@ -916,6 +916,20 @@ function atualizarDashboard(){
 
   document.getElementById("badgeInfo").textContent =
     `Concurso 3780 · ${fmtNum.format(qtdSimples)} simples · ${qtdBolaoGrupos} bolões`;
+  // Atualiza botão Mostrar todos com total real (0 por enquanto, atualiza quando adicionar apostas)
+  const btnMostrar = document.getElementById("btnMostrarTodosJogos");
+  if (btnMostrar){
+    const total = totalJogos;
+    // Mantém texto base mas atualiza número
+    if (btnMostrar.textContent.includes("Mostrar todos") || btnMostrar.textContent.includes("Ocultar")){
+      // Não sobrescreve se já está com estado de mostrar/ocultar, apenas garante número correto quando for mostrar
+      if (total===0){
+        btnMostrar.innerHTML = `📋 Mostrar todos os jogos apostados em conferência — 0 jogos`;
+      } else if (btnMostrar.innerHTML.includes("Mostrar todos")){
+        btnMostrar.innerHTML = `📋 Mostrar todos os jogos apostados em conferência — ${total} jogos`;
+      }
+    }
+  }
   // Painel 39 cotas no topo — dividido mantendo ganho principal
   const totalBruto39 = state.resumo.liquido; // corrigido: divide o liquido (o que os 39 realmente recebem), nao o bruto 1183
   const por39 = totalBruto39 / 39;
@@ -1125,7 +1139,7 @@ function mostrarTodosJogos(){
     document.getElementById("emptyState").style.display = "block";
     document.getElementById("emptyMsg").textContent = "Conferência ocultada. Clique em Mostrar todos novamente para exibir.";
     forcarExibirTodos = false;
-    if (btn) btn.innerHTML = "📋 Mostrar todos os jogos apostados em conferência — 176 jogos";
+    const totalJogosBtn = state.grupos.reduce((s,g)=>s+g.jogos.length,0); if (btn) btn.innerHTML = `📋 Mostrar todos os jogos apostados em conferência — ${totalJogosBtn} jogos`;
     toast("🙈 Conferência ocultada");
     try{ vibrar(10); }catch(_){}
     return;
@@ -1136,7 +1150,7 @@ function mostrarTodosJogos(){
   const infoBusca = document.getElementById("buscaInfo");
   if (elBusca) elBusca.value = "";
   if (infoBusca) infoBusca.textContent = "";
-  // Força filtro Todos e garante que todos os 176 jogos apareçam em conferência mesmo sem sorteio
+  // Força filtro Todos e garante que todos os 0 jogos apareçam em conferência mesmo sem sorteio
   forcarExibirTodos = true;
   state.filtro = "todos";
   document.querySelectorAll("#filtros .chip").forEach(c=>{
@@ -1152,8 +1166,8 @@ function mostrarTodosJogos(){
   // Mantém forçado para que Todos continue mostrando mesmo com 0 sorteados
   // Não reseta para false imediatamente — deixa true até próxima interação de filtro
   if (grid) grid.scrollIntoView({behavior:"smooth", block:"start"});
-  if (btn) btn.innerHTML = "🙈 Ocultar conferência — 176 jogos";
-  toast(`📋 Exibindo todos os 176 jogos apostados em conferência`);
+  if (btn) btn.innerHTML = `🙈 Ocultar conferência — ${state.grupos.reduce((s,g)=>s+g.jogos.length,0)} jogos`;
+  const totalToast = state.grupos.reduce((s,g)=>s+g.jogos.length,0); toast(`📋 Exibindo todos os ${totalToast} jogos apostados em conferência`);
   try{ vibrar(14); }catch(_){}
 }
 
@@ -1752,7 +1766,7 @@ document.getElementById("btnLimpar").addEventListener("click", () => {
   toast("🧹 Seleção limpa");
 });
 function limparTodosJogos(){
-  if (!confirm("Tem certeza que deseja limpar TODOS os 176 jogos? Isso ocultará a conferência. Recarregue a página para restaurar.")) return;
+  if (!confirm("Tem certeza que deseja limpar TODOS os 0 jogos? Isso ocultará a conferência. Recarregue a página para restaurar.")) return;
   state.grupos = [];
   state.resultados = [];
   state.sorteados.clear();
@@ -1765,7 +1779,7 @@ function limparTodosJogos(){
   if (infoBusca) infoBusca.textContent = "";
   jogosGrid.innerHTML = "";
   emptyState.style.display = "block";
-  document.getElementById("emptyMsg").textContent = "Todos os jogos foram limpos. Recarregue a página para restaurar os 176 jogos.";
+  document.getElementById("emptyMsg").textContent = "Todos os jogos foram limpos. Recarregue a página para restaurar os 0 jogos.";
   atualizarDashboard();
   toast("🗑️ Todos os jogos limpos");
   vibrar([30,20,30]);
