@@ -444,18 +444,18 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </aside>
 
-  <!-- IA DeepSeek — Verificação por foto/PDF e lançamento automático -->
+  <!-- IA Nvidia — Verificação por foto/PDF e lançamento automático -->
   <section class="panel" id="panelIA" style="border:1.5px solid rgba(147,0,137,0.18); background:linear-gradient(135deg,rgba(147,0,137,0.06),rgba(26,0,51,0.03));">
     <div class="panel-title">
       <h2 style="font-size:0.95rem;">🤖 IA — Verificar foto/PDF e lançar apostas</h2>
-      <span class="counter-pill" style="background:var(--primary); color:#fff;">DeepSeek</span>
+      <span class="counter-pill" style="background:var(--primary); color:#fff;">Nvidia</span>
     </div>
-    <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">Anexe foto ou PDF do volante/comprovante. A IA extrai os números e lança as apostas automaticamente (chave já configurada).</p>
+    <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">Anexe foto ou PDF do volante/comprovante. A IA Nvidia extrai os números e lança as apostas automaticamente.</p>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
       <input type="file" id="inputIA" accept="image/*,application/pdf" style="flex:1; min-width:200px; padding:8px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem;">
     </div>
-    <button id="btnAnalisarIA" onclick="analisarComDeepSeek()" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border:none; border-radius:12px; background:linear-gradient(145deg,#930089,#6d0066); color:#fff; font-weight:800; font-size:0.84rem; cursor:pointer; box-shadow:0 4px 14px rgba(147,0,137,0.28);">
-      🔍 Analisar e lançar apostas
+    <button id="btnAnalisarIA" onclick="analisarComDeepSeek()" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border:none; border-radius:12px; background:linear-gradient(145deg,#76b900,#5a8d00); color:#fff; font-weight:800; font-size:0.84rem; cursor:pointer; box-shadow:0 4px 14px rgba(118,185,0,0.28);">
+      🔍 Analisar com Nvidia e lançar apostas
     </button>
     <div id="iaStatus" style="margin-top:10px; font-size:0.72rem; color:var(--text-soft); min-height:1.2em;"></div>
     <div id="iaExtraido" style="margin-top:10px; display:none; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px; font-size:0.78rem; line-height:1.5; max-height:220px; overflow:auto;"></div>
@@ -2192,9 +2192,9 @@ async function analisarComDeepSeek(){
   const input = document.getElementById("inputIA");
   const status = document.getElementById("iaStatus");
   const extraidoDiv = document.getElementById("iaExtraido");
-  // Chave DeepSeek configurada internamente (não visível no site)
-  const apiKey = "sk-88803052750f4dada40a3ea6ef5decf1";
-  if (!apiKey || !apiKey.startsWith("sk-")){ toast("⚠️ Chave DeepSeek não configurada"); if(status) status.textContent="❌ Chave não configurada."; return; }
+  // Chave Nvidia configurada internamente (não visível no site)
+  const apiKey = "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";
+  if (!apiKey || !apiKey.startsWith("nvapi-")){ toast("⚠️ Chave Nvidia não configurada"); if(status) status.textContent="❌ Chave não configurada."; return; }
   if (!input || !input.files || input.files.length===0){ toast("⚠️ Selecione uma foto ou PDF"); if(status) status.textContent="❌ Nenhum arquivo selecionado."; return; }
   const file = input.files[0];
   if (status) status.textContent = `⏳ Lendo ${file.name} (${(file.size/1024).toFixed(1)}KB)...`;
@@ -2219,17 +2219,17 @@ async function analisarComDeepSeek(){
         {type:"image_url", image_url:{url:`data:${file.type};base64,${base64}`}}
       ]});
     }
-    const resp = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    const resp = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method:"POST",
       headers:{"Content-Type":"application/json","Authorization":`Bearer ${apiKey}`},
-      body: JSON.stringify({model: isPdf ? "deepseek-chat" : "deepseek-chat", messages, temperature:0.1, max_tokens:3000})
+      body: JSON.stringify({model: isPdf ? "meta/llama-3.1-405b-instruct" : "meta/llama-3.2-90b-vision-instruct", messages, temperature:0.1, max_tokens:3000})
     });
     if (!resp.ok){
       const txt = await resp.text();
-      if (resp.status===402){
-        throw new Error(`DeepSeek sem saldo (402 Insufficient Balance): ${txt.slice(0,200)} — Adicione créditos em https://platform.deepseek.com/api-keys/billing ou use extração manual abaixo`);
+      if (resp.status===402 || resp.status===401){
+        throw new Error(`Nvidia sem saldo/autenticação (${resp.status}): ${txt.slice(0,200)} — Verifique em https://build.nvidia.com ou use extração manual abaixo`);
       }
-      throw new Error(`DeepSeek HTTP ${resp.status}: ${txt.slice(0,300)}`);
+      throw new Error(`Nvidia HTTP ${resp.status}: ${txt.slice(0,300)}`);
     }
     const j = await resp.json();
     const content = j.choices?.[0]?.message?.content || "";
@@ -2249,8 +2249,8 @@ async function analisarComDeepSeek(){
     if (status) status.textContent = `✅ ${jogos.length} jogo(s) extraído(s) com sucesso! Clique em Confirmar para lançar.`;
     toast(`✅ ${jogos.length} jogo(s) extraído(s) via DeepSeek`);
   }catch(e){
-    console.error("DeepSeek erro", e);
-    const is402 = String(e.message).includes("402") || String(e.message).includes("Insufficient Balance");
+    console.error("Nvidia erro", e);
+    const is402 = String(e.message).includes("402") || String(e.message).includes("Insufficient Balance") || String(e.message).includes("401");
     const showManualFallback = ()=>{
       if (status){
         const alreadyHasFallback = document.getElementById("fallbackManual");
@@ -2265,8 +2265,8 @@ async function analisarComDeepSeek(){
       }
     };
     if (is402){
-      if (status) status.innerHTML = `❌ <b>DeepSeek sem saldo (402)</b><br>${e.message}<br><br>👉 <a href="https://platform.deepseek.com/api-keys" target="_blank" style="color:var(--primary); font-weight:700;">Adicionar créditos</a> ou use extração manual abaixo:`;
-      toast(`❌ DeepSeek sem saldo — use extração manual`, 5000);
+      if (status) status.innerHTML = `❌ <b>Nvidia sem saldo (402)</b><br>${e.message}<br><br>👉 <a href="https://build.nvidia.com/api-keys" target="_blank" style="color:var(--primary); font-weight:700;">Adicionar créditos</a> ou use extração manual abaixo:`;
+      toast(`❌ Nvidia sem saldo — use extração manual`, 5000);
       showManualFallback();
       return;
     }
