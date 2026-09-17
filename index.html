@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#930089">
-<meta name="description" content="Conferidor Inteligente da Lotofácil da Independência 2026 — Concurso 3780. Confira 0 jogos e 13 bolões com rateio por cota. Funciona offline.">
-<title>Lotofácil Independência 2026 — Conferidor Inteligente</title>
+<meta name="description" content="Conferidor Inteligente da Lotofácil — Confira seus jogos com rateio por cota. Funciona offline.">
+<title>Lotofácil — Conferidor Inteligente</title>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Lotofácil 3780">
+<meta name="apple-mobile-web-app-title" content="Lotofácil">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23930089'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%23ffeb3b' stroke-width='6'/%3E%3Ctext x='50' y='63' font-size='38' font-family='sans-serif' font-weight='bold' fill='%23ffeb3b' text-anchor='middle'%3E15%3C/text%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.json">
 
@@ -365,7 +365,7 @@ footer.app-footer strong{color:var(--primary)}
   <img src="lotofacil-capa-2.webp" alt="Lotofácil - Guia do Concurso - Concursos Resultados Prêmios" style="width:100%; height:auto; max-height:360px; object-fit:cover; object-position:center top; display:block; filter:saturate(1.05);" onerror="this.style.display='none'">
   <div style="position:absolute; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 14px 12px; background:linear-gradient(to top, rgba(26,0,51,0.92) 0%, rgba(26,0,51,0.7) 58%, transparent 100%); backdrop-filter:blur(2px);">
     <div style="font-size:0.62em; letter-spacing:2px; font-weight:800; color:#fff; background:rgba(255,0,160,0.18); border:1px solid rgba(255,47,160,0.45); padding:4px 14px; border-radius:999px; box-shadow:0 0 12px rgba(255,0,160,0.4);">★ GUIA DO CONCURSO</div>
-    <div style="font-size:0.74em; font-weight:700; color:#ff8ad4; letter-spacing:1.2px; text-align:center; text-shadow:0 0 10px rgba(255,0,160,0.6);">INDEPENDÊNCIA 2026 • CONCURSO 3780 • R$ 300 MILHÕES</div>
+    <div id="heroSub" style="font-size:0.74em; font-weight:700; color:#ff8ad4; letter-spacing:1.2px; text-align:center; text-shadow:0 0 10px rgba(255,0,160,0.6);">LOTOFÁCIL • CONCURSO — • R$ —</div>
     <div style="font-size:0.65em; background:rgba(255,255,255,0.92); color:#1a0033; padding:5px 12px; border-radius:999px; font-weight:800; box-shadow:0 2px 10px rgba(0,0,0,0.2);">🎯 Conferidor Inteligente &nbsp;•&nbsp; CONCURSOS • RESULTADOS • PRÊMIOS</div>
   </div>
 </div>
@@ -388,13 +388,13 @@ footer.app-footer strong{color:var(--primary)}
         <rect x="40" y="77" width="20" height="3.6" rx="1.8" fill="#930089"/>
       </svg>
       <div class="header-text">
-        <h1>Lotofácil da Independência</h1>
-        <div class="sub">Conferidor Inteligente · 2026</div>
+        <h1 id="headerTitle">Lotofácil</h1>
+        <div class="sub" id="headerSub">Conferidor Inteligente</div>
       </div>
     </div>
     <div class="header-badge">
       <span class="pulse-dot" aria-hidden="true"></span>
-      <span id="badgeInfo">Concurso 3780 · carregando…</span>
+      <span id="badgeInfo">Carregando concurso...</span>
     </div>
   </div>
 </header>
@@ -552,7 +552,7 @@ footer.app-footer strong{color:var(--primary)}
   </section>
 
   <footer class="app-footer">
-    <strong>Lotofácil Independência 2026</strong> · Conferidor Inteligente<br>
+    <strong id="footerTitle">Lotofácil</strong> · Conferidor Inteligente<br>
     Ferramenta independente. Não possui vínculo com a Caixa Econômica Federal.<br>
     Confira o resultado oficial em <strong>loterias.caixa.gov.br</strong>
   </footer>
@@ -1015,6 +1015,28 @@ async function carregarProximoSorteio(){
     proximoAlvo = dt;
     if (titulo) titulo.textContent = `⏰ Próximo Sorteio — Concurso ${proxNum} — ${proxDataStr} — 21h`;
     if (info) info.innerHTML = `Concurso <b>${j.numero}</b> em ${j.dataApuracao} — <b>${(j.listaDezenas||[]).join(" ")}</b> • Próximo <b>${proxNum}</b> em ${proxDataStr} • Estimativa <b>${fmtBRL.format(estimativa)}</b> • ${local}`;
+    // Atualiza cabeçalhos dinâmicos (remove Independência, usa nº do concurso da data)
+    const headerTitle = document.getElementById("headerTitle");
+    const headerSub = document.getElementById("headerSub");
+    const heroSub = document.getElementById("heroSub");
+    const footerTitle = document.getElementById("footerTitle");
+    const badgeInfo2 = document.getElementById("badgeInfo");
+    if (headerTitle) headerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
+    if (headerSub) headerSub.textContent = `Conferidor Inteligente · ${proxDataStr.split("/")[2] || "2026"}`;
+    if (heroSub) heroSub.textContent = `LOTOFÁCIL • CONCURSO ${j.numero} • ${j.dataApuracao} • ${fmtBRL.format(j.valorArrecadado || 0)}`;
+    if (badgeInfo2) badgeInfo2.textContent = `Concurso ${j.numero} · ${j.dataApuracao}`;
+    if (footerTitle) footerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
+    document.title = `Lotofácil — Concurso ${j.numero} — Conferidor Inteligente`;
+    // Auto-preenche resultado quando sair, se ainda não houver seleção
+    if (j.listaDezenas && j.listaDezenas.length===15 && state.sorteados.size===0){
+      const dezenasAuto = j.listaDezenas.map(s=>parseInt(s,10));
+      state.sorteados.clear();
+      dezenasAuto.forEach(n=> state.sorteados.add(n));
+      forcarExibirTodos = true;
+      sincronizarUI();
+      salvarHistorico();
+      toast(`✅ Resultado Concurso ${j.numero} preenchido automaticamente!`);
+    }
     atualizarCronometro();
   }catch(e){
     console.warn("Falha ao buscar próximo sorteio Caixa", e);
