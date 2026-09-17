@@ -444,23 +444,23 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </aside>
 
-  <!-- IA Nvidia — Verificação por foto/PDF e lançamento automático -->
+  <!-- IA — Verificação por foto/PDF e lançamento automático -->
   <section class="panel" id="panelIA" style="border:1.5px solid rgba(147,0,137,0.18); background:linear-gradient(135deg,rgba(147,0,137,0.06),rgba(26,0,51,0.03));">
     <div class="panel-title">
       <h2 style="font-size:0.95rem;">🤖 IA — Verificar foto/PDF e lançar apostas</h2>
-      <span class="counter-pill" style="background:var(--primary); color:#fff;">Nvidia</span>
+      <span class="counter-pill" style="background:var(--primary); color:#fff;">IA</span>
     </div>
-    <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">Anexe foto ou PDF do volante/comprovante. A IA Nvidia extrai os números e lança as apostas automaticamente.</p>
+    <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">Anexe foto ou PDF do volante/comprovante. A IA extrai os números e lança as apostas automaticamente.</p>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
       <input type="file" id="inputIA" accept="image/*,application/pdf" style="flex:1; min-width:200px; padding:8px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem;">
     </div>
     <button id="btnAnalisarIA" onclick="analisarComDeepSeek()" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border:none; border-radius:12px; background:linear-gradient(145deg,#76b900,#5a8d00); color:#fff; font-weight:800; font-size:0.84rem; cursor:pointer; box-shadow:0 4px 14px rgba(118,185,0,0.28);">
-      🔍 Analisar com Nvidia e lançar apostas
+      🔍 Analisar e lançar apostas
     </button>
     <div id="iaStatus" style="margin-top:10px; font-size:0.72rem; color:var(--text-soft); min-height:1.2em;"></div>
     <div id="iaExtraido" style="margin-top:10px; display:none; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px; font-size:0.78rem; line-height:1.5; max-height:220px; overflow:auto;"></div>
     <div style="margin-top:12px; background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px;">
-      <div style="font-size:0.72rem; font-weight:800; color:var(--text); margin-bottom:6px;">✏️ Ou cole manualmente (sem DeepSeek):</div>
+      <div style="font-size:0.72rem; font-weight:800; color:var(--text); margin-bottom:6px;">✏️ Ou cole manualmente:</div>
       <textarea id="fallbackManualSempre" placeholder="Cole um jogo por linha ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25" style="width:100%; min-height:60px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea>
       <button onclick="usarExtracaoManualSempre()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--secondary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais (sempre funciona)</button>
     </div>
