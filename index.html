@@ -1564,16 +1564,13 @@ function criarCardGrupo(g){
             return `<span style="display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--border); border-radius:999px; padding:4px 8px; font-size:0.72rem;">${nome}<button onclick="toggleParticipanteNoBolao('${g.hash}','${pid}')" style="background:var(--danger); color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:0.65rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button></span>`;
           }).join("")}
       </div>
-      <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-        <select id="selectAddBolao_${g.hash}" style="flex:1; min-width:140px; padding:7px 8px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); font-size:0.72rem;">
-          <option value="">— Selecione do banco —</option>
-          ${dbAll.filter(p=> !idsBolao.includes(p.id)).map(p=>`<option value="${p.id}">${p.nome}</option>`).join("")}
-        </select>
-        <button onclick="const sel=document.getElementById('selectAddBolao_${g.hash}'); if(sel&&sel.value) toggleParticipanteNoBolao('${g.hash}', sel.value);" style="padding:7px 10px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; font-size:0.72rem; cursor:pointer;">+ Adicionar</button>
+      <div style="margin-bottom:6px; font-size:0.68rem; color:var(--text-soft);">Toque em um nome do banco para adicionar a este bolão:</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+        ${dbAll.filter(p=> !idsBolao.includes(p.id)).map(p=>`<button onclick="toggleParticipanteNoBolao('${g.hash}','${p.id}')" style="background:#fff; border:1px solid var(--border); border-radius:999px; padding:4px 8px; font-size:0.68rem; cursor:pointer; display:flex; align-items:center; gap:4px;">+ ${p.nome}</button>`).join("") || `<span style="font-size:0.68rem; color:var(--text-soft);">Todos do banco já estão neste bolão</span>`}
       </div>
       <div style="display:flex; gap:6px; margin-top:8px;">
-        <input type="text" id="inputNovoBolao_${g.hash}" placeholder="Novo nome e já adicionar" style="flex:1; padding:7px 8px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); font-size:0.72rem;">
-        <button onclick="criarParticipanteEAdicionarAoBolao('${g.hash}')" style="padding:7px 10px; border:1px solid var(--primary); border-radius:8px; background:#fff; color:var(--primary); font-weight:700; font-size:0.72rem; cursor:pointer;">Criar e adicionar</button>
+        <input type="text" id="inputNovoBolao_${g.hash}" placeholder="Novo participante" style="flex:1; padding:7px 8px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); font-size:0.72rem;">
+        <button onclick="criarParticipanteEAdicionarAoBolao('${g.hash}')" style="padding:7px 10px; border:1px solid var(--primary); border-radius:8px; background:#fff; color:var(--primary); font-weight:700; font-size:0.72rem; cursor:pointer;">Criar</button>
       </div>
     `;
     card.appendChild(partSec);
