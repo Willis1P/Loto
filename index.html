@@ -1043,18 +1043,18 @@ async function carregarProximoSorteio(){
     ultimoConcursoVisto = j.numero;
     if (titulo) titulo.textContent = `⏰ Próximo Sorteio — Concurso ${proxNum} — ${proxDataStr} — 21h`;
     if (info) info.innerHTML = `Concurso <b>${j.numero}</b> em ${j.dataApuracao} — <b>${(j.listaDezenas||[]).join(" ")}</b> • Próximo <b>${proxNum}</b> em ${proxDataStr} • Estimativa <b>${fmtBRL.format(estimativa)}</b> • ${local}`;
-    // Atualiza cabeçalhos dinâmicos para PRÓXIMO concurso (mantém bolas manuais)
+    // Cabeçalhos mostram CONCURSO ATUAL (conferência do dia = 3781), cronômetro mostra PRÓXIMO (3782)
     const headerTitle = document.getElementById("headerTitle");
     const headerSub = document.getElementById("headerSub");
     const heroSub = document.getElementById("heroSub");
     const footerTitle = document.getElementById("footerTitle");
     const badgeInfo2 = document.getElementById("badgeInfo");
-    if (headerTitle) headerTitle.textContent = `Lotofácil — Concurso ${proxNum}`;
-    if (headerSub) headerSub.textContent = `Conferidor Inteligente · ${proxDataStr.split("/")[2] || "2026"} · Próx. ${proxDataStr}`;
-    if (heroSub) heroSub.textContent = `LOTOFÁCIL • PRÓXIMO CONCURSO ${proxNum} • ${proxDataStr} • Estimativa ${fmtBRL.format(estimativa)}`;
-    if (badgeInfo2) badgeInfo2.textContent = `Próx. Concurso ${proxNum} · ${proxDataStr} · ${fmtBRL.format(estimativa)}`;
-    if (footerTitle) footerTitle.textContent = `Lotofácil — Concurso ${proxNum}`;
-    document.title = `Lotofácil — Concurso ${proxNum} — Conferidor Inteligente`;
+    if (headerTitle) headerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
+    if (headerSub) headerSub.textContent = `Conferidor Inteligente · ${j.dataApuracao.split("/")[2] || "2026"} · ${j.dataApuracao}`;
+    if (heroSub) heroSub.textContent = `LOTOFÁCIL • CONCURSO ${j.numero} • ${j.dataApuracao} • ${fmtBRL.format(j.valorArrecadado || 0)} arrecadados`;
+    if (badgeInfo2) badgeInfo2.textContent = `Concurso ${j.numero} · ${j.dataApuracao} · ${j.listaDezenas.length} dezenas`;
+    if (footerTitle) footerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
+    document.title = `Lotofácil — Concurso ${j.numero} — Conferidor Inteligente`;
     // Auto-preenche APENAS se ainda não houver seleção manual (preserva bolas manuais)
     if (j.listaDezenas && j.listaDezenas.length===15 && state.sorteados.size===0){
       const dezenasAuto = j.listaDezenas.map(s=>parseInt(s,10));
