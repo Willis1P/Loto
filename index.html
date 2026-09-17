@@ -14,9 +14,6 @@
 <link rel="manifest" href="manifest.json">
 
 <style>
-/* ═══════════════════════════════════════════════════════════
-   DESIGN SYSTEM
-   ═══════════════════════════════════════════════════════════ */
 :root{
   --primary:#930089; --primary-dark:#6d0066; --secondary:#4a0045;
   --accent:#ffeb3b; --accent-deep:#f9a825; --gold:#d4af37;
@@ -44,8 +41,6 @@ body{
   padding-bottom:calc(110px + var(--safe-b)); overflow-x:hidden;
   line-height:1.5; transition:background .3s,color .3s;
 }
-
-/* ═══ HEADER ═══ */
 header.app-header{
   position:relative;
   background:linear-gradient(135deg,#930089 0%,#6d0066 25%,#4a0045 55%,#930089 100%);
@@ -74,10 +69,7 @@ header.app-header::after{
 }
 .pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(255,235,59,.7);animation:pulso 2s infinite}
 @keyframes pulso{0%{box-shadow:0 0 0 0 rgba(255,235,59,.7)}70%{box-shadow:0 0 0 9px rgba(255,235,59,0)}100%{box-shadow:0 0 0 0 rgba(255,235,59,0)}}
-
 .wrap{width:100%;max-width:1180px;margin:0 auto;padding:0 14px;padding-left:calc(14px + var(--safe-l));padding-right:calc(14px + var(--safe-r))}
-
-/* ═══ DASHBOARD ═══ */
 .dashboard{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:-22px;position:relative;z-index:5}
 .stat-box{
   background:var(--card-glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
@@ -89,8 +81,6 @@ header.app-header::after{
 .stat-val{font-size:1.45rem;font-weight:800;color:var(--primary);letter-spacing:-1px;font-variant-numeric:tabular-nums;display:block;line-height:1.15}
 .stat-val.ganho{color:var(--success-dark);font-size:1.25rem}
 .stat-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text-soft);margin-top:5px;display:block}
-
-/* ═══ PAINEIS ═══ */
 .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 16px;margin-top:18px}
 .panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .panel-title h2{font-size:1rem;font-weight:800;color:var(--primary);display:flex;align-items:center;gap:8px}
@@ -101,8 +91,6 @@ header.app-header::after{
 }
 .counter-pill.full{background:var(--success);color:#fff;border-color:transparent}
 .hint{font-size:.72rem;color:var(--text-soft);margin-top:9px;display:block}
-
-/* ═══ NÚMEROS ═══ */
 .numbers-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
 .num-btn{
   position:relative;aspect-ratio:1/1;min-height:44px;border:none;border-radius:50%;
@@ -120,8 +108,6 @@ header.app-header::after{
   background:var(--accent);color:var(--secondary);font-size:10px;font-weight:900;
   display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.25);
 }
-
-/* ═══ ACTION BAR ═══ */
 .action-bar{
   position:fixed;left:0;right:0;bottom:0;z-index:60;
   background:var(--card-glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
@@ -141,8 +127,6 @@ header.app-header::after{
 .btn-install{background:linear-gradient(145deg,var(--success),var(--success-dark));color:#fff;box-shadow:0 5px 15px rgba(46,204,113,.35);display:flex}
 .btn-install.show{animation:aparece .45s cubic-bezier(.34,1.56,.64,1)}
 @keyframes aparece{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
-
-/* ═══ ALERTAS ═══ */
 .alerta{
   margin-top:16px;background:linear-gradient(135deg,rgba(249,168,37,.13),rgba(255,235,59,.09));
   border:1px solid rgba(249,168,37,.4);border-left:4px solid var(--accent-deep);
@@ -152,8 +136,6 @@ header.app-header::after{
 .alerta strong{color:var(--accent-deep);display:block;margin-bottom:3px;font-size:.76rem}
 .alerta.info{background:linear-gradient(135deg,rgba(147,0,137,.09),rgba(46,204,113,.07));border-color:var(--border);border-left-color:var(--primary)}
 .alerta.info strong{color:var(--primary)}
-
-/* ═══ FILTROS ═══ */
 .filtros{display:flex;gap:7px;overflow-x:auto;padding:3px 0;scrollbar-width:none}
 .filtros::-webkit-scrollbar{display:none}
 .chip{
@@ -163,8 +145,6 @@ header.app-header::after{
 }
 .chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
 .chip:active{transform:scale(.94)}
-
-/* ═══ CARDS ═══ */
 .jogos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px;margin-top:18px}
 .jogo-card{
   background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
@@ -183,8 +163,6 @@ header.app-header::after{
   background-size:200% 100%;animation:brilho 2.4s linear infinite;
 }
 @keyframes brilho{0%{background-position:0% 0}100%{background-position:200% 0}}
-
-/* Card de bolão agrupado */
 .grupo-card{
   background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
   box-shadow:var(--shadow);overflow:hidden;contain:content;grid-column:1/-1;
@@ -208,8 +186,6 @@ header.app-header::after{
   font-variant-numeric:tabular-nums;letter-spacing:-.4px;
 }
 .grupo-total.zero{color:var(--text-soft);font-size:.82rem;font-weight:700}
-
-/* Linha de rateio por cota */
 .rateio{
   background:linear-gradient(135deg,rgba(255,235,59,.14),rgba(249,168,37,.09));
   border-bottom:1px solid var(--border);
@@ -222,14 +198,12 @@ header.app-header::after{
   font-variant-numeric:tabular-nums;letter-spacing:-.4px;text-align:right;
 }
 .rateio-val small{display:block;font-size:.6rem;font-weight:700;color:var(--text-soft);letter-spacing:.3px}
-
 .jogos-internos{padding:11px 15px 15px;display:flex;flex-direction:column;gap:11px}
 .jogo-linha{
   border:1px solid var(--border);border-radius:var(--radius-sm);
   padding:11px;background:var(--bg);transition:border-color .2s;
 }
 .jogo-linha.premiado{border-color:var(--gold);background:linear-gradient(135deg,var(--bg),rgba(255,235,59,.07))}
-
 .jogo-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px}
 .jogo-id{display:flex;align-items:center;gap:8px;min-width:0}
 .jogo-num{font-size:.64rem;font-weight:800;color:#fff;background:var(--secondary);padding:3px 9px;border-radius:7px;letter-spacing:.4px;flex:0 0 auto}
@@ -241,7 +215,6 @@ header.app-header::after{
 .p12{background:linear-gradient(145deg,#7e57c2,#4527a0)}
 .p11{background:linear-gradient(145deg,#546e7a,#37474f)}
 .p0{background:#9e9e9e}
-
 .bolas{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
 .bola{
   width:29px;height:29px;border-radius:50%;display:flex;align-items:center;justify-content:center;
@@ -249,7 +222,6 @@ header.app-header::after{
 }
 .bola.hit{background:linear-gradient(145deg,var(--success),var(--success-dark));color:#fff;box-shadow:0 3px 8px rgba(46,204,113,.35)}
 .bola.miss{background:var(--bg);color:#9e9e9e;border:1px solid var(--border); opacity:0.92;}
-
 .premio{border-top:1px dashed var(--border);padding-top:9px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .premio-info{min-width:0}
 .premio-label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-soft);display:block}
@@ -263,13 +235,10 @@ header.app-header::after{
 }
 .estrela{position:absolute;top:11px;right:11px;font-size:1.1rem;animation:gira 2.6s ease-in-out infinite}
 @keyframes gira{0%,100%{transform:rotate(-12deg) scale(1)}50%{transform:rotate(12deg) scale(1.14)}}
-
 .skeleton{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);height:158px;display:flex;align-items:center;justify-content:center;color:var(--text-soft);font-size:.72rem;font-weight:600;opacity:.4}
 .empty{text-align:center;padding:52px 20px;color:var(--text-soft)}
 .empty .ico{font-size:2.8rem;margin-bottom:10px;opacity:.55}
 .empty p{font-size:.84rem;line-height:1.6}
-
-/* ═══ TOAST ═══ */
 .toast{
   position:fixed;bottom:calc(88px + var(--safe-b));left:50%;
   transform:translateX(-50%) translateY(24px);
@@ -278,8 +247,6 @@ header.app-header::after{
   z-index:200;transition:opacity .28s,transform .28s;max-width:88vw;text-align:center;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* ═══ OVERLAY MILIONÁRIO ═══ */
 #milionario{
   position:fixed;inset:0;z-index:500;display:none;
   background:radial-gradient(circle at 50% 40%,#3a0055 0%,#0d0018 55%,#000 100%);
@@ -335,10 +302,8 @@ header.app-header::after{
   background:linear-gradient(135deg,#8fe3ae,#3fa96a);border-radius:3px;
   padding:3px 6px;box-shadow:0 3px 9px rgba(0,0,0,.4);pointer-events:none;
 }
-
 footer.app-footer{text-align:center;padding:26px 18px 12px;font-size:.67rem;color:var(--text-soft);line-height:1.7}
 footer.app-footer strong{color:var(--primary)}
-
 @media (min-width:720px){
   .numbers-grid{grid-template-columns:repeat(10,1fr);gap:11px}
   .num-btn{font-size:1.05rem}
@@ -360,7 +325,6 @@ footer.app-footer strong{color:var(--primary)}
 </style>
 </head>
 <body>
-<!-- HERO banner lotofacil-capa-2.webp - mantido conforme pedido -->
 <div style="position:relative; width:100%; overflow:hidden; background:#1a0033; border-bottom:4px solid #ff00a0; box-shadow:0 8px 28px rgba(255,0,160,0.35);">
   <img src="loteria-lotofacil.jpg.optimal.jpg" alt="Lotofácil" style="width:100%; height:auto; max-height:380px; object-fit:cover; object-position:center; display:block;" onerror="this.style.display='none'">
 </div>
@@ -392,7 +356,6 @@ footer.app-footer strong{color:var(--primary)}
 </header>
 
 <main class="wrap">
-
   <section class="dashboard" aria-label="Painel de resultados">
     <div class="stat-box">
       <span class="stat-val" id="statJogos">0</span>
@@ -412,12 +375,11 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </section>
 
-  <!-- Próximo Sorteio e Cronômetro — dados oficiais Caixa (3781 já apurado, próximo 3782) -->
   <section class="panel" id="panelCronometro" style="background:linear-gradient(135deg,rgba(147,0,137,0.08),rgba(26,0,51,0.04)); border:1.5px solid rgba(147,0,137,0.18); text-align:center; padding:14px 12px;">
     <div style="font-size:0.68rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:1px;" id="cronometroTitulo">⏰ Próximo Sorteio — Concurso 3782 — 17/09/2026 — 21h</div>
     <div id="cronometro" style="font-size:1.65rem; font-weight:900; color:var(--primary); letter-spacing:1.5px; font-variant-numeric:tabular-nums; margin-top:6px; line-height:1;">--:--:--</div>
     <div id="cronometroLegenda" style="font-size:0.68rem; color:var(--text-soft); margin-top:4px;">Calculando tempo restante...</div>
-    <div id="proximoInfo" style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); font-size:0.70rem; color:var(--text-soft); line-height:1.5;">Concurso 3781 em 16/09 — 03 05 06 07 08 09 11 12 13 16 19 21 22 24 25 • Próximo 3782 em 17/09 • Estimativa R$5.000.000,00</div>
+    <div id="proximoInfo" style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); font-size:0.70rem; color:var(--text-soft); line-height:1.5;">Carregando dados oficiais...</div>
   </section>
 
   <section class="panel" aria-labelledby="tituloSorteio">
@@ -444,20 +406,28 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </aside>
 
-  <!-- IA — Verificação por foto/PDF e lançamento automático -->
   <section class="panel" id="panelIA" style="border:1.5px solid rgba(147,0,137,0.18); background:linear-gradient(135deg,rgba(147,0,137,0.06),rgba(26,0,51,0.03));">
     <div class="panel-title">
       <h2 style="font-size:0.95rem;">🤖 IA — Verificar foto/PDF e lançar apostas</h2>
       <span class="counter-pill" style="background:var(--primary); color:#fff;">IA</span>
     </div>
     <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">Anexe foto ou PDF do volante/comprovante. A IA extrai os números e lança as apostas automaticamente.</p>
+    <div id="iaKeyBox" style="display:none; margin-bottom:10px; background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px;">
+      <div style="font-size:0.72rem; font-weight:800; color:var(--text); margin-bottom:6px;">🔑 Chave Nvidia (nvapi-...)</div>
+      <input type="password" id="nvKeyInput" placeholder="nvapi-..." style="width:100%; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;">
+      <button onclick="salvarChaveNvidia()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;">Salvar chave</button>
+      <div style="font-size:0.65rem; color:var(--text-soft); margin-top:6px; line-height:1.4;">Obtenha grátis em build.nvidia.com. A chave fica salva só no seu navegador.</div>
+    </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
       <input type="file" id="inputIA" accept="image/*,application/pdf" style="flex:1; min-width:200px; padding:8px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem;">
     </div>
-    <button id="btnAnalisarIA" onclick="analisarComDeepSeek()" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border:none; border-radius:12px; background:linear-gradient(145deg,#76b900,#5a8d00); color:#fff; font-weight:800; font-size:0.84rem; cursor:pointer; box-shadow:0 4px 14px rgba(118,185,0,0.28);">
-      🔍 Analisar e lançar apostas
-    </button>
-    <div id="iaStatus" style="margin-top:10px; font-size:0.72rem; color:var(--text-soft); min-height:1.2em;"></div>
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+      <button id="btnConfigKey" onclick="toggleKeyBox()" style="flex:0 0 auto; padding:10px 12px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem; font-weight:700; cursor:pointer;">🔑</button>
+      <button id="btnAnalisarIA" onclick="analisarComIA()" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border:none; border-radius:12px; background:linear-gradient(145deg,#76b900,#5a8d00); color:#fff; font-weight:800; font-size:0.84rem; cursor:pointer; box-shadow:0 4px 14px rgba(118,185,0,0.28);">
+        🔍 Analisar e lançar apostas
+      </button>
+    </div>
+    <div id="iaStatus" style="margin-top:10px; font-size:0.72rem; color:var(--text-soft); min-height:1.2em; line-height:1.5;"></div>
     <div id="iaExtraido" style="margin-top:10px; display:none; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px; font-size:0.78rem; line-height:1.5; max-height:220px; overflow:auto;"></div>
     <div style="margin-top:12px; background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px;">
       <div style="font-size:0.72rem; font-weight:800; color:var(--text); margin-bottom:6px;">✏️ Ou cole manualmente:</div>
@@ -499,33 +469,36 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </section>
 
-  <!-- Banco de Participantes — dinâmico por bolão + lateral -->
   <section class="panel" id="panelParticipantes" style="margin-top:18px">
     <div class="panel-title">
       <h2 style="font-size:0.95rem;">👥 Banco de Participantes</h2>
       <span class="counter-pill" id="contadorParticipantesDB" style="background:var(--primary); color:#fff;">38 nomes</span>
     </div>
     <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">
-      Cadastre e selecione quem participa de <b>cada bolão</b> — a divisão <b>por participante</b> e a quantidade atualizam na hora. Use a <b>lateral</b> para selecionar rapidamente.
+      Cadastre e selecione quem participa de <b>cada bolão</b> ou do <b>concurso inteiro</b> — a divisão por participante e a quantidade atualizam na hora.
     </p>
+    <div style="display:flex; gap:6px; margin-bottom:10px;">
+      <button class="chip on" id="modoBolao" onclick="setModoPart('bolao')">Por bolão</button>
+      <button class="chip" id="modoConcurso" onclick="setModoPart('concurso')">Concurso inteiro</button>
+    </div>
     <div style="display:flex; gap:8px; margin-bottom:10px;">
       <input type="text" id="inputNovoParticipante" placeholder="Novo participante ex: João Silva" style="flex:1; padding:8px 10px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem;">
       <button class="chip on" onclick="adicionarParticipanteDB()" style="flex:0 0 auto;">➕ Adicionar</button>
     </div>
-    <button class="chip on" id="btnToggleParticipantes" onclick="toggleSidebarParticipantes()" style="width:100%; justify-content:center; margin-bottom:12px; background:var(--primary); color:#fff;">👥 Participantes</button>
+    <button class="chip on" id="btnToggleParticipantes" onclick="toggleParticipantes()" style="width:100%; justify-content:center; margin-bottom:12px; background:var(--primary); color:#fff;">👥 Participantes</button>
     <div id="listaParticipantes" style="display:none;">
       <div id="gridParticipantesDB" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:7px; font-size:0.74rem; line-height:1.45;"></div>
       <div id="infoParticipantesDB" style="margin-top:12px; background:linear-gradient(135deg,rgba(147,0,137,0.07),rgba(255,235,59,0.06)); border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:0.72rem; color:var(--text-soft); line-height:1.6; text-align:center;"></div>
     </div>
   </section>
-  <!-- Lateral fixa para seleção rápida — invertida para esquerda -->
+
   <div id="sidebarParticipantes" style="position:fixed; top:0; left:-340px; width:320px; max-width:85vw; height:100dvh; background:var(--card); border-right:1px solid var(--border); box-shadow:8px 0 24px rgba(0,0,0,0.18); z-index:90; transition:left 0.28s cubic-bezier(.34,1.56,.64,1); display:flex; flex-direction:column; overflow:hidden;">
     <div style="padding:14px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:8px; background:linear-gradient(135deg,rgba(147,0,137,0.06),rgba(255,235,59,0.04));">
       <b style="font-size:0.85rem; color:var(--primary);">👥 Selecionar participantes</b>
       <button onclick="toggleSidebarParticipantes()" style="background:#fff; border:1px solid var(--border); border-radius:999px; width:28px; height:28px; font-size:0.9rem; cursor:pointer;">✕</button>
     </div>
     <div style="padding:10px 12px; border-bottom:1px solid var(--border); font-size:0.70rem; color:var(--text-soft);">
-      Toque no nome para <b>adicionar/remover</b> do bolão em foco. Quantidade e <b>R$/pessoa</b> atualizam na hora. Total jogos via IA (<span id="sidebarTotalJogos">0</span>).
+      Modo: <b id="sidebarModo">Por bolão</b>. Toque no nome para <b>adicionar/remover</b>. Total jogos: <span id="sidebarTotalJogos">0</span>.
     </div>
     <div id="sidebarLista" style="flex:1; overflow:auto; padding:10px 12px; display:flex; flex-direction:column; gap:6px;"></div>
     <div style="padding:10px 12px; border-top:1px solid var(--border); display:flex; gap:8px;">
@@ -557,7 +530,6 @@ footer.app-footer strong{color:var(--primary)}
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<!-- ═══ OVERLAY MILIONÁRIO ═══ -->
 <div id="milionario" role="dialog" aria-modal="true" aria-label="Celebração de prêmio máximo">
   <canvas id="granaCanvas" aria-hidden="true"></canvas>
   <div class="celebra">
@@ -573,29 +545,19 @@ footer.app-footer strong{color:var(--primary)}
 <script>
 "use strict";
 /* ═══════════════════════════════════════════════════════════════════════
-   LOTOFÁCIL INDEPENDÊNCIA 2026 — CONFERIDOR INTELIGENTE v2.0
-   Arquitetura por GRUPO (hash) com rateio de cotas para bolões.
+   LOTOFÁCIL INDEPENDÊNCIA 2026 — CONFERIDOR INTELIGENTE v2.1
+   Correções aplicadas:
+   - Persistência de jogos (IA e custom) via localStorage
+   - IA realmente funcional com modelo de visão + PDF→imagem (pdf.js)
+   - Vínculo de participantes por bolão E por concurso inteiro
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ─── 1. PRÊMIOS — REGRA OFICIAL ATUALIZADA (43,79% + fixos 7/14/35) ──
-   Conforme especificação: 11=7,00 12=14,00 13=35,00 fixos; 14=13% e 15=62% do líquido (10% final0, 15% Independência)
-   Bolão: prêmio total = Σ apostas múltiplas C(S,j)×C(N-S,15-j) × valorFaixa(j) ÷ totalCotas
-   Ex: 17dz S=11 → 15×7=105/32=3,28 por cota
-*/
 const PRIZES = Object.freeze({
-  15: 0,        // rateio 62% (Independência 87%)
-  14: 0,        // rateio 13%
-  13: 35.00,    // ✅ FIXO atual Caixa
-  12: 14.00,    // ✅ FIXO atual
-  11: 7.00      // ✅ FIXO atual
+  15: 0, 14: 0, 13: 35.00, 12: 14.00, 11: 7.00
 });
-const PRIZE_ESTIMADO_15 = 300000000.00; // ⚠️ R$300MI Independência
-const PRIZE_ESTIMADO_14 = 1500.00;      // estimativa até rateio oficial
+const PRIZE_ESTIMADO_15 = 300000000.00;
+const PRIZE_ESTIMADO_14 = 1500.00;
 
-/**
- * Retorna o valor unitário de cada faixa.
- * Para 14 e 15, usa o valor oficial se informado; senão a estimativa.
- */
 function valorFaixa(pts){
   if (pts === 15) return PRIZES[15] > 0 ? PRIZES[15] : PRIZE_ESTIMADO_15;
   if (pts === 14) return PRIZES[14] > 0 ? PRIZES[14] : PRIZE_ESTIMADO_14;
@@ -603,15 +565,11 @@ function valorFaixa(pts){
 }
 function faixaEhEstimativa(pts){ return pts === 15 || pts === 14; }
 
-/* ─── 2. BASE DE DADOS — 0 jogos (IA atualiza quantidade) ────────────── */
-/* Formato por linha: PAGINA|TIPO|HASH|JOGO|DEZENAS|DEZENAS_QTD|VALOR|COTA|TOTAL_COTAS|VALOR_COTA */
-const rawGamesData = ``; // 0 jogos por padrão — IA via anexos atualiza quantidade de apostas
-
-/* ─── 3. PARSER — agrupa por hash ────────────────────────────────────── */
+/* ─── PARSER ─────────────────────────────────────────────────────────── */
 function numBR(s){ return parseFloat(String(s).replace(/\./g, "").replace(",", ".")) || 0; }
 
 function parseGames(raw){
-  const mapa = new Map(); // hash -> grupo
+  const mapa = new Map();
   let ordemPagina = 0;
   const linhas = String(raw).split("\n");
 
@@ -620,8 +578,7 @@ function parseGames(raw){
     if (!linha) continue;
     try {
       const p = linha.split("|");
-      if (p.length < 6) { console.warn(`[Parser] Linha ${i+1} malformada.`); continue; }
-
+      if (p.length < 6) continue;
       const pagina = parseInt(p[0], 10);
       const tipo = p[1];
       const hash = p[2];
@@ -633,11 +590,10 @@ function parseGames(raw){
       const totalCotas = p[8] ? parseInt(p[8], 10) : 0;
       const valorCota = p[9] ? numBR(p[9]) : 0;
 
-      // Validações
-      if (dezenas.length < 15 || dezenas.length > 20) { console.warn(`[Parser] Linha ${i+1}: ${dezenas.length} dezenas.`); continue; }
-      if (!dezenas.every(n => n >= 1 && n <= 25)) { console.warn(`[Parser] Linha ${i+1}: dezena fora de 1–25.`); continue; }
+      if (dezenas.length < 15 || dezenas.length > 20) continue;
+      if (!dezenas.every(n => n >= 1 && n <= 25)) continue;
       const unicas = new Set(dezenas);
-      if (unicas.size !== dezenas.length) { console.warn(`[Parser] Linha ${i+1}: dezenas repetidas.`); continue; }
+      if (unicas.size !== dezenas.length) continue;
 
       if (!mapa.has(hash)){
         ordemPagina++;
@@ -657,14 +613,14 @@ function parseGames(raw){
         qtd,
         ehBolao: grupo.ehBolao
       });
-    } catch (err){
-      console.warn(`[Parser] Erro na linha ${i+1}:`, err);
-    }
+    } catch (err){}
   }
   return [...mapa.values()].sort((a, b) => a.ordem - b.ordem);
 }
 
-/* ─── 4. COMBINATÓRIA MEMOIZADA ──────────────────────────────────────── */
+const rawGamesData = ``;
+
+/* ─── COMBINATÓRIA ───────────────────────────────────────────────────── */
 const combCache = new Map();
 function C(n, k){
   if (k < 0 || n < 0 || k > n) return 0;
@@ -680,11 +636,6 @@ function C(n, k){
   return v;
 }
 
-/**
- * Módulo Aposta Múltipla — regra oficial:
- * Para N apostados e S acertos, combinações premiadas na faixa j = C(S,j)×C(N-S,15-j)
- * Ex: N=16 S=15 → 1×15 e 15×14 ; N=17 S=11 → 15×11
- */
 function analisarFaixas(hits, misses, qtdDezenas){
   const faixas = {};
   let premioBruto = 0;
@@ -705,7 +656,7 @@ function analisarFaixas(hits, misses, qtdDezenas){
   };
 }
 
-/* ─── 5. ESTADO ──────────────────────────────────────────────────────── */
+/* ─── ESTADO ─────────────────────────────────────────────────────────── */
 const state = {
   grupos: [],
   sorteados: new Set(),
@@ -716,13 +667,12 @@ const state = {
   jaFestejou: false,
   deferredPrompt: null
 };
-const COTA_PESSOAL = 1; // você detém 1 cota em cada bolão adquirido
+const COTA_PESSOAL = 1;
 
-/* ─── 6. FORMATADORES ────────────────────────────────────────────────── */
 const fmtBRL = new Intl.NumberFormat("pt-BR", { style:"currency", currency:"BRL", minimumFractionDigits:2 });
 const fmtNum = new Intl.NumberFormat("pt-BR");
 
-/* ─── 7. FEEDBACK / TOAST ────────────────────────────────────────────── */
+/* ─── FEEDBACK ───────────────────────────────────────────────────────── */
 function vibrar(p){
   try { if (navigator.vibrate && window.matchMedia("(pointer: coarse)").matches) navigator.vibrate(p); } catch(_){}
 }
@@ -734,7 +684,73 @@ function toast(msg, ms = 2400){
   toastTimer = setTimeout(() => el.classList.remove("show"), ms);
 }
 
-/* ─── 8. GRID DE NÚMEROS ─────────────────────────────────────────────── */
+/* ─── PERSISTÊNCIA DE GRUPOS CUSTOM ──────────────────────────────────── */
+const LS_KEY = "lotofacil-3780-sorteio-v2";
+const LS_GRUPOS_CUSTOM = "gruposCustom_v1";
+const LS_DB_KEY = "participantesDB_v2";
+const LS_BOLAO_KEY = "bolaoParticipantes_v2";
+const LS_PART_CONCURSO = "participantesConcurso_v1";
+const LS_NVKEY = "nvapi_key_local";
+
+function serializarGrupo(g){
+  return {
+    hash: g.hash, pagina: g.pagina, tipo: g.tipo, ordem: g.ordem,
+    cota: g.cota || 0, totalCotas: g.totalCotas || 0, valorCota: g.valorCota || 0,
+    valorTotalGrupo: g.valorTotalGrupo || 0,
+    ehBolao: !!g.ehBolao,
+    jogos: g.jogos.map(j => ({
+      idx: j.idx, dezenas: [...j.dezenas], qtd: j.qtd, ehBolao: !!j.ehBolao
+    }))
+  };
+}
+function desserializarGrupo(obj){
+  const jogos = (obj.jogos||[]).map(j => ({
+    idx: j.idx, dezenas: [...j.dezenas].sort((a,b)=>a-b),
+    set: new Set(j.dezenas), qtd: j.qtd, ehBolao: !!j.ehBolao
+  }));
+  return {
+    hash: obj.hash, pagina: obj.pagina, tipo: obj.tipo, ordem: obj.ordem,
+    cota: obj.cota||0, totalCotas: obj.totalCotas||0, valorCota: obj.valorCota||0,
+    valorTotalGrupo: obj.valorTotalGrupo||0,
+    ehBolao: !!obj.ehBolao, jogos
+  };
+}
+function salvarGruposCustom(){
+  try{
+    const custom = state.grupos
+      .filter(g => String(g.hash).startsWith("IA_") || g._custom)
+      .map(serializarGrupo);
+    localStorage.setItem(LS_GRUPOS_CUSTOM, JSON.stringify(custom));
+    console.info(`[Persist] ${custom.length} grupo(s) salvos`);
+  }catch(e){ console.warn("Falha ao salvar grupos custom", e); }
+}
+function carregarGruposCustom(){
+  try{
+    const raw = localStorage.getItem(LS_GRUPOS_CUSTOM);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr.map(desserializarGrupo);
+  }catch(e){ console.warn("Falha ao carregar grupos custom", e); return []; }
+}
+function salvarHistorico(){
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({ sorteados: [...state.sorteados], quando: Date.now() }));
+  } catch(_){}
+}
+function restaurarHistorico(){
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (Array.isArray(d.sorteados)){
+      d.sorteados.filter(n => Number.isInteger(n) && n >= 1 && n <= 25).slice(0, 15)
+        .forEach(n => state.sorteados.add(n));
+    }
+  } catch(_){}
+}
+
+/* ─── GRID ───────────────────────────────────────────────────────────── */
 const numbersGrid = document.getElementById("numbersGrid");
 function construirGridNumeros(){
   const frag = document.createDocumentFragment();
@@ -749,7 +765,6 @@ function construirGridNumeros(){
   }
   numbersGrid.appendChild(frag);
 }
-
 let rafPendente = null;
 function toggleNumero(n){
   if (state.sorteados.has(n)) state.sorteados.delete(n);
@@ -760,7 +775,6 @@ function toggleNumero(n){
   if (rafPendente) cancelAnimationFrame(rafPendente);
   rafPendente = requestAnimationFrame(() => { rafPendente = null; sincronizarUI(); });
 }
-
 function sincronizarUI(){
   for (const b of numbersGrid.querySelectorAll(".num-btn")){
     const sel = state.sorteados.has(Number(b.dataset.n));
@@ -776,11 +790,13 @@ function sincronizarUI(){
     : `Faltam ${15 - qtd} número(s) para completar o sorteio.`;
   conferirTudo();
 }
+
+/* ─── BUSCA RESULTADO CAIXA ──────────────────────────────────────────── */
 async function buscarResultadoCaixa(){
   const btn = document.getElementById("btnResultado");
   const info = document.getElementById("resultadoInfo");
   if (btn){ btn.disabled=true; btn.textContent="⏳ Buscando no site da Caixa..."; }
-  if (info) info.textContent="Consultando https://servicebus2.caixa.gov.br ... (concurso atual)";
+  if (info) info.textContent="Consultando servicebus2.caixa.gov.br ...";
   const urls = [
     "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil",
     "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3781",
@@ -812,7 +828,7 @@ async function buscarResultadoCaixa(){
     return;
   }
   const dezenas = dados.listaDezenas.map(s=>parseInt(s,10));
-  const concurso = dados.numero || dados.numeroConcurso || "3780";
+  const concurso = dados.numero || dados.numeroConcurso || "3781";
   const data = dados.dataApuracao || "";
   state.sorteados.clear();
   dezenas.forEach(n=> state.sorteados.add(n));
@@ -826,23 +842,82 @@ async function buscarResultadoCaixa(){
   vibrar([30,20,30]);
 }
 
-/* ─── 9. CONFERÊNCIA COM RATEIO DE COTAS ─────────────────────────────── */
+/* ─── DIVISOR / PARTICIPANTES ────────────────────────────────────────── */
+function getParticipantesDB(){
+  try{
+    const raw = localStorage.getItem(LS_DB_KEY);
+    if (raw){
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr.length>0) return arr;
+    }
+  }catch(_){}
+  return PARTICIPANTES_INICIAIS.map((nome,i)=>({id:"p"+(i+1), nome}));
+}
+function setParticipantesDB(arr){
+  try{ localStorage.setItem(LS_DB_KEY, JSON.stringify(arr)); }catch(_){}
+  const contador = document.getElementById("contadorParticipantesDB");
+  if (contador) contador.textContent = `${arr.length} nomes`;
+}
+function getBolaoParticipantes(hash){
+  try{
+    const raw = localStorage.getItem(LS_BOLAO_KEY+"_"+hash);
+    if (raw){
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
+  }catch(_){}
+  return [];
+}
+function setBolaoParticipantes(hash, ids){
+  try{ localStorage.setItem(LS_BOLAO_KEY+"_"+hash, JSON.stringify(ids)); }catch(_){}
+}
+function getParticipantesConcurso(){
+  try{
+    const raw = localStorage.getItem(LS_PART_CONCURSO);
+    if (raw) return JSON.parse(raw);
+  }catch(_){}
+  return [];
+}
+function setParticipantesConcurso(ids){
+  try{ localStorage.setItem(LS_PART_CONCURSO, JSON.stringify(ids)); }catch(_){}
+}
+function getDivisorBolao(g){
+  try{
+    const custom = getBolaoParticipantes(g.hash);
+    if (custom && custom.length > 0) return custom.length;
+    const conc = getParticipantesConcurso();
+    if (conc && conc.length > 0) return conc.length;
+  }catch(_){}
+  return g.totalCotas && g.totalCotas > 0 ? g.totalCotas : 1;
+}
+
+const PARTICIPANTES_INICIAIS = ["Carlos Rodrigues","Edson Borghi","José Elias","Alexsandro Silva","Nelson UTGC","Sérgio Mendonça","Nilson Dias","Anderson Silva","Geilson Miranda","Wagner Divino","Marcus Vinícius","Izabete Silva","Joilson Bonomo","Wellington Capelini","Giovane Costa","Reginaldo Biancardi","Marcio RC","Elisio Neto","Gustavo CS Vix","Valdir Gonzaga","Adriano Kiko","Antonio de Jesus","Lidiana Rodrigues","Manoel Paulinho","Anderson Barros","Jarbas Baiôcco","Edgard Broca","Jocemar Augusto","Willis dos Anjos","Elicassio dos Santos","Aldair Brunharas","Ana Lilia","Cristiane Coutinho","Jair Rodrigues","Vantuil","David de Oliveira","Alessandro do TABR","Reinaldo"];
+
+let modoParticipacao = "bolao";
+function setModoPart(m){
+  modoParticipacao = m;
+  const b1 = document.getElementById("modoBolao");
+  const b2 = document.getElementById("modoConcurso");
+  if (b1) b1.classList.toggle("on", m==="bolao");
+  if (b2) b2.classList.toggle("on", m==="concurso");
+  const sm = document.getElementById("sidebarModo");
+  if (sm) sm.textContent = m==="bolao" ? "Por bolão" : "Concurso inteiro";
+  renderSidebarParticipantes();
+}
+
+/* ─── CONFERÊNCIA ────────────────────────────────────────────────────── */
 function conferirTudo(){
   const sorteados = state.sorteados;
   let bruto = 0, liquido = 0, premiados = 0, ganhou14 = false, ganhou15 = false;
 
   state.resultados = state.grupos.map(g => {
-    // Confere cada jogo interno do grupo
     const jogos = g.jogos.map(j => {
       let hits = 0, misses = 0;
       for (const d of j.dezenas){ if (sorteados.has(d)) hits++; else misses++; }
       const a = analisarFaixas(hits, misses, j.qtd);
       return { ...j, hits, misses, ...a, premiado: a.premioBruto > 0 };
     });
-
-    // Soma o prêmio bruto do grupo (todos os jogos internos)
     const premioBrutoGrupo = jogos.reduce((s, j) => s + j.premioBruto, 0);
-    // RATEIO: se bolão tem lista custom de participantes, divide por ela, senão pela Caixa (totalCotas)
     const divisor = g.ehBolao ? getDivisorBolao(g) : 1;
     const premioCota = divisor>0 ? premioBrutoGrupo / divisor : 0;
     const tem14 = jogos.some(j => j.hits === 14);
@@ -855,13 +930,9 @@ function conferirTudo(){
     if (tem15) ganhou15 = true;
 
     return {
-      ...g, jogos,
-      premioBrutoGrupo,
-      divisor,
-      premioCota,
-      premiado: premioCota > 0,
-      tem14, tem15,
-      melhorHits: Math.max(...jogos.map(j => j.hits))
+      ...g, jogos, premioBrutoGrupo, divisor, premioCota,
+      premiado: premioCota > 0, tem14, tem15,
+      melhorHits: jogos.length ? Math.max(...jogos.map(j => j.hits)) : 0
     };
   });
 
@@ -871,64 +942,42 @@ function conferirTudo(){
   talvezCelebrar();
 }
 
-/* ─── 10. DASHBOARD ──────────────────────────────────────────────────── */
+/* ─── DASHBOARD ──────────────────────────────────────────────────────── */
 function atualizarDashboard(){
   const totalJogos = state.grupos.reduce((s, g) => s + g.jogos.length, 0);
   const qtdBolaoGrupos = state.grupos.filter(g=>g.ehBolao).length;
   const qtdBolaoJogos = state.grupos.filter(g=>g.ehBolao).reduce((s,g)=>s+g.jogos.length,0);
   const qtdSimples = totalJogos - qtdBolaoJogos;
-  document.getElementById("statJogos").textContent =
-    `${fmtNum.format(totalJogos)}`;
+  document.getElementById("statJogos").textContent = `${fmtNum.format(totalJogos)}`;
   document.getElementById("statJogos").nextElementSibling.textContent =
-    `${fmtNum.format(qtdSimples)} simples • ${qtdBolaoGrupos} bolões (${fmtNum.format(qtdBolaoJogos)} jogos)`;
+    `${fmtNum.format(qtdSimples)} simples • ${qtdBolaoGrupos} grupos c/ rateio`;
   document.getElementById("statSorteados").textContent = `${state.sorteados.size}/15`;
   document.getElementById("statVencedores").textContent = fmtNum.format(state.resumo.premiados);
 
   const elG = document.getElementById("statGanhos");
   const elL = document.getElementById("statGanhosLbl");
   elG.textContent = fmtBRL.format(state.resumo.liquido);
-
-  // Detalha o bruto quando há bolões no meio
   if (state.resumo.bruto > state.resumo.liquido + 0.01){
     elL.textContent = `Sua parte · bruto ${fmtBRL.format(state.resumo.bruto)} rateado`;
   } else {
     elL.textContent = "Retorno das suas cotas";
   }
-
   document.getElementById("counterPremiadas").textContent =
     `${state.resumo.premiados} premiado${state.resumo.premiados === 1 ? "" : "s"}`;
   document.getElementById("counterPremiadas").classList.toggle("full", state.resumo.premiados > 0);
-
   document.getElementById("badgeInfo").textContent =
-    `Concurso 3780 · ${fmtNum.format(qtdSimples)} simples · ${qtdBolaoGrupos} bolões`;
-  // Atualiza botão Mostrar todos com total real (0 por enquanto, atualiza quando adicionar apostas)
+    `${fmtNum.format(totalJogos)} jogos · ${qtdBolaoGrupos} grupos`;
+
   const btnMostrar = document.getElementById("btnMostrarTodosJogos");
-  if (btnMostrar){
-    const total = totalJogos;
-    // Mantém texto base mas atualiza número
-    if (btnMostrar.textContent.includes("Mostrar todos") || btnMostrar.textContent.includes("Ocultar")){
-      // Não sobrescreve se já está com estado de mostrar/ocultar, apenas garante número correto quando for mostrar
-      if (total===0){
-        btnMostrar.innerHTML = `📋 Mostrar todos os jogos apostados em conferência — 0 jogos`;
-      } else if (btnMostrar.innerHTML.includes("Mostrar todos")){
-        btnMostrar.innerHTML = `📋 Mostrar todos os jogos apostados em conferência — ${total} jogos`;
-      }
-    }
+  if (btnMostrar && btnMostrar.innerHTML.includes("Mostrar todos")){
+    btnMostrar.innerHTML = `📋 Mostrar todos os jogos apostados em conferência — ${totalJogos} jogos`;
   }
-  // Painel 39 cotas no topo — dividido mantendo ganho principal
-  const totalBruto39 = state.resumo.liquido; // corrigido: divide o liquido (o que os 39 realmente recebem), nao o bruto 1183
-  const por39 = totalBruto39 / 39;
-  const elBruto39 = document.getElementById("totalBruto39");
-  const elPor39 = document.getElementById("valorPor39");
-  const elDet39 = document.getElementById("valorPor39detalhe");
-  if (elBruto39) elBruto39.textContent = fmtBRL.format(totalBruto39);
-  if (elPor39) elPor39.textContent = fmtBRL.format(por39);
-  if (elDet39) elDet39.textContent = fmtBRL.format(por39);}
-// ─── 10b. CRONÔMETRO 21h — ajustado para próximo sorteio oficial Caixa (bate com dia do sorteio) ──
+}
+
+/* ─── CRONÔMETRO ─────────────────────────────────────────────────────── */
 let proximoAlvo = null;
 let ultimoConcursoVisto = null;
 function proximoDiaLotofacil(base){
-  // Lotofácil: seg(1), qua(3), sex(5) às 21h
   const dias = [1,3,5];
   let d = new Date(base);
   d.setHours(21,0,0,0);
@@ -941,17 +990,9 @@ function proximoDiaLotofacil(base){
 function atualizarCronometro(){
   const agora = new Date();
   let alvo = proximoAlvo ? new Date(proximoAlvo) : proximoDiaLotofacil(agora);
-  // Se alvo já passou (ex: API retornou 16/09 e hoje é 17/09), avança para próximo dia de sorteio
   if (alvo <= agora){
     alvo = proximoDiaLotofacil(new Date(alvo.getTime()+60000));
     proximoAlvo = alvo;
-    const titulo = document.getElementById("cronometroTitulo");
-    if (titulo){
-      const dd = String(alvo.getDate()).padStart(2,"0");
-      const mm = String(alvo.getMonth()+1).padStart(2,"0");
-      const yyyy = alvo.getFullYear();
-      titulo.textContent = `⏰ Próximo Sorteio — ${dd}/${mm}/${yyyy} — 21h`;
-    }
   }
   const diff = alvo - agora;
   const el = document.getElementById("cronometro");
@@ -960,7 +1001,6 @@ function atualizarCronometro(){
   if (diff <= 0){
     el.textContent = "00:00:00";
     if (leg) leg.textContent = "🔔 Sorteio em apuração — buscando resultado...";
-    // Quando zerar, prevalece conferência do dia: busca novo concurso e atualiza
     if (!el.dataset.zerou){
       el.dataset.zerou = "1";
       setTimeout(()=>{ carregarProximoSorteio(); buscarResultadoCaixa(); }, 3000);
@@ -983,40 +1023,7 @@ function atualizarCronometro(){
   }
 }
 setInterval(atualizarCronometro, 1000);
-// A cada 15 min busca atualizações no site da Caixa: próximo concurso, horário premiação (se adiado) e resultados
-setInterval(async ()=>{
-  console.info("[Auto 15min] Verificando atualizações Caixa...");
-  const prevAlvo = proximoAlvo ? new Date(proximoAlvo).toISOString() : null;
-  await carregarProximoSorteio();
-  // Se próximo alvo mudou (adiamento ou novo concurso), notifica
-  if (proximoAlvo && prevAlvo && new Date(proximoAlvo).toISOString() !== prevAlvo){
-    toast(`🔄 Próximo sorteio atualizado para ${new Date(proximoAlvo).toLocaleDateString("pt-BR")} 21h`);
-  }
-  // Se resultado do concurso atual mudou e sorteados ainda é do concurso anterior, auto-atualiza silenciosamente
-  // carregarProximoSorteio já auto-preenche quando sorteados vazio; aqui força verificação mesmo com sorteados preenchido se concurso for novo
-  try{
-    const r = await fetch("https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil", {cache:"no-store"});
-    if (r.ok){
-      const j = await r.json();
-      const dezenasNovas = (j.listaDezenas||[]).map(s=>parseInt(s,10)).sort((a,b)=>a-b).join(",");
-      const atuais = [...state.sorteados].sort((a,b)=>a-b).join(",");
-      if (j.listaDezenas && j.listaDezenas.length===15 && dezenasNovas !== atuais && j.numero !== ultimoConcursoVisto){
-        ultimoConcursoVisto = j.numero;
-        // Só auto-atualiza se ainda não houver 15 selecionados ou se for o mesmo concurso
-        if (state.sorteados.size===0 || confirm(`Novo resultado Concurso ${j.numero} disponível (${j.dataApuracao}). Atualizar conferência automaticamente?`)){
-          state.sorteados.clear();
-          j.listaDezenas.forEach(s=> state.sorteados.add(parseInt(s,10)));
-          forcarExibirTodos = true;
-          sincronizarUI();
-          salvarHistorico();
-          toast(`✅ Resultado ${j.numero} atualizado automaticamente!`);
-        }
-      } else if (j.numero){
-        ultimoConcursoVisto = j.numero;
-      }
-    }
-  }catch(e){ console.warn("Auto verificação 15min falhou", e); }
-}, 15*60*1000);
+
 async function carregarProximoSorteio(){
   const titulo = document.getElementById("cronometroTitulo");
   const info = document.getElementById("proximoInfo");
@@ -1024,12 +1031,10 @@ async function carregarProximoSorteio(){
     const r = await fetch("https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil", {cache:"no-store"});
     if (!r.ok) throw new Error("HTTP "+r.status);
     const j = await r.json();
-    // j.numero = 3780 (Independência), j.numeroConcursoProximo = 3781, j.dataProximoConcurso = 16/09/2026, j.valorEstimadoProximoConcurso = 2000000
-    const proxNum = j.numeroConcursoProximo || 3781;
-    const proxDataStr = j.dataProximoConcurso || "16/09/2026";
+    const proxNum = j.numeroConcursoProximo || 3782;
+    let proxDataStr = j.dataProximoConcurso || "17/09/2026";
     const estimativa = j.valorEstimadoProximoConcurso || 2000000;
     const local = j.localSorteio || "ESPAÇO DA SORTE";
-    // Parse data dd/mm/yyyy -> Date 21h e corrige se já passou (bate com dia do sorteio)
     const [d,m,y] = proxDataStr.split("/").map(Number);
     let dt = new Date(y, m-1, d, 21,0,0);
     if (dt <= new Date()){
@@ -1043,52 +1048,25 @@ async function carregarProximoSorteio(){
     ultimoConcursoVisto = j.numero;
     if (titulo) titulo.textContent = `⏰ Próximo Sorteio — Concurso ${proxNum} — ${proxDataStr} — 21h`;
     if (info) info.innerHTML = `Concurso <b>${j.numero}</b> em ${j.dataApuracao} — <b>${(j.listaDezenas||[]).join(" ")}</b> • Próximo <b>${proxNum}</b> em ${proxDataStr} • Estimativa <b>${fmtBRL.format(estimativa)}</b> • ${local}`;
-    // Cabeçalhos mostram CONCURSO ATUAL (conferência do dia = 3781), cronômetro mostra PRÓXIMO (3782)
     const headerTitle = document.getElementById("headerTitle");
     const headerSub = document.getElementById("headerSub");
-    const heroSub = document.getElementById("heroSub");
     const footerTitle = document.getElementById("footerTitle");
     const badgeInfo2 = document.getElementById("badgeInfo");
     if (headerTitle) headerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
-    if (headerSub) headerSub.textContent = `Conferidor Inteligente · ${j.dataApuracao.split("/")[2] || "2026"} · ${j.dataApuracao}`;
-    if (heroSub) heroSub.textContent = `LOTOFÁCIL • CONCURSO ${j.numero} • ${j.dataApuracao} • ${fmtBRL.format(j.valorArrecadado || 0)} arrecadados`;
-    if (badgeInfo2) badgeInfo2.textContent = `Concurso ${j.numero} · ${j.dataApuracao} · ${j.listaDezenas.length} dezenas`;
+    if (headerSub) headerSub.textContent = `Conferidor Inteligente · ${j.dataApuracao}`;
+    if (badgeInfo2) badgeInfo2.textContent = `Concurso ${j.numero} · ${j.dataApuracao} · ${(j.listaDezenas||[]).length} dezenas`;
     if (footerTitle) footerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
     document.title = `Lotofácil — Concurso ${j.numero} — Conferidor Inteligente`;
-    // Auto-preenche APENAS se ainda não houver seleção manual (preserva bolas manuais)
     if (j.listaDezenas && j.listaDezenas.length===15 && state.sorteados.size===0){
-      const dezenasAuto = j.listaDezenas.map(s=>parseInt(s,10));
-      // Não sobrescreve se usuário já está preenchendo manualmente para o próximo concurso
-      if (state.sorteados.size===0){
-        state.sorteados.clear();
-        dezenasAuto.forEach(n=> state.sorteados.add(n));
-        forcarExibirTodos = true;
-        sincronizarUI();
-        salvarHistorico();
-        toast(`✅ Resultado Concurso ${j.numero} preenchido automaticamente!`);
-      }
+      j.listaDezenas.map(s=>parseInt(s,10)).forEach(n=> state.sorteados.add(n));
+      forcarExibirTodos = true;
+      sincronizarUI();
+      salvarHistorico();
+      toast(`✅ Resultado Concurso ${j.numero} preenchido automaticamente!`);
     }
     atualizarCronometro();
   }catch(e){
     console.warn("Falha ao buscar próximo sorteio Caixa", e);
-    // Fallback usa próximo dia Lotofácil a partir de agora e tenta proxy CORS
-    try{
-      const proxyUrl = "https://api.allorigins.win/get?url="+encodeURIComponent("https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil");
-      const rp = await fetch(proxyUrl, {cache:"no-store"});
-      const jp = await rp.json();
-      const jd = JSON.parse(jp.contents);
-      if (jd && jd.dataProximoConcurso){
-        const proxDataStr2 = jd.dataProximoConcurso;
-        const [d2,m2,y2] = proxDataStr2.split("/").map(Number);
-        const dtP = new Date(y2, m2-1, d2, 21,0,0);
-        proximoAlvo = dtP;
-        if (titulo) titulo.textContent = `⏰ Próximo Sorteio — Concurso ${jd.numeroConcursoProximo} — ${proxDataStr2} — 21h`;
-        if (info) info.innerHTML = `Concurso <b>${jd.numero}</b> em ${jd.dataApuracao} — <b>${(jd.listaDezenas||[]).join(" ")}</b> • Próximo <b>${jd.numeroConcursoProximo}</b> em ${proxDataStr2} • Estimativa <b>${fmtBRL.format(jd.valorEstimadoProximoConcurso||2000000)}</b> • ${jd.localSorteio||"ESPAÇO DA SORTE"}`;
-        ultimoConcursoVisto = jd.numero;
-        atualizarCronometro();
-        return;
-      }
-    }catch(e2){ console.warn("Proxy também falhou", e2); }
     let dt2 = proximoDiaLotofacil(new Date());
     proximoAlvo = dt2;
     const ddF = String(dt2.getDate()).padStart(2,"0");
@@ -1097,11 +1075,10 @@ async function carregarProximoSorteio(){
     if (info) info.textContent = `Próximo sorteio: ${ddF}/${mmF}/${yyyyF} às 21h — Estimativa R$2.000.000,00 (dados locais)`;
     if (titulo) titulo.textContent = `⏰ Próximo Sorteio — ${ddF}/${mmF}/${yyyyF} — 21h`;
     atualizarCronometro();
-    if (titulo) titulo.textContent = "⏰ Próximo Sorteio — Concurso 3781 — 16/09/2026 — 21h";
   }
 }
 
-/* ─── 11. FILTROS E RENDER ───────────────────────────────────────────── */
+/* ─── FILTROS / RENDER ───────────────────────────────────────────────── */
 const jogosGrid = document.getElementById("jogosGrid");
 const emptyState = document.getElementById("emptyState");
 
@@ -1116,15 +1093,11 @@ function aplicarFiltro(lista){
       if (!isNaN(alvo)) res = res.filter(g => g.jogos.some(j => j.hits === alvo));
     }
   }
-  // Busca por números colados (ex: 03 | 05 | 07 | ... ) — filtra grupos que contenham a aposta
   if (buscaApostaNumeros.length > 0){
     res = res.filter(g => g.jogos.some(j => {
-      // contém todos os números buscados
       const contem = buscaApostaNumeros.every(n => j.dezenas.includes(n));
       if (!contem) return false;
-      // se busca tem mesmo tamanho do jogo, exige exato; senão contém já basta
       if (buscaApostaNumeros.length === j.dezenas.length){
-        // exato: mesmo tamanho e todos contidos já garante igualdade (sem ordem)
         return j.dezenas.length === buscaApostaNumeros.length && buscaApostaNumeros.every(n => j.dezenas.includes(n));
       }
       return contem;
@@ -1133,26 +1106,24 @@ function aplicarFiltro(lista){
   return res;
 }
 
-let forcarExibirTodos = true; // mostra todos por padrao
+let forcarExibirTodos = true;
 let buscaApostaNumeros = [];
 function onBuscaAposta(val){
   const nums = (String(val).match(/\d+/g) || []).map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25);
-  // remove duplicados e ordena
   const uniq = [...new Set(nums)].sort((a,b)=>a-b);
   buscaApostaNumeros = uniq;
   const info = document.getElementById("buscaInfo");
   if (uniq.length===0){
     if (info) info.textContent = "";
   } else {
-    if (info) info.textContent = `🔍 Buscando aposta com ${uniq.length} números: ${uniq.map(n=>String(n).padStart(2,"0")).join(" ")} — ${uniq.length>=11 ? "todos os números devem estar no jogo" : "filtrando jogos que contém"}`;
+    if (info) info.textContent = `🔍 Buscando aposta com ${uniq.length} números: ${uniq.map(n=>String(n).padStart(2,"0")).join(" ")}`;
     forcarExibirTodos = true;
-    if (state.grupos.length>0 && state.resultados.length===0) conferirTudo();
   }
   renderizarGrupos();
   if (uniq.length>0){
     const lista = aplicarFiltro(state.resultados);
     if (lista.length===0 && info) info.textContent += " — nenhum jogo encontrado";
-    else if (lista.length>0 && info) info.textContent += ` — ${lista.reduce((s,g)=>s+g.jogos.length,0)} jogo(s) em ${lista.length} grupo(s) encontrado(s)`;
+    else if (lista.length>0 && info) info.textContent += ` — ${lista.reduce((s,g)=>s+g.jogos.length,0)} jogo(s) encontrado(s)`;
   }
 }
 function limparBuscaAposta(){
@@ -1165,296 +1136,28 @@ function limparBuscaAposta(){
 }
 function renderizarGrupos(){
   jogosGrid.innerHTML = "";
+  if (state.grupos.length === 0){
+    emptyState.style.display = "block";
+    document.getElementById("emptyMsg").textContent = "Nenhum jogo cadastrado. Use a IA para anexar uma foto/PDF ou cole manualmente.";
+    return;
+  }
   if (state.sorteados.size === 0 && !forcarExibirTodos){
     emptyState.style.display = "block";
     document.getElementById("emptyMsg").textContent = "Selecione os números sorteados acima para conferir seus jogos.";
     return;
   }
-  const lista = aplicarFiltro(state.resultados);
+  const lista = aplicarFiltro(state.resultados.length > 0 ? state.resultados : state.grupos.map(g => ({...g, jogos: g.jogos.map(j=>({...j, hits:0, misses:j.qtd, premiado:false, faixas:{}, combinacoesPremiadas:0, premioBruto:0, totalSimples:1})), premioBrutoGrupo:0, divisor:getDivisorBolao(g), premioCota:0, premiado:false, tem14:false, tem15:false, melhorHits:0})));
   if (lista.length === 0){
     emptyState.style.display = "block";
     document.getElementById("emptyMsg").textContent = "Nenhum jogo corresponde a este filtro.";
     return;
   }
   emptyState.style.display = "none";
-  // Mostra TODOS os jogos de uma vez (sem skeleton/lazy) — Grupo de participantes com todos visíveis
   const frag = document.createDocumentFragment();
   lista.forEach(g => frag.appendChild(criarCardGrupo(g)));
   jogosGrid.appendChild(frag);
-  if (state.observer){ try{ state.observer.disconnect(); }catch(_){} }
-}
-function toggleParticipantes(){
-  const el = document.getElementById("listaParticipantes");
-  const btn = document.getElementById("btnToggleParticipantes");
-  if (!el || !btn) return;
-  const isHidden = el.style.display === "none" || !el.style.display || el.style.display === "";
-  if (isHidden){
-    renderParticipantesDB();
-    el.style.display = "block";
-    btn.textContent = "🙈 Ocultar / Editar Banco";
-    btn.classList.remove("on");
-    el.scrollIntoView({behavior:"smooth", block:"start"});
-  } else {
-    el.style.display = "none";
-    btn.textContent = "👁️ Mostrar / Editar Banco";
-    btn.classList.add("on");
-  }
-}
-// ─── BANCO DE PARTICIPANTES (por bolão) ───────────────────────────────
-const PARTICIPANTES_INICIAIS = ["Carlos Rodrigues","Edson Borghi","José Elias","Alexsandro Silva","Nelson UTGC","Sérgio Mendonça","Nilson Dias","Anderson Silva","Geilson Miranda","Wagner Divino","Marcus Vinícius","Izabete Silva","Joilson Bonomo","Wellington Capelini","Giovane Costa","Reginaldo Biancardi","Marcio RC","Elisio Neto","Gustavo CS Vix","Valdir Gonzaga","Adriano Kiko","Antonio de Jesus","Lidiana Rodrigues","Manoel Paulinho","Anderson Barros","Jarbas Baiôcco","Edgard Broca","Jocemar Augusto","Willis dos Anjos","Elicassio dos Santos","Aldair Brunharas","Ana Lilia","Cristiane Coutinho","Jair Rodrigues","Vantuil","David de Oliveira","Alessandro do TABR","Reinaldo"];
-const LS_DB_KEY = "participantesDB_v2";
-const LS_BOLAO_KEY = "bolaoParticipantes_v2";
-function getParticipantesDB(){
-  try{
-    const raw = localStorage.getItem(LS_DB_KEY);
-    if (raw){
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr) && arr.length>0) return arr;
-    }
-  }catch(_){}
-  // inicializa com 38 nomes (1 cota cada, sem divisões fixas)
-  return PARTICIPANTES_INICIAIS.map((nome,i)=>({id:"p"+(i+1), nome}));
-}
-function setParticipantesDB(arr){
-  try{ localStorage.setItem(LS_DB_KEY, JSON.stringify(arr)); }catch(_){}
-  const contador = document.getElementById("contadorParticipantesDB");
-  if (contador) contador.textContent = `${arr.length} nomes`;
-}
-function getBolaoParticipantes(hash){
-  try{
-    const raw = localStorage.getItem(LS_BOLAO_KEY+"_"+hash);
-    if (raw){
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) return arr;
-    }
-  }catch(_){}
-  return [];
-}
-function setBolaoParticipantes(hash, ids){
-  try{ localStorage.setItem(LS_BOLAO_KEY+"_"+hash, JSON.stringify(ids)); }catch(_){}
-  // Atualiza divisor no grupo em memória se já carregado
-  const g = state.grupos.find(x=>x.hash===hash);
-  if (g) g._divisorCache = ids.length>0 ? ids.length : (g.totalCotas||1);
-}
-function getDivisorBolao(g){
-  try{
-    const custom = getBolaoParticipantes(g.hash);
-    if (custom && custom.length>0) return custom.length;
-  }catch(_){}
-  return g.totalCotas && g.totalCotas>0 ? g.totalCotas : 1;
-}
-let bolaoEmFoco = null;
-function toggleSidebarParticipantes(){
-  const sb = document.getElementById("sidebarParticipantes");
-  const ov = document.getElementById("sidebarOverlay");
-  if (!sb) return;
-  const isOpen = sb.style.left === "0px";
-  if (isOpen){
-    sb.style.left = "-340px";
-    if (ov) ov.style.display = "none";
-  } else {
-    const primeiro = state.grupos.find(g=>g.ehBolao);
-    if (primeiro) bolaoEmFoco = primeiro.hash;
-    renderSidebarParticipantes();
-    const totalEl = document.getElementById("sidebarTotalJogos");
-    if (totalEl) totalEl.textContent = state.grupos.reduce((s,g)=>s+g.jogos.length,0);
-    sb.style.left = "0px";
-    if (ov) ov.style.display = "block";
-  }
-}
-function renderSidebarParticipantes(){
-  const cont = document.getElementById("sidebarLista");
-  if (!cont) return;
-  const db = getParticipantesDB();
-  const hash = bolaoEmFoco || (state.grupos.find(g=>g.ehBolao)?.hash);
-  const ids = hash ? getBolaoParticipantes(hash) : [];
-  cont.innerHTML = "";
-  if (db.length===0){
-    cont.innerHTML = `<div style="font-size:0.72rem; color:var(--text-soft); text-align:center; padding:12px;">Nenhum participante no banco. Adicione abaixo.</div>`;
-    return;
-  }
-  db.forEach(p=>{
-    const isIn = ids.includes(p.id);
-    const div = document.createElement("div");
-    div.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border-radius:10px; border:1.5px solid ${isIn ? 'var(--primary)' : 'var(--border)'}; background:${isIn ? 'rgba(147,0,137,0.08)' : 'var(--bg)'}; cursor:pointer;`;
-    div.onclick = () => {
-      if (!hash){ toast("⚠️ Nenhum bolão em foco"); return; }
-      toggleParticipanteNoBolao(hash, p.id);
-      renderSidebarParticipantes();
-    };
-    div.innerHTML = `<span style="flex:1; font-size:0.78rem; font-weight:${isIn?'700':'500'}; color:${isIn?'var(--primary)':'var(--text)'};">${isIn?'✓ ':''}${p.nome}</span><span style="font-size:0.62rem; background:${isIn?'var(--primary)':'#fff'}; color:${isIn?'#fff':'var(--text-soft)'}; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">${isIn?'no bolão':'adicionar'}</span>`;
-    cont.appendChild(div);
-  });
-  const totalEl = document.getElementById("sidebarTotalJogos");
-  if (totalEl) totalEl.textContent = state.grupos.reduce((s,g)=>s+g.jogos.length,0);
-}
-function adicionarParticipanteSidebar(){
-  const el = document.getElementById("sidebarInputNovo");
-  const nome = el ? el.value.trim() : "";
-  if (!nome || nome.length<2){ toast("⚠️ Digite um nome"); return; }
-  let db = getParticipantesDB();
-  if (db.some(p=>p.nome.toLowerCase()===nome.toLowerCase())){ toast("⚠️ Já existe"); return; }
-  const novo = {id:"p"+Date.now(), nome};
-  db.push(novo);
-  setParticipantesDB(db);
-  renderParticipantesDB();
-  renderSidebarParticipantes();
-  if (el) el.value="";
-  toast(`✅ ${nome} criado`);
-  const hash = bolaoEmFoco || (state.grupos.find(g=>g.ehBolao)?.hash);
-  if (hash){
-    const ids = getBolaoParticipantes(hash);
-    if (!ids.includes(novo.id)){
-      ids.push(novo.id);
-      setBolaoParticipantes(hash, ids);
-      conferirTudo();
-      renderizarGrupos();
-      renderSidebarParticipantes();
-    }
-  }
-}
-function renderParticipantesDB(){
-  const db = getParticipantesDB();
-  const grid = document.getElementById("gridParticipantesDB");
-  const info = document.getElementById("infoParticipantesDB");
-  if (!grid) return;
-  grid.innerHTML = "";
-  db.forEach(p=>{
-    const div = document.createElement("div");
-    div.style.cssText="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:6px; cursor:pointer;";
-    div.title = "Clique para adicionar este participante ao primeiro bolão visível";
-    div.onclick = ()=> {
-      // Adiciona ao primeiro bolão visível (útil para toque rápido)
-      const primeiroBolao = state.grupos.find(g=>g.ehBolao);
-      if (primeiroBolao){
-        toggleParticipanteNoBolao(primeiroBolao.hash, p.id);
-        toast(`👥 ${p.nome} ${getBolaoParticipantes(primeiroBolao.hash).includes(p.id) ? 'adicionado ao' : 'removido do'} bolão ${primeiroBolao.hash}`);
-      } else {
-        toast(`ℹ️ ${p.nome} — selecione um bolão abaixo e toque em + ${p.nome}`);
-      }
-    };
-    div.innerHTML = `<span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; pointer-events:none;">${p.nome}</span><button onclick="event.stopPropagation(); removerParticipanteDB('${p.id}')" style="flex:0 0 auto; background:#fff; border:1px solid var(--border); border-radius:999px; padding:2px 8px; font-size:0.7rem; cursor:pointer;" title="Excluir">✕</button>`;
-    grid.appendChild(div);
-  });
-  if (info) info.innerHTML = `<b style="color:var(--primary);">${db.length} participantes no banco</b> • Cada bolão pode ter seu próprio subconjunto. Selecione participantes em cada bolão abaixo — a divisão por participante atualiza automaticamente.`;
-  const contador = document.getElementById("contadorParticipantesDB");
-  if (contador) contador.textContent = `${db.length} nomes`;
-}
-function adicionarParticipanteDB(){
-  const input = document.getElementById("inputNovoParticipante");
-  const nome = input ? input.value.trim() : "";
-  if (!nome || nome.length<2){ toast("⚠️ Digite um nome válido"); return; }
-  const db = getParticipantesDB();
-  if (db.some(p=> p.nome.toLowerCase()===nome.toLowerCase())){ toast("⚠️ Participante já existe no banco"); return; }
-  const novo = {id:"p"+Date.now(), nome};
-  db.push(novo);
-  setParticipantesDB(db);
-  if (input) input.value="";
-  renderParticipantesDB();
-  toast(`✅ ${nome} adicionado ao banco`);
-}
-function removerParticipanteDB(id){
-  if (!confirm("Remover este participante do banco? Ele também será removido de todos os bolões onde está.")) return;
-  let db = getParticipantesDB();
-  const alvo = db.find(p=>p.id===id);
-  db = db.filter(p=>p.id!==id);
-  setParticipantesDB(db);
-  // Remove de todos os bolões
-  try{
-    state.grupos.forEach(g=>{
-      if (!g.ehBolao) return;
-      const ids = getBolaoParticipantes(g.hash);
-      if (ids.includes(id)){
-        setBolaoParticipantes(g.hash, ids.filter(x=>x!==id));
-      }
-    });
-  }catch(_){}
-  renderParticipantesDB();
-  // Re-renderiza bolões para atualizar divisão
-  conferirTudo();
-  toast(`🗑️ ${alvo?alvo.nome:"Participante"} removido`);
-}
-function toggleParticipanteNoBolao(hash, participanteId){
-  const ids = getBolaoParticipantes(hash);
-  const idx = ids.indexOf(participanteId);
-  if (idx>=0) ids.splice(idx,1);
-  else ids.push(participanteId);
-  setBolaoParticipantes(hash, ids);
-  conferirTudo();
-  renderizarGrupos();
-}
-function criarParticipanteEAdicionarAoBolao(hash){
-  const inputId = "inputNovoBolao_"+hash;
-  const el = document.getElementById(inputId);
-  const nome = el ? el.value.trim() : "";
-  if (!nome || nome.length<2){ toast("⚠️ Digite um nome"); return; }
-  let db = getParticipantesDB();
-  let existente = db.find(p=> p.nome.toLowerCase()===nome.toLowerCase());
-  let pid;
-  if (existente){
-    pid = existente.id;
-  } else {
-    const novo = {id:"p"+Date.now(), nome};
-    db.push(novo);
-    setParticipantesDB(db);
-    pid = novo.id;
-    renderParticipantesDB();
-  }
-  const ids = getBolaoParticipantes(hash);
-  if (!ids.includes(pid)){
-    ids.push(pid);
-    setBolaoParticipantes(hash, ids);
-    conferirTudo();
-    renderizarGrupos();
-    toast(`✅ ${nome} adicionado ao bolão`);
-  } else {
-    toast("⚠️ Já está neste bolão");
-  }
-  if (el) el.value="";
-}
-function mostrarTodosJogos(){
-  const grid = document.getElementById("jogosGrid");
-  const btn = document.getElementById("btnMostrarTodosJogos");
-  const jaVisivel = grid && grid.children.length > 0 && document.getElementById("emptyState").style.display === "none";
-  if (jaVisivel){
-    // Oculta conferência ao clicar novamente
-    grid.innerHTML = "";
-    document.getElementById("emptyState").style.display = "block";
-    document.getElementById("emptyMsg").textContent = "Conferência ocultada. Clique em Mostrar todos novamente para exibir.";
-    forcarExibirTodos = false;
-    const totalJogosBtn = state.grupos.reduce((s,g)=>s+g.jogos.length,0); if (btn) btn.innerHTML = `📋 Mostrar todos os jogos apostados em conferência — ${totalJogosBtn} jogos`;
-    toast("🙈 Conferência ocultada");
-    try{ vibrar(10); }catch(_){}
-    return;
-  }
-  // Limpa busca colada que pode estar filtrando para 0
-  buscaApostaNumeros = [];
-  const elBusca = document.getElementById("buscaAposta");
-  const infoBusca = document.getElementById("buscaInfo");
-  if (elBusca) elBusca.value = "";
-  if (infoBusca) infoBusca.textContent = "";
-  // Força filtro Todos e garante que todos os 0 jogos apareçam em conferência mesmo sem sorteio
-  forcarExibirTodos = true;
-  state.filtro = "todos";
-  document.querySelectorAll("#filtros .chip").forEach(c=>{
-    const isTodos = c.dataset.filtro==="todos";
-    c.classList.toggle("on", isTodos);
-    c.setAttribute("aria-selected", isTodos ? "true" : "false");
-  });
-  // Garante resultados (0 pts) mesmo sem sorteio
-  if (state.grupos.length>0){
-    conferirTudo();
-  }
-  renderizarGrupos();
-  // Mantém forçado para que Todos continue mostrando mesmo com 0 sorteados
-  // Não reseta para false imediatamente — deixa true até próxima interação de filtro
-  if (grid) grid.scrollIntoView({behavior:"smooth", block:"start"});
-  if (btn) btn.innerHTML = `🙈 Ocultar conferência — ${state.grupos.reduce((s,g)=>s+g.jogos.length,0)} jogos`;
-  const totalToast = state.grupos.reduce((s,g)=>s+g.jogos.length,0); toast(`📋 Exibindo todos os ${totalToast} jogos apostados em conferência`);
-  try{ vibrar(14); }catch(_){}
 }
 
-/* Monta as bolas de um jogo */
 function montarBolas(jogo){
   const wrap = document.createElement("div");
   wrap.className = "bolas";
@@ -1464,18 +1167,15 @@ function montarBolas(jogo){
     const hit = state.sorteados.has(d);
     b.className = "bola " + (hit ? "hit" : "miss");
     b.textContent = String(d).padStart(2, "0");
-    b.setAttribute("aria-label", `Dezena ${d} ${hit ? "sorteada" : "não sorteada"}`);
     frag.appendChild(b);
   }
   wrap.appendChild(frag);
   return wrap;
 }
 
-/* Linha de um jogo (usada dentro de card de bolão e em jogos simples) */
 function montarLinhaJogo(jogo, idx, qtdGrupo, totalCotasGrupo){
   const linha = document.createElement("div");
   linha.className = "jogo-linha" + (jogo.premiado ? " premiado" : "");
-
   const head = document.createElement("div");
   head.className = "jogo-head";
   const idBox = document.createElement("div");
@@ -1488,15 +1188,12 @@ function montarLinhaJogo(jogo, idx, qtdGrupo, totalCotasGrupo){
   tipo.textContent = `${jogo.qtd} dezenas`;
   idBox.append(num, tipo);
   head.appendChild(idBox);
-
   const badge = document.createElement("span");
   badge.className = "badge-pts " + (jogo.hits >= 11 ? `p${jogo.hits}` : "p0");
   badge.textContent = `${jogo.hits} PTS`;
   head.appendChild(badge);
   linha.appendChild(head);
-
   linha.appendChild(montarBolas(jogo));
-
   const prem = document.createElement("div");
   prem.className = "premio";
   const info = document.createElement("div");
@@ -1509,35 +1206,27 @@ function montarLinhaJogo(jogo, idx, qtdGrupo, totalCotasGrupo){
   const val = document.createElement("span");
   val.className = "premio-val" + (jogo.premiado ? "" : " zero");
   if (jogo.premiado && isBolaoJogo){
-    val.innerHTML = `${fmtBRL.format(valorExibido)}<span style="font-size:0.62rem; color:var(--text-soft); font-weight:600;"> ÷${totalCotasGrupo} cotas</span>`;
+    val.innerHTML = `${fmtBRL.format(valorExibido)}<span style="font-size:0.62rem; color:var(--text-soft); font-weight:600;"> ÷${totalCotasGrupo}</span>`;
   } else {
     val.textContent = jogo.premiado ? fmtBRL.format(valorExibido) : "Não premiado";
   }
   info.append(lbl, val);
   prem.appendChild(info);
-
   if (jogo.combinacoesPremiadas > 0){
     const combo = document.createElement("div");
     combo.className = "combo";
-    combo.textContent = Object.keys(jogo.faixas)
-      .sort((a, b) => Number(b) - Number(a))
-      .map(p => `${jogo.faixas[p]}×${p}pts`).join(" · ");
-    combo.title = `Jogo de ${jogo.qtd} dezenas = ${fmtNum.format(jogo.totalSimples)} apostas simples. ${jogo.combinacoesPremiadas} premiadas.`;
+    combo.textContent = Object.keys(jogo.faixas).sort((a,b)=>Number(b)-Number(a)).map(p=>`${jogo.faixas[p]}×${p}pts`).join(" · ");
     prem.appendChild(combo);
   }
   linha.appendChild(prem);
   return linha;
 }
 
-/* Card unificado: jogo simples OU bolão agrupado com rateio */
 function criarCardGrupo(g){
-  // ─── Jogo simples ───
-  if (!g.ehBolao || g.jogos.length === 1 && g.totalCotas === 0){
+  if (!g.ehBolao && g.jogos.length === 1){
     const j = g.jogos[0];
     const card = document.createElement("article");
     card.className = "jogo-card" + (j.premiado ? " vencedor" : "");
-    card.setAttribute("role", "listitem");
-
     const head = document.createElement("div");
     head.className = "jogo-head";
     const idBox = document.createElement("div");
@@ -1556,7 +1245,6 @@ function criarCardGrupo(g){
     head.appendChild(badge);
     card.appendChild(head);
     card.appendChild(montarBolas(j));
-
     const prem = document.createElement("div");
     prem.className = "premio";
     const info = document.createElement("div");
@@ -1569,56 +1257,35 @@ function criarCardGrupo(g){
     val.textContent = j.premiado ? fmtBRL.format(j.premioBruto) : "Não premiado";
     info.append(lbl, val);
     prem.appendChild(info);
-    if (j.premiado && faixaEhEstimativa(j.hits)){
-      const combo = document.createElement("div");
-      combo.className = "combo"; combo.textContent = "valor estimado";
-      prem.appendChild(combo);
-    }
     card.appendChild(prem);
-
-    if (j.hits === 15){
-      const est = document.createElement("span");
-      est.className = "estrela"; est.textContent = "⭐";
-      est.setAttribute("aria-label", "15 pontos");
-      card.appendChild(est);
-    }
     return card;
   }
 
-  // ─── Bolão agrupado ───
   const card = document.createElement("article");
   card.className = "grupo-card" + (g.premiado ? " vencedor" : "");
-  card.setAttribute("role", "listitem");
-
-  // Cabeçalho
   const head = document.createElement("div");
   head.className = "grupo-head";
   const hl = document.createElement("div");
   hl.className = "grupo-head-l";
   const tag = document.createElement("span");
-  tag.className = "tag-bolao"; tag.textContent = "BOLÃO";
+  tag.className = "tag-bolao"; tag.textContent = g.ehBolao ? "BOLÃO" : "GRUPO";
   const tit = document.createElement("span");
   tit.className = "grupo-titulo";
   tit.textContent = `Grupo ${String(g.ordem).padStart(3,"0")}`;
-  const divisorAtual = getDivisorBolao(g);
+  const divisorAtual = g.divisor || getDivisorBolao(g);
   const meta = document.createElement("span");
   meta.className = "grupo-meta";
-  const baseCotasTxt = `${g.totalCotas} cotas (Caixa)`;
+  const baseCotasTxt = g.totalCotas > 0 ? `${g.totalCotas} cotas` : `sem cotas fixas`;
   const customTxt = divisorAtual !== g.totalCotas ? ` → ${divisorAtual} participantes` : "";
   meta.textContent = `${g.jogos.length} jogo${g.jogos.length>1?"s":""} · ${g.jogos[0].qtd} dezenas · ${baseCotasTxt}${customTxt}`;
   hl.append(tag, tit, meta);
   head.appendChild(hl);
-
   const tot = document.createElement("div");
   tot.className = "grupo-total" + (g.premioCota > 0 ? "" : " zero");
   tot.textContent = g.premioCota > 0 ? fmtBRL.format(g.premioCota) : "Sem prêmio";
-  if (g.ehBolao && divisorAtual !== g.totalCotas){
-    tot.title = `Dividido por ${divisorAtual} participantes (custom) em vez de ${g.totalCotas} cotas Caixa`;
-  }
   head.appendChild(tot);
   card.appendChild(head);
 
-  // Faixa de rateio (só quando há prêmio) — detalha quantos jogos premiados para transparência (ex: 2×11pts = 30 combos)
   if (g.premioCota > 0){
     const rat = document.createElement("div");
     rat.className = "rateio";
@@ -1626,172 +1293,61 @@ function criarCardGrupo(g){
     rl.className = "rateio-l";
     const brl = document.createElement("strong");
     const premiados = g.jogos.filter(j=>j.premiado);
-    const totComb = premiados.reduce((s,j)=>s+j.combinacoesPremiadas,0);
+    const totComb = premiados.reduce((s,j)=>s+(j.combinacoesPremiadas||0),0);
     const detalheJogos = premiados.length===1
-      ? `1 jogo premiado: ${Object.entries(premiados[0].faixas).map(([p,q])=>`${q}×${p}pts`).join(" · ")}`
-      : `${premiados.length} jogos premiados: ${premiados.map(j=>Object.entries(j.faixas).map(([p,q])=>`${q}×${p}pts`).join("+")).join(" | ")} • ${totComb} combinações`;
-    brl.textContent = `Prêmio bruto do bolão: ${fmtBRL.format(g.premioBrutoGrupo)}`;
+      ? `1 jogo premiado: ${Object.entries(premiados[0].faixas||{}).map(([p,q])=>`${q}×${p}pts`).join(" · ")}`
+      : `${premiados.length} jogos premiados • ${totComb} combinações`;
+    brl.textContent = `Prêmio bruto do grupo: ${fmtBRL.format(g.premioBrutoGrupo)}`;
     const det = document.createElement("span");
-    det.style.cssText="display:block; font-size:0.62rem; color:var(--text-soft); margin-top:2px; line-height:1.4;";
+    det.style.cssText="display:block; font-size:0.62rem; color:var(--text-soft); margin-top:2px;";
     det.textContent = detalheJogos;
-    rl.append(brl, det, document.createTextNode(`⤸ dividido por ${g.divisor} cotas (sua cota = 1/${g.totalCotas})`));
+    rl.append(brl, det, document.createTextNode(`⤸ dividido por ${divisorAtual} participantes`));
     rat.appendChild(rl);
     const rv = document.createElement("div");
     rv.className = "rateio-val";
     rv.textContent = fmtBRL.format(g.premioCota);
     const sm = document.createElement("small");
-    sm.textContent = `sua cota (1 de ${g.totalCotas})`;
+    sm.textContent = `sua cota`;
     rv.appendChild(sm);
     rat.appendChild(rv);
     card.appendChild(rat);
-    // Retorno dos Participantes — Grupo (todos visíveis)
-    const retPart = document.createElement("div");
-    retPart.style.cssText="background:linear-gradient(135deg,rgba(46,204,113,0.07),rgba(255,255,255,0.9)); border:1px solid rgba(46,204,113,0.22); border-left:4px solid var(--success); border-radius:10px; padding:10px 14px; margin:0 15px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;";
-    const rpL = document.createElement("div");
-    rpL.innerHTML = `<div style="font-size:0.68rem; font-weight:800; color:var(--success-dark); text-transform:uppercase; letter-spacing:0.5px;">Retorno dos Participantes</div><div style="font-size:0.72rem; color:var(--text-soft);">Grupo de <b>${divisorAtual} participante${divisorAtual>1?'s':''}</b> • cada 1 cota • <span style="color:var(--text); font-weight:700;">${premiados.length} jogo${premiados.length>1?'s':''} premiado${premiados.length>1?'s':''}</span></div>`;
-    const rpR = document.createElement("div");
-    rpR.style.cssText="text-align:right;";
-    rpR.innerHTML = `<div style="font-size:0.62rem; font-weight:700; text-transform:uppercase; color:var(--text-soft); letter-spacing:0.4px;">Por participante</div><div style="font-size:1.15rem; font-weight:900; color:var(--success-dark);">${fmtBRL.format(g.premioCota)}</div><div style="font-size:0.6rem; color:var(--text-soft);">Retorno das Cotas: total ${fmtBRL.format(g.premioBrutoGrupo)} ÷ ${g.totalCotas}</div>`;
-    retPart.append(rpL, rpR);
-    card.appendChild(retPart);
-    // Gerenciamento de participantes por bolão
-    const partSec = document.createElement("div");
-    partSec.style.cssText="margin:0 15px 12px; background:#f8f5ff; border:1px solid rgba(147,0,137,0.12); border-radius:10px; padding:10px 12px;";
-    const idsBolao = getBolaoParticipantes(g.hash);
-    const dbAll = getParticipantesDB();
-    const qtdPart = idsBolao.length;
-    const perPart = qtdPart>0 ? g.premioBrutoGrupo/qtdPart : 0;
-    partSec.innerHTML = `
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
-        <div style="font-size:0.72rem; font-weight:800; color:var(--primary);">👥 Participantes deste bolão: <b>${qtdPart}</b> ${qtdPart===1?'pessoa':'pessoas'} ${qtdPart>0?`• <span style="color:var(--success-dark);">${fmtBRL.format(perPart)}/pessoa</span>`:``}</div>
-        <span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:3px 7px; border-radius:999px;">${qtdPart>0?`÷${qtdPart}`:`vazio`}</span>
-      </div>
-      <div id="listaBolao_${g.hash}" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; min-height:22px;">
-        ${idsBolao.length===0?`<span style="font-size:0.68rem; color:var(--text-soft);">Nenhum participante ainda. Adicione abaixo.</span>`:
-          idsBolao.map(pid=>{
-            const p = dbAll.find(x=>x.id===pid);
-            const nome = p ? p.nome : pid;
-            return `<span style="display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--border); border-radius:999px; padding:4px 8px; font-size:0.72rem;">${nome}<button onclick="toggleParticipanteNoBolao('${g.hash}','${pid}')" style="background:var(--danger); color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:0.65rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button></span>`;
-          }).join("")}
-      </div>
-      <div style="margin-bottom:6px; font-size:0.68rem; color:var(--text-soft);">Toque em um nome do banco para adicionar a este bolão:</div>
-      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-        ${dbAll.filter(p=> !idsBolao.includes(p.id)).map(p=>`<button onclick="toggleParticipanteNoBolao('${g.hash}','${p.id}')" style="background:#fff; border:1px solid var(--border); border-radius:999px; padding:4px 8px; font-size:0.68rem; cursor:pointer; display:flex; align-items:center; gap:4px;">+ ${p.nome}</button>`).join("") || `<span style="font-size:0.68rem; color:var(--text-soft);">Todos do banco já estão neste bolão</span>`}
-      </div>
-      <div style="display:flex; gap:6px; margin-top:8px;">
-        <input type="text" id="inputNovoBolao_${g.hash}" placeholder="Novo participante" style="flex:1; padding:7px 8px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); font-size:0.72rem;">
-        <button onclick="criarParticipanteEAdicionarAoBolao('${g.hash}')" style="padding:7px 10px; border:1px solid var(--primary); border-radius:8px; background:#fff; color:var(--primary); font-weight:700; font-size:0.72rem; cursor:pointer;">Criar</button>
-      </div>
-    `;
-    card.appendChild(partSec);
   }
 
-  // Jogos internos — TODOS visíveis
   const box = document.createElement("div");
   box.className = "jogos-internos";
   g.jogos.forEach(j => box.appendChild(montarLinhaJogo(j, g.ordem, g.jogos.length, g.totalCotas)));
   card.appendChild(box);
 
-  if (g.tem15){
-    const est = document.createElement("span");
-    est.className = "estrela"; est.textContent = "⭐";
-    card.appendChild(est);
+  // Seção de participantes para grupos com rateio (bolão)
+  if (g.ehBolao){
+    const idsBolao = getBolaoParticipantes(g.hash);
+    const dbAll = getParticipantesDB();
+    const qtdPart = idsBolao.length;
+    const perPart = qtdPart>0 ? g.premioBrutoGrupo/qtdPart : 0;
+    const partSec = document.createElement("div");
+    partSec.style.cssText="margin:0 15px 12px; background:#f8f5ff; border:1px solid rgba(147,0,137,0.12); border-radius:10px; padding:10px 12px;";
+    partSec.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+        <div style="font-size:0.72rem; font-weight:800; color:var(--primary);">👥 Participantes deste grupo: <b>${qtdPart}</b> ${qtdPart>0?`• <span style="color:var(--success-dark);">${fmtBRL.format(perPart)}/pessoa</span>`:``}</div>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; min-height:22px;">
+        ${idsBolao.length===0?`<span style="font-size:0.68rem; color:var(--text-soft);">Nenhum participante. Toque abaixo para adicionar.</span>`:
+          idsBolao.map(pid=>{
+            const p = dbAll.find(x=>x.id===pid);
+            const nome = p ? p.nome : pid;
+            return `<span style="display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--border); border-radius:999px; padding:4px 8px; font-size:0.72rem;">${nome}<button onclick="toggleParticipanteNoBolao('${g.hash}','${pid}');event.stopPropagation();" style="background:var(--danger); color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:0.65rem; cursor:pointer;">✕</button></span>`;
+          }).join("")}
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px;">
+        ${dbAll.filter(p=> !idsBolao.includes(p.id)).slice(0,10).map(p=>`<button onclick="toggleParticipanteNoBolao('${g.hash}','${p.id}');event.stopPropagation();" style="background:#fff; border:1px solid var(--border); border-radius:999px; padding:4px 8px; font-size:0.68rem; cursor:pointer;">+ ${p.nome}</button>`).join("") || ``}
+      </div>
+    `;
+    card.appendChild(partSec);
   }
   return card;
 }
 
-/* ─── 12. WEBAUDIO — SOM DE ARTIFÍCIOS (sem arquivos externos) ────────── */
-let audioCtx = null;
-function ctxAudio(){
-  if (!audioCtx){
-    try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) audioCtx = new AC();
-    } catch(_){ audioCtx = null; }
-  }
-  return audioCtx;
-}
-
-/** Estalo de explosão: ruído branco filtrado + decaimento */
-function somExplosao(delay = 0, forca = 0.5, dur = 0.55){
-  const ctx = ctxAudio(); if (!ctx) return;
-  const t0 = ctx.currentTime + delay;
-  const tam = Math.floor(ctx.sampleRate * dur);
-  const buf = ctx.createBuffer(1, tam, ctx.sampleRate);
-  const dados = buf.getChannelData(0);
-  for (let i = 0; i < tam; i++){
-    const env = Math.pow(1 - i / tam, 2.4);
-    dados[i] = (Math.random() * 2 - 1) * env;
-  }
-  const src = ctx.createBufferSource(); src.buffer = buf;
-  const filtro = ctx.createBiquadFilter();
-  filtro.type = "lowpass";
-  filtro.frequency.setValueAtTime(2600, t0);
-  filtro.frequency.exponentialRampToValueAtTime(260, t0 + dur);
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(forca, t0);
-  gain.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
-  src.connect(filtro).connect(gain).connect(ctx.destination);
-  src.start(t0); src.stop(t0 + dur);
-}
-
-/** Assobio de foguete subindo */
-function somFoguete(delay, dur){
-  const ctx = ctxAudio(); if (!ctx) return;
-  const t0 = ctx.currentTime + delay;
-  const osc = ctx.createOscillator();
-  osc.type = "sawtooth";
-  osc.frequency.setValueAtTime(220, t0);
-  osc.frequency.exponentialRampToValueAtTime(1500, t0 + dur);
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0.045, t0);
-  gain.gain.exponentialRampToValueAtTime(0.012, t0 + dur * 0.9);
-  gain.gain.exponentialRampToValueAtTime(0.0005, t0 + dur);
-  const filtro = ctx.createBiquadFilter();
-  filtro.type = "bandpass"; filtro.frequency.value = 1100; filtro.Q.value = 1.6;
-  osc.connect(filtro).connect(gain).connect(ctx.destination);
-  osc.start(t0); osc.stop(t0 + dur);
-}
-
-/** Fanfarra de vitória: acorde maior ascendente */
-function somFanfarra(){
-  const ctx = ctxAudio(); if (!ctx) return;
-  const t0 = ctx.currentTime;
-  const notas = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
-  notas.forEach((f, i) => {
-    const t = t0 + 0.42 + i * 0.15;
-    [1, 2].forEach((mult, k) => {
-      const osc = ctx.createOscillator();
-      osc.type = k === 0 ? "triangle" : "sine";
-      osc.frequency.value = f * mult;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(k === 0 ? 0.16 : 0.07, t + 0.03);
-      g.gain.exponentialRampToValueAtTime(0.0006, t + 1.5);
-      osc.connect(g).connect(ctx.destination);
-      osc.start(t); osc.stop(t + 1.55);
-    });
-  });
-}
-
-/** Sequência completa de show pirotécnico (~4s) */
-function tocarShowPirotecnico(){
-  // Foguetes subindo
-  somFoguete(0.05, 0.5); somFoguete(0.35, 0.6); somFoguete(0.7, 0.5); somFoguete(1.05, 0.65);
-  // Explosões sincronizadas
-  somExplosao(0.55, 0.55, 0.5);
-  somExplosao(0.92, 0.5, 0.55);
-  somExplosao(1.28, 0.6, 0.6);
-  somExplosao(1.68, 0.55, 0.55);
-  somExplosao(2.05, 0.5, 0.6);
-  somExplosao(2.42, 0.58, 0.65);
-  somExplosao(2.85, 0.5, 0.7);
-  somExplosao(3.25, 0.45, 0.8);
-  // Fanfarra
-  somFanfarra();
-}
-
-/* ─── 13. CELEBRAÇÃO MILIONÁRIO — canvas de notas + barras de ouro ───── */
+/* ─── CELEBRAÇÃO ─────────────────────────────────────────────────────── */
 const overlay = document.getElementById("milionario");
 const gCanvas = document.getElementById("granaCanvas");
 const gCtx = gCanvas.getContext("2d");
@@ -1807,106 +1363,49 @@ function ajustarGranaCanvas(){
   gCanvas.style.height = window.innerHeight + "px";
   gCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-
-/** Desenha uma nota de R$ 100 estilizada */
 function desenharNota(ctx, x, y, w, h, rot, alpha){
-  ctx.save();
-  ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = alpha;
-
-  // Cédula
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = alpha;
   const g = ctx.createLinearGradient(-w/2, -h/2, w/2, h/2);
   g.addColorStop(0, "#b7ecc9"); g.addColorStop(.5, "#85dda5"); g.addColorStop(1, "#4fb87a");
   ctx.fillStyle = g;
   ctx.beginPath(); ctx.roundRect(-w/2, -h/2, w, h, Math.min(w,h)*0.13); ctx.fill();
-
-  // Borda
   ctx.strokeStyle = "rgba(10,61,30,.75)"; ctx.lineWidth = Math.max(1, w*0.022);
   ctx.beginPath(); ctx.roundRect(-w/2, -h/2, w, h, Math.min(w,h)*0.13); ctx.stroke();
-
-  // Tarja central
   ctx.fillStyle = "rgba(255,255,255,.55)";
   ctx.fillRect(-w/2 + w*0.12, -h*0.1, w*0.76, h*0.2);
-
-  // "100"
   ctx.fillStyle = "#0a3d1e";
   ctx.font = `900 ${Math.round(h*0.42)}px -apple-system,sans-serif`;
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillText("100", 0, 0);
-
-  // Cantos
-  ctx.font = `800 ${Math.round(h*0.2)}px -apple-system,sans-serif`;
-  ctx.fillText("100", -w*0.31, -h*0.3);
-  ctx.fillText("100",  w*0.31,  h*0.3);
-
   ctx.restore();
 }
-
-/** Desenha uma barra de ouro com brilho */
 function desenharBarra(ctx, x, y, w, h, rot, alpha){
-  ctx.save();
-  ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = alpha;
-
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = alpha;
   const g = ctx.createLinearGradient(-w/2, -h/2, w/2, h/2);
   g.addColorStop(0, "#fff3b0"); g.addColorStop(.28, "#ffd54f");
   g.addColorStop(.55, "#d4af37"); g.addColorStop(.8, "#a67c00"); g.addColorStop(1, "#ffe082");
   ctx.fillStyle = g;
   ctx.beginPath(); ctx.roundRect(-w/2, -h/2, w, h, Math.min(w,h)*0.12); ctx.fill();
-
-  // Reflexo superior
   ctx.fillStyle = "rgba(255,255,255,.62)";
-  ctx.beginPath();
-  ctx.roundRect(-w/2 + w*0.09, -h/2 + h*0.1, w*0.82, h*0.19, h*0.08);
-  ctx.fill();
-
-  // Contorno
+  ctx.beginPath(); ctx.roundRect(-w/2 + w*0.09, -h/2 + h*0.1, w*0.82, h*0.19, h*0.08); ctx.fill();
   ctx.strokeStyle = "rgba(120,84,0,.7)"; ctx.lineWidth = Math.max(1, w*0.02);
   ctx.beginPath(); ctx.roundRect(-w/2, -h/2, w, h, Math.min(w,h)*0.12); ctx.stroke();
-
-  // Selo "999.9"
-  ctx.fillStyle = "rgba(120,84,0,.8)";
-  ctx.font = `900 ${Math.round(h*0.26)}px -apple-system,sans-serif`;
-  ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText("999.9", 0, h*0.12);
-
   ctx.restore();
 }
-
 function criarGrana(qtdNotas, qtdBarras){
   granaItens = [];
   const W = window.innerWidth;
   for (let i = 0; i < qtdNotas; i++){
-    granaItens.push({
-      tipo: "nota",
-      x: Math.random() * W,
-      y: -Math.random() * window.innerHeight * 0.9,
-      vx: (Math.random() - 0.5) * 2.1,
-      vy: 1.9 + Math.random() * 3.6,
-      w: 58 + Math.random() * 34, h: 30 + Math.random() * 16,
-      rot: Math.random() * Math.PI * 2,
-      vr: (Math.random() - 0.5) * 0.16,
-      balanca: Math.random() * Math.PI * 2
-    });
+    granaItens.push({ tipo:"nota", x:Math.random()*W, y:-Math.random()*window.innerHeight*0.9, vx:(Math.random()-0.5)*2.1, vy:1.9+Math.random()*3.6, w:58+Math.random()*34, h:30+Math.random()*16, rot:Math.random()*Math.PI*2, vr:(Math.random()-0.5)*0.16, balanca:Math.random()*Math.PI*2 });
   }
   for (let i = 0; i < qtdBarras; i++){
-    granaItens.push({
-      tipo: "barra",
-      x: Math.random() * W,
-      y: -Math.random() * window.innerHeight * 1.3,
-      vx: (Math.random() - 0.5) * 1.7,
-      vy: 2.3 + Math.random() * 3.9,
-      w: 42 + Math.random() * 22, h: 20 + Math.random() * 12,
-      rot: Math.random() * Math.PI * 2,
-      vr: (Math.random() - 0.5) * 0.13,
-      balanca: Math.random() * Math.PI * 2
-    });
+    granaItens.push({ tipo:"barra", x:Math.random()*W, y:-Math.random()*window.innerHeight*1.3, vx:(Math.random()-0.5)*1.7, vy:2.3+Math.random()*3.9, w:42+Math.random()*22, h:20+Math.random()*12, rot:Math.random()*Math.PI*2, vr:(Math.random()-0.5)*0.13, balanca:Math.random()*Math.PI*2 });
   }
 }
-
 function animarGrana(){
   const W = window.innerWidth, H = window.innerHeight;
   gCtx.clearRect(0, 0, W, H);
   let visiveis = 0;
-
   for (const it of granaItens){
     it.x += it.vx + Math.sin(it.balanca) * 0.85;
     it.y += it.vy;
@@ -1914,55 +1413,97 @@ function animarGrana(){
     it.vx *= 0.996;
     it.rot += it.vr;
     it.balanca += 0.045;
-
-    // Recicla itens que saíram por baixo, mantendo o show contínuo
     if (it.y > H + 70){
-      if (granaAtiva){
-        it.y = -Math.random() * 220 - 40;
-        it.x = Math.random() * W;
-        it.vy = 1.9 + Math.random() * 3.4;
-      } else { continue; }
+      if (granaAtiva){ it.y = -Math.random()*220-40; it.x = Math.random()*W; it.vy = 1.9+Math.random()*3.4; }
+      else continue;
     }
     visiveis++;
-
     const alpha = Math.max(0, Math.min(1, 1 - (it.y / (H * 1.42))));
     if (it.tipo === "nota") desenharNota(gCtx, it.x, it.y, it.w, it.h, it.rot, alpha);
     else desenharBarra(gCtx, it.x, it.y, it.w, it.h, it.rot, alpha);
   }
-
-  if (visiveis > 0 || granaAtiva){
-    granaRaf = requestAnimationFrame(animarGrana);
-  } else {
-    granaRaf = null;
-    gCtx.clearRect(0, 0, W, H);
-  }
+  if (visiveis > 0 || granaAtiva) granaRaf = requestAnimationFrame(animarGrana);
+  else { granaRaf = null; gCtx.clearRect(0, 0, W, H); }
 }
-
-/** Exibe a celebração de milionário com chuva de dinheiro e ouro + som */
+let audioCtx = null;
+function ctxAudio(){
+  if (!audioCtx){
+    try { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); } catch(_){ audioCtx = null; }
+  }
+  return audioCtx;
+}
+function somExplosao(delay=0, forca=0.5, dur=0.55){
+  const ctx = ctxAudio(); if (!ctx) return;
+  const t0 = ctx.currentTime + delay;
+  const tam = Math.floor(ctx.sampleRate * dur);
+  const buf = ctx.createBuffer(1, tam, ctx.sampleRate);
+  const dados = buf.getChannelData(0);
+  for (let i = 0; i < tam; i++){ const env = Math.pow(1 - i / tam, 2.4); dados[i] = (Math.random()*2-1)*env; }
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const filtro = ctx.createBiquadFilter(); filtro.type="lowpass";
+  filtro.frequency.setValueAtTime(2600, t0);
+  filtro.frequency.exponentialRampToValueAtTime(260, t0+dur);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(forca, t0);
+  gain.gain.exponentialRampToValueAtTime(0.0008, t0+dur);
+  src.connect(filtro).connect(gain).connect(ctx.destination);
+  src.start(t0); src.stop(t0+dur);
+}
+function somFoguete(delay, dur){
+  const ctx = ctxAudio(); if (!ctx) return;
+  const t0 = ctx.currentTime + delay;
+  const osc = ctx.createOscillator(); osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(220, t0);
+  osc.frequency.exponentialRampToValueAtTime(1500, t0+dur);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.045, t0);
+  gain.gain.exponentialRampToValueAtTime(0.012, t0+dur*0.9);
+  gain.gain.exponentialRampToValueAtTime(0.0005, t0+dur);
+  const filtro = ctx.createBiquadFilter(); filtro.type="bandpass"; filtro.frequency.value=1100; filtro.Q.value=1.6;
+  osc.connect(filtro).connect(gain).connect(ctx.destination);
+  osc.start(t0); osc.stop(t0+dur);
+}
+function somFanfarra(){
+  const ctx = ctxAudio(); if (!ctx) return;
+  const t0 = ctx.currentTime;
+  [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+    const t = t0 + 0.42 + i * 0.15;
+    [1,2].forEach((mult,k)=>{
+      const osc = ctx.createOscillator(); osc.type = k===0?"triangle":"sine";
+      osc.frequency.value = f * mult;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(k===0?0.16:0.07, t+0.03);
+      g.gain.exponentialRampToValueAtTime(0.0006, t+1.5);
+      osc.connect(g).connect(ctx.destination);
+      osc.start(t); osc.stop(t+1.55);
+    });
+  });
+}
+function tocarShowPirotecnico(){
+  somFoguete(0.05,0.5); somFoguete(0.35,0.6); somFoguete(0.7,0.5); somFoguete(1.05,0.65);
+  somExplosao(0.55,0.55,0.5); somExplosao(0.92,0.5,0.55); somExplosao(1.28,0.6,0.6);
+  somExplosao(1.68,0.55,0.55); somExplosao(2.05,0.5,0.6); somExplosao(2.42,0.58,0.65);
+  somExplosao(2.85,0.5,0.7); somExplosao(3.25,0.45,0.8);
+  somFanfarra();
+}
 function celebrarMilionario(qtd15, premioCota){
   overlay.classList.add("on");
   document.body.style.overflow = "hidden";
-
-  document.getElementById("milDetalhe").textContent =
-    `${qtd15} aposta${qtd15 > 1 ? "s" : ""} sua${qtd15 > 1 ? "s" : ""} com 15 PONTOS`;
+  document.getElementById("milDetalhe").textContent = `${qtd15} aposta${qtd15 > 1 ? "s" : ""} com 15 PONTOS`;
   document.getElementById("milValor").textContent = fmtBRL.format(premioCota);
   document.getElementById("milObs").textContent =
     "Prêmio principal estimado em R$ 300.000.000 (rateio oficial divulgado pela Caixa). " +
     "O sorteio da Lotofácil da Independência não acumula — se não houver ganhador de 15, o valor desce para a faixa de 14 acertos.";
-
   ajustarGranaCanvas();
   granaAtiva = true;
   criarGrana(46, 26);
   if (granaRaf) cancelAnimationFrame(granaRaf);
   granaRaf = requestAnimationFrame(animarGrana);
-
-  // Som (só após interação do usuário, respeitando autoplay policy)
   try { if (ctxAudio() && audioCtx.state === "suspended") audioCtx.resume(); } catch(_){}
   tocarShowPirotecnico();
-
   vibrar([120, 60, 120, 60, 260, 80, 380]);
 }
-
 function fecharMilionario(){
   overlay.classList.remove("on");
   document.body.style.overflow = "";
@@ -1970,15 +1511,11 @@ function fecharMilionario(){
   if (granaRaf){ cancelAnimationFrame(granaRaf); granaRaf = null; }
   gCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 }
-
-/** Dispara a celebração apenas na primeira vez que aparece 15 pontos */
 function talvezCelebrar(){
   const tem15 = state.resumo.ganhou15;
   if (tem15 && !state.jaFestejou){
     state.jaFestejou = true;
-    const apostas15 = state.resultados.reduce((s, g) =>
-      s + g.jogos.filter(j => j.hits === 15).length, 0);
-    // Soma a parte das cotas das apostas de 15 pontos
+    const apostas15 = state.resultados.reduce((s, g) => s + g.jogos.filter(j => j.hits === 15).length, 0);
     const premioCota15 = state.resultados.reduce((s, g) => {
       const n15 = g.jogos.filter(j => j.hits === 15).length;
       if (!n15) return s;
@@ -1987,17 +1524,13 @@ function talvezCelebrar(){
     setTimeout(() => celebrarMilionario(apostas15, premioCota15), 340);
   }
   if (!tem15) state.jaFestejou = false;
-
-  // Aviso próprio quando só há 14 pontos (faixa de rateio variável)
   if (state.resumo.ganhou14 && !state.resumo.ganhou15 && !state._avisou14){
     state._avisou14 = true;
-    setTimeout(() => {
-      toast("🔔 Você tem aposta com 14 PONTOS — valor depende do rateio oficial!", 5200);
-    }, 500);
+    setTimeout(() => { toast("🔔 Você tem aposta com 14 PONTOS — valor depende do rateio oficial!", 5200); }, 500);
   }
 }
 
-/* ─── 14. EXPORTAÇÃO ─────────────────────────────────────────────────── */
+/* ─── EXPORTAÇÃO ─────────────────────────────────────────────────────── */
 function montarResumo(){
   return {
     concurso: 3780,
@@ -2005,7 +1538,7 @@ function montarResumo(){
     geradoEm: new Date().toISOString(),
     sorteados: [...state.sorteados].sort((a, b) => a - b),
     cotaPorBolao: COTA_PESSOAL,
-    aviso: "Prêmio de 14 pontos depende do rateio oficial. Prêmios de 11/12/13 são fixos. Bolões rateados pelo total de cotas.",
+    aviso: "Prêmio de 14 pontos depende do rateio oficial. Prêmios de 11/12/13 são fixos.",
     totais: {
       grupos: state.grupos.length,
       jogos: state.grupos.reduce((s, g) => s + g.jogos.length, 0),
@@ -2031,65 +1564,444 @@ function montarResumo(){
     }))
   };
 }
-
 async function exportar(){
-  if (state.sorteados.size === 0){
-    toast("⚠️ Selecione os números sorteados primeiro"); vibrar(60); return;
-  }
+  if (state.sorteados.size === 0){ toast("⚠️ Selecione os números sorteados primeiro"); vibrar(60); return; }
   const json = JSON.stringify(montarResumo(), null, 2);
   const texto =
-    `🍀 Lotofácil Independência 2026 — Concurso 3780\n` +
+    `🍀 Lotofácil Independência 2026\n` +
     `Sorteados: ${[...state.sorteados].sort((a,b)=>a-b).map(d=>String(d).padStart(2,"0")).join(" ")}\n` +
     `Apostas premiadas: ${state.resumo.premiados}\n` +
     `Prêmio bruto: ${fmtBRL.format(state.resumo.bruto)}\n` +
     `Sua parte (cotas): ${fmtBRL.format(state.resumo.liquido)}`;
-
   if (navigator.share){
-    try {
-      await navigator.share({ title: "Lotofácil Independência 2026 — Resultado", text: texto });
-      toast("✅ Resultado compartilhado!"); return;
-    } catch(err){ if (err && err.name === "AbortError") return; }
+    try { await navigator.share({ title: "Lotofácil — Resultado", text: texto }); toast("✅ Compartilhado!"); return; }
+    catch(err){ if (err && err.name === "AbortError") return; }
   }
   try {
     if (navigator.clipboard && navigator.clipboard.writeText){
       await navigator.clipboard.writeText(json);
-      toast("📋 JSON copiado para a área de transferência!"); return;
+      toast("📋 JSON copiado!"); return;
     }
   } catch(_){}
   try {
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "lotofacil-3780-conferencia.json";
+    a.href = url; a.download = "lotofacil-conferencia.json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1500);
-    toast("💾 Arquivo JSON exportado!");
-  } catch(err){ console.error(err); toast("⚠️ Não foi possível exportar."); }
+    toast("💾 JSON exportado!");
+  } catch(err){ toast("⚠️ Não foi possível exportar."); }
 }
 
-/* ─── 15. EVENTOS ────────────────────────────────────────────────────── */
-numbersGrid.addEventListener("click", e => {
-  const btn = e.target.closest(".num-btn");
-  if (!btn) return;
-  toggleNumero(Number(btn.dataset.n));
-  vibrar(14);
-  salvarHistorico();
-});
+/* ─── IA ─────────────────────────────────────────────────────────────── */
+function getChaveNvidia(){
+  try{ return localStorage.getItem(LS_NVKEY) || ""; }catch(_){ return ""; }
+}
+function salvarChaveNvidia(){
+  const el = document.getElementById("nvKeyInput");
+  const k = el ? el.value.trim() : "";
+  if (!k.startsWith("nvapi-")){ toast("⚠️ Chave inválida (precisa começar com nvapi-)"); return; }
+  try{ localStorage.setItem(LS_NVKEY, k); }catch(_){}
+  toast("✅ Chave salva neste navegador");
+  toggleKeyBox(false);
+}
+function toggleKeyBox(force){
+  const box = document.getElementById("iaKeyBox");
+  if (!box) return;
+  const show = force !== undefined ? force : (box.style.display === "none" || !box.style.display);
+  box.style.display = show ? "block" : "none";
+  if (show){
+    const el = document.getElementById("nvKeyInput");
+    if (el) el.value = getChaveNvidia();
+  }
+}
 
-document.getElementById("btnLimpar").addEventListener("click", () => {
-  state.sorteados.clear();
-  state.jaFestejou = false;
-  state._avisou14 = false;
-  sincronizarUI(); salvarHistorico();
-  vibrar([45, 35, 45]);
-  toast("🧹 Seleção limpa");
-});
+async function pdfParaImagem(dataUrl){
+  if (!window.pdfjsLib){
+    await new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+  const pdf = await window.pdfjsLib.getDocument(dataUrl).promise;
+  const page = await pdf.getPage(1);
+  const viewport = page.getViewport({ scale: 2.0 });
+  const canvas = document.createElement("canvas");
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+  return canvas.toDataURL("image/png");
+}
+
+async function analisarComIA(){
+  const input = document.getElementById("inputIA");
+  const status = document.getElementById("iaStatus");
+  const extraidoDiv = document.getElementById("iaExtraido");
+  const apiKey = getChaveNvidia();
+
+  if (!apiKey || !apiKey.startsWith("nvapi-")){
+    toggleKeyBox(true);
+    if (status) status.innerHTML = "❌ Configure a chave Nvidia primeiro (botão 🔑).";
+    return;
+  }
+  if (!input || !input.files || input.files.length === 0){
+    toast("⚠️ Selecione uma foto ou PDF");
+    if (status) status.textContent = "❌ Nenhum arquivo selecionado.";
+    return;
+  }
+
+  const file = input.files[0];
+  if (status) status.textContent = `⏳ Lendo ${file.name} (${(file.size/1024).toFixed(1)}KB)...`;
+  if (extraidoDiv){ extraidoDiv.style.display = "none"; extraidoDiv.textContent = ""; }
+
+  try{
+    const dataUrl = await new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = () => res(String(fr.result));
+      fr.onerror = rej;
+      fr.readAsDataURL(file);
+    });
+
+    const isPdf = file.type.includes("pdf") || file.name.toLowerCase().endsWith(".pdf");
+    let imgDataUrl = dataUrl;
+    if (isPdf){
+      if (status) status.textContent = "📄 Convertendo PDF em imagem...";
+      imgDataUrl = await pdfParaImagem(dataUrl);
+    }
+    const base64 = imgDataUrl.split(",")[1];
+    const mime = isPdf ? "image/png" : (file.type || "image/jpeg");
+
+    if (status) status.innerHTML = "🤖 Enviando para Nvidia Vision...<br><small>Aguarde 10-25s</small>";
+
+    const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem do volante/comprovante e extraia TODOS os jogos apostados. Cada jogo tem 15 a 20 números entre 01 e 25. Ignore cabeçalhos, valores, datas e números sorteados. Responda APENAS com JSON válido: {"jogos": [[1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], ...]}. Se não encontrar jogos, responda {"jogos":[]}.`;
+
+    const resp = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "meta/llama-3.2-90b-vision-instruct",
+        messages: [{
+          role: "user",
+          content: [
+            { type: "text", text: systemPrompt },
+            { type: "image_url", image_url: { url: `data:${mime};base64,${base64}` } }
+          ]
+        }],
+        temperature: 0.1,
+        max_tokens: 3000
+      })
+    });
+
+    if (!resp.ok){
+      const txt = await resp.text();
+      throw new Error(`Nvidia HTTP ${resp.status}: ${txt.slice(0, 300)}`);
+    }
+    const j = await resp.json();
+    const content = j.choices?.[0]?.message?.content || "";
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("Resposta sem JSON: " + content.slice(0, 300));
+    const parsed = JSON.parse(jsonMatch[0]);
+    const jogos = Array.isArray(parsed.jogos) ? parsed.jogos : [];
+    if (jogos.length === 0) throw new Error("Nenhum jogo extraído. Tente foto mais nítida.");
+
+    window._jogosExtraidosIA = jogos;
+    if (extraidoDiv){
+      extraidoDiv.style.display = "block";
+      extraidoDiv.innerHTML = `<b>✅ ${jogos.length} jogo(s) extraído(s):</b>
+        <pre style="white-space:pre-wrap; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos.map((n,i)=>`Jogo ${i+1}: ${n.map(x=>String(x).padStart(2,"0")).join(" ")}`).join("\n")}</pre>
+        <button class="chip on" style="margin-top:8px; width:100%; justify-content:center; background:var(--success); border-color:var(--success);" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos.length} aposta(s)</button>`;
+    }
+    if (status) status.textContent = `✅ ${jogos.length} jogo(s) extraído(s)! Clique em Confirmar.`;
+    toast(`✅ ${jogos.length} jogo(s) extraído(s)`);
+  } catch(e){
+    console.error("IA erro", e);
+    const msg = String(e.message || "");
+    if (status) status.innerHTML = `❌ Erro: ${msg.slice(0, 200)}<br><br>
+      <div style="background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px; margin-top:8px;">
+        <b>Extração manual (sempre funciona):</b>
+        <textarea id="fallbackManual" placeholder="Cole os números ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25 (um jogo por linha)" style="width:100%; min-height:70px; margin-top:8px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea>
+        <button onclick="usarExtracaoManual()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais</button>
+      </div>`;
+    toast("❌ Falha na IA — use extração manual");
+  }
+}
+
+function usarExtracaoManual(){
+  const ta = document.getElementById("fallbackManual");
+  if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números"); return; }
+  processarJogosManuais(ta.value);
+}
+
+function usarExtracaoManualSempre(){
+  const ta = document.getElementById("fallbackManualSempre");
+  if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números primeiro"); return; }
+  processarJogosManuais(ta.value);
+}
+
+function processarJogosManuais(texto){
+  const linhas = texto.trim().split("\n");
+  const jogos = [];
+  for (const linha of linhas){
+    const nums = (linha.match(/\d+/g)||[]).map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25);
+    const uniq = [...new Set(nums)].sort((a,b)=>a-b);
+    if (uniq.length>=15 && uniq.length<=20) jogos.push(uniq);
+  }
+  if (jogos.length===0){ toast("⚠️ Nenhum jogo válido (15-20 números por linha)"); return; }
+  window._jogosExtraidosIA = jogos;
+  const extraidoDiv = document.getElementById("iaExtraido");
+  if (extraidoDiv){
+    extraidoDiv.style.display = "block";
+    extraidoDiv.innerHTML = `<b>✅ ${jogos.length} jogo(s):</b>
+      <pre style="white-space:pre-wrap; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos.map((n,i)=>`Jogo ${i+1}: ${n.map(x=>String(x).padStart(2,"0")).join(" ")}`).join("\n")}</pre>
+      <button class="chip on" style="margin-top:8px; width:100%; justify-content:center; background:var(--success); border-color:var(--success);" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos.length} aposta(s)</button>`;
+  }
+  const status = document.getElementById("iaStatus");
+  if (status) status.textContent = `✅ ${jogos.length} jogo(s) pronto(s)`;
+  toast(`✅ ${jogos.length} jogo(s) pronto(s)`);
+}
+
+function confirmarLancamentoIA(){
+  const jogos = window._jogosExtraidosIA;
+  if (!jogos || !jogos.length){ toast("⚠️ Nenhum jogo para lançar"); return; }
+  let adicionados = 0;
+  jogos.forEach(nums => {
+    const clean = [...new Set(nums.map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25))].sort((a,b)=>a-b);
+    if (clean.length < 15 || clean.length > 20) return;
+    const existe = state.grupos.some(g => g.jogos.some(j => j.dezenas.length === clean.length && j.dezenas.every((v,i)=>v===clean[i])));
+    if (existe) return;
+    const hash = "IA_" + Date.now() + "_" + adicionados + "_" + Math.random().toString(36).slice(2,6);
+    const grupo = {
+      hash, pagina: 900 + adicionados, tipo: "Simples",
+      ordem: state.grupos.length + 1, cota: 0, totalCotas: 0, valorCota: 0,
+      valorTotalGrupo: 0,
+      ehBolao: true,   // ← tratado como bolão p/ permitir participantes
+      _custom: true,
+      jogos: [{ idx: 1, dezenas: clean, set: new Set(clean), qtd: clean.length, ehBolao: true }]
+    };
+    state.grupos.push(grupo);
+    adicionados++;
+  });
+  salvarGruposCustom();
+  forcarExibirTodos = true;
+  conferirTudo();
+  renderizarGrupos();
+  atualizarDashboard();
+  document.getElementById("jogosGrid").scrollIntoView({behavior:"smooth"});
+  toast(`✅ ${adicionados} aposta(s) lançada(s) e salva(s)!`);
+  const status = document.getElementById("iaStatus");
+  if (status) status.textContent = `✅ ${adicionados} aposta(s) adicionada(s). Total: ${state.grupos.reduce((s,g)=>s+g.jogos.length,0)} jogos (persistidos)`;
+  window._jogosExtraidosIA = null;
+  const ex = document.getElementById("iaExtraido");
+  if (ex) ex.style.display = "none";
+  const ta = document.getElementById("fallbackManualSempre");
+  if (ta) ta.value = "";
+}
+
+/* ─── PARTICIPANTES (UI) ─────────────────────────────────────────────── */
+function toggleParticipantes(){
+  const el = document.getElementById("listaParticipantes");
+  const btn = document.getElementById("btnToggleParticipantes");
+  if (!el || !btn) return;
+  const isHidden = el.style.display === "none" || !el.style.display;
+  if (isHidden){
+    renderParticipantesDB();
+    el.style.display = "block";
+    btn.textContent = "🙈 Ocultar / Editar Banco";
+    el.scrollIntoView({behavior:"smooth", block:"start"});
+  } else {
+    el.style.display = "none";
+    btn.textContent = "👥 Participantes";
+  }
+}
+let bolaoEmFoco = null;
+function toggleSidebarParticipantes(){
+  const sb = document.getElementById("sidebarParticipantes");
+  const ov = document.getElementById("sidebarOverlay");
+  if (!sb) return;
+  const isOpen = sb.style.left === "0px";
+  if (isOpen){
+    sb.style.left = "-340px";
+    if (ov) ov.style.display = "none";
+  } else {
+    const primeiro = state.grupos.find(g=>g.ehBolao);
+    if (primeiro) bolaoEmFoco = primeiro.hash;
+    renderSidebarParticipantes();
+    const totalEl = document.getElementById("sidebarTotalJogos");
+    if (totalEl) totalEl.textContent = state.grupos.reduce((s,g)=>s+g.jogos.length,0);
+    sb.style.left = "0px";
+    if (ov) ov.style.display = "block";
+  }
+}
+function renderSidebarParticipantes(){
+  const cont = document.getElementById("sidebarLista");
+  if (!cont) return;
+  const db = getParticipantesDB();
+  const hash = bolaoEmFoco || (state.grupos.find(g=>g.ehBolao)?.hash);
+  const ids = modoParticipacao === "concurso" ? getParticipantesConcurso() : (hash ? getBolaoParticipantes(hash) : []);
+  cont.innerHTML = "";
+  if (db.length===0){
+    cont.innerHTML = `<div style="font-size:0.72rem; color:var(--text-soft); text-align:center; padding:12px;">Nenhum participante no banco. Adicione abaixo.</div>`;
+    return;
+  }
+  db.forEach(p=>{
+    const isIn = ids.includes(p.id);
+    const div = document.createElement("div");
+    div.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border-radius:10px; border:1.5px solid ${isIn ? 'var(--primary)' : 'var(--border)'}; background:${isIn ? 'rgba(147,0,137,0.08)' : 'var(--bg)'}; cursor:pointer;`;
+    div.onclick = () => {
+      if (modoParticipacao === "bolao" && !hash){ toast("⚠️ Nenhum bolão em foco"); return; }
+      toggleParticipanteNoBolao(hash || "concurso", p.id);
+    };
+    div.innerHTML = `<span style="flex:1; font-size:0.78rem; font-weight:${isIn?'700':'500'}; color:${isIn?'var(--primary)':'var(--text)'};">${isIn?'✓ ':''}${p.nome}</span><span style="font-size:0.62rem; background:${isIn?'var(--primary)':'#fff'}; color:${isIn?'#fff':'var(--text-soft)'}; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">${isIn?'selecionado':'adicionar'}</span>`;
+    cont.appendChild(div);
+  });
+}
+function adicionarParticipanteSidebar(){
+  const el = document.getElementById("sidebarInputNovo");
+  const nome = el ? el.value.trim() : "";
+  if (!nome || nome.length<2){ toast("⚠️ Digite um nome"); return; }
+  let db = getParticipantesDB();
+  if (db.some(p=>p.nome.toLowerCase()===nome.toLowerCase())){ toast("⚠️ Já existe"); return; }
+  const novo = {id:"p"+Date.now(), nome};
+  db.push(novo);
+  setParticipantesDB(db);
+  renderParticipantesDB();
+  if (el) el.value="";
+  toast(`✅ ${nome} criado`);
+  const hash = bolaoEmFoco || (state.grupos.find(g=>g.ehBolao)?.hash);
+  toggleParticipanteNoBolao(hash || "concurso", novo.id);
+  renderSidebarParticipantes();
+}
+function toggleParticipanteNoBolao(hash, participanteId){
+  if (modoParticipacao === "concurso" || hash === "concurso"){
+    const ids = getParticipantesConcurso();
+    const idx = ids.indexOf(participanteId);
+    if (idx >= 0) ids.splice(idx, 1); else ids.push(participanteId);
+    setParticipantesConcurso(ids);
+  } else {
+    const ids = getBolaoParticipantes(hash);
+    const idx = ids.indexOf(participanteId);
+    if (idx >= 0) ids.splice(idx, 1); else ids.push(participanteId);
+    setBolaoParticipantes(hash, ids);
+  }
+  conferirTudo();
+  renderizarGrupos();
+  renderSidebarParticipantes();
+  renderParticipantesDB();
+  // Atualiza cabeçalho se estiver no painel participantes
+  const info = document.getElementById("infoParticipantesDB");
+  if (info){
+    const qtdC = getParticipantesConcurso().length;
+    info.innerHTML = `<b style="color:var(--primary);">Concurso inteiro:</b> ${qtdC} participante${qtdC!==1?'s':''}. <b>Por bolão:</b> cada grupo com rateio tem sua própria lista.`;
+  }
+}
+function renderParticipantesDB(){
+  const db = getParticipantesDB();
+  const grid = document.getElementById("gridParticipantesDB");
+  if (!grid) return;
+  const concIds = getParticipantesConcurso();
+  grid.innerHTML = "";
+  db.forEach(p=>{
+    const isConc = concIds.includes(p.id);
+    const div = document.createElement("div");
+    div.style.cssText = `background:${isConc?'rgba(147,0,137,0.08)':'var(--bg)'}; border:1.5px solid ${isConc?'var(--primary)':'var(--border)'}; border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:6px; cursor:pointer;`;
+    div.title = "Clique para adicionar/remover do CONCURSO inteiro";
+    div.onclick = ()=> toggleParticipanteNoBolao("concurso", p.id);
+    div.innerHTML = `<span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; font-weight:${isConc?'700':'500'}; color:${isConc?'var(--primary)':'var(--text)'};">${isConc?'✓ ':''}${p.nome}</span><button onclick="event.stopPropagation(); removerParticipanteDB('${p.id}')" style="flex:0 0 auto; background:#fff; border:1px solid var(--border); border-radius:999px; padding:2px 8px; font-size:0.7rem; cursor:pointer;">✕</button>`;
+    grid.appendChild(div);
+  });
+  const info = document.getElementById("infoParticipantesDB");
+  if (info){
+    const qtdC = concIds.length;
+    info.innerHTML = `<b style="color:var(--primary);">${db.length} participantes no banco</b> • <b>Concurso inteiro:</b> ${qtdC} selecionado${qtdC!==1?'s':''}. Toque no nome para alternar.`;
+  }
+  const contador = document.getElementById("contadorParticipantesDB");
+  if (contador) contador.textContent = `${db.length} nomes`;
+}
+function adicionarParticipanteDB(){
+  const input = document.getElementById("inputNovoParticipante");
+  const nome = input ? input.value.trim() : "";
+  if (!nome || nome.length<2){ toast("⚠️ Digite um nome válido"); return; }
+  const db = getParticipantesDB();
+  if (db.some(p=> p.nome.toLowerCase()===nome.toLowerCase())){ toast("⚠️ Já existe"); return; }
+  const novo = {id:"p"+Date.now(), nome};
+  db.push(novo);
+  setParticipantesDB(db);
+  if (input) input.value="";
+  renderParticipantesDB();
+  toast(`✅ ${nome} adicionado`);
+}
+function removerParticipanteDB(id){
+  if (!confirm("Remover este participante do banco?")) return;
+  let db = getParticipantesDB();
+  db = db.filter(p=>p.id!==id);
+  setParticipantesDB(db);
+  // Remove de bolões
+  try{
+    state.grupos.forEach(g=>{
+      if (!g.ehBolao) return;
+      const ids = getBolaoParticipantes(g.hash);
+      if (ids.includes(id)) setBolaoParticipantes(g.hash, ids.filter(x=>x!==id));
+    });
+  }catch(_){}
+  // Remove do concurso
+  const concIds = getParticipantesConcurso().filter(x=>x!==id);
+  setParticipantesConcurso(concIds);
+  renderParticipantesDB();
+  conferirTudo();
+  toast(`🗑️ Removido`);
+}
+
+/* ─── MOSTRAR TODOS ──────────────────────────────────────────────────── */
+function mostrarTodosJogos(){
+  const grid = document.getElementById("jogosGrid");
+  const btn = document.getElementById("btnMostrarTodosJogos");
+  const jaVisivel = grid && grid.children.length > 0 && emptyState.style.display === "none";
+  if (jaVisivel){
+    grid.innerHTML = "";
+    emptyState.style.display = "block";
+    document.getElementById("emptyMsg").textContent = "Conferência ocultada. Clique novamente para exibir.";
+    forcarExibirTodos = false;
+    const totalJogosBtn = state.grupos.reduce((s,g)=>s+g.jogos.length,0);
+    if (btn) btn.innerHTML = `📋 Mostrar todos os jogos apostados em conferência — ${totalJogosBtn} jogos`;
+    toast("🙈 Ocultada");
+    return;
+  }
+  buscaApostaNumeros = [];
+  const elBusca = document.getElementById("buscaAposta");
+  const infoBusca = document.getElementById("buscaInfo");
+  if (elBusca) elBusca.value = "";
+  if (infoBusca) infoBusca.textContent = "";
+  forcarExibirTodos = true;
+  state.filtro = "todos";
+  document.querySelectorAll("#filtros .chip").forEach(c=>{
+    const isTodos = c.dataset.filtro==="todos";
+    c.classList.toggle("on", isTodos);
+    c.setAttribute("aria-selected", isTodos ? "true" : "false");
+  });
+  if (state.grupos.length>0) conferirTudo();
+  renderizarGrupos();
+  if (grid) grid.scrollIntoView({behavior:"smooth", block:"start"});
+  const total = state.grupos.reduce((s,g)=>s+g.jogos.length,0);
+  if (btn) btn.innerHTML = `🙈 Ocultar conferência — ${total} jogos`;
+  toast(`📋 ${total} jogo(s) exibido(s)`);
+}
+
+/* ─── LIMPAR ─────────────────────────────────────────────────────────── */
 function limparTodosJogos(){
-  if (!confirm("Tem certeza que deseja limpar TODOS os 0 jogos? Isso ocultará a conferência. Recarregue a página para restaurar.")) return;
+  if (!confirm("Tem certeza que deseja APAGAR TODOS os jogos salvos? Esta ação não pode ser desfeita.")) return;
   state.grupos = [];
   state.resultados = [];
   state.sorteados.clear();
   try{ localStorage.removeItem(LS_KEY); }catch(_){}
+  try{ localStorage.removeItem(LS_GRUPOS_CUSTOM); }catch(_){}
   forcarExibirTodos = false;
   buscaApostaNumeros = [];
   const elBusca = document.getElementById("buscaAposta");
@@ -2098,14 +2010,28 @@ function limparTodosJogos(){
   if (infoBusca) infoBusca.textContent = "";
   jogosGrid.innerHTML = "";
   emptyState.style.display = "block";
-  document.getElementById("emptyMsg").textContent = "Todos os jogos foram limpos. Recarregue a página para restaurar os 0 jogos.";
+  document.getElementById("emptyMsg").textContent = "Todos os jogos foram apagados.";
   atualizarDashboard();
-  toast("🗑️ Todos os jogos limpos");
-  vibrar([30,20,30]);
+  toast("🗑️ Jogos apagados");
 }
 
+/* ─── EVENTOS ────────────────────────────────────────────────────────── */
+numbersGrid.addEventListener("click", e => {
+  const btn = e.target.closest(".num-btn");
+  if (!btn) return;
+  toggleNumero(Number(btn.dataset.n));
+  vibrar(14);
+  salvarHistorico();
+});
+document.getElementById("btnLimpar").addEventListener("click", () => {
+  state.sorteados.clear();
+  state.jaFestejou = false;
+  state._avisou14 = false;
+  sincronizarUI(); salvarHistorico();
+  vibrar([45, 35, 45]);
+  toast("🧹 Seleção limpa");
+});
 document.getElementById("btnExport").addEventListener("click", exportar);
-
 document.getElementById("filtros").addEventListener("click", e => {
   const chip = e.target.closest(".chip");
   if (!chip) return;
@@ -2114,7 +2040,6 @@ document.getElementById("filtros").addEventListener("click", e => {
   });
   chip.classList.add("on"); chip.setAttribute("aria-selected", "true");
   state.filtro = chip.dataset.filtro;
-  // Quando clicar em Todos, limpa busca colada e mostra todos os jogos igual ao botão Mostrar todos (mesmo sem sorteio)
   if (state.filtro === "todos"){
     buscaApostaNumeros = [];
     const elBusca = document.getElementById("buscaAposta");
@@ -2122,238 +2047,53 @@ document.getElementById("filtros").addEventListener("click", e => {
     if (elBusca) elBusca.value = "";
     if (infoBusca) infoBusca.textContent = "";
     forcarExibirTodos = true;
-    if (state.grupos.length>0) conferirTudo();
   }
   renderizarGrupos();
-  if (state.filtro === "todos"){
-    setTimeout(()=>{ forcarExibirTodos = false; }, 400);
-  }
   vibrar(10);
 });
-
 document.getElementById("milFechar").addEventListener("click", fecharMilionario);
-
 document.addEventListener("keydown", e => {
   if (e.key === "Escape" && overlay.classList.contains("on")) fecharMilionario();
 });
-
 window.addEventListener("resize", () => {
-  if (granoAtiva) ajustarGranaCanvas();
+  if (granaAtiva) ajustarGranaCanvas();
 }, { passive: true });
 
-/* ─── 16. PWA ────────────────────────────────────────────────────────── */
-const btnInstall = document.getElementById("btnInstall");
-if (btnInstall){
-  window.addEventListener("beforeinstallprompt", e => {
-    e.preventDefault(); state.deferredPrompt = e; btnInstall.classList.add("show");
-  });
-  btnInstall.addEventListener("click", async () => {
-    if (!state.deferredPrompt){ toast("ℹ️ Menu do navegador → “Adicionar à tela inicial”"); return; }
-    state.deferredPrompt.prompt();
-    const { outcome } = await state.deferredPrompt.userChoice;
-    if (outcome === "accepted") toast("✅ App instalado!");
-    state.deferredPrompt = null; btnInstall.classList.remove("show");
-  });
-  window.addEventListener("appinstalled", () => {
-    btnInstall.classList.remove("show");
-    toast("✅ Lotofácil 2026 instalado!");
-  });
-}
+/* ─── PWA ────────────────────────────────────────────────────────────── */
 if ("serviceWorker" in navigator){
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js")
-      .then(reg => console.info("[SW] ativo:", reg.scope))
-      .catch(err => console.warn("[SW] falha:", err));
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
   });
 }
 
-/* ─── 17. PERSISTÊNCIA ───────────────────────────────────────────────── */
-const LS_KEY = "lotofacil-3780-sorteio-v2";
-function salvarHistorico(){
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify({ sorteados: [...state.sorteados], quando: Date.now() }));
-  } catch(_){}
-}
-function restaurarHistorico(){
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return;
-    const d = JSON.parse(raw);
-    if (Array.isArray(d.sorteados)){
-      d.sorteados.filter(n => Number.isInteger(n) && n >= 1 && n <= 25).slice(0, 15)
-        .forEach(n => state.sorteados.add(n));
-    }
-  } catch(_){}
-}
-const LS_DEEPSEEK_KEY = "deepseek_api_key";
-function salvarChaveDeepSeek(){ /* chave já configurada internamente, não visível no site */ toast("✅ Chave já configurada internamente"); }
-function carregarChaveDeepSeek(){ /* não precisa exibir chave */ }
-async function analisarComDeepSeek(){
-  const input = document.getElementById("inputIA");
-  const status = document.getElementById("iaStatus");
-  const extraidoDiv = document.getElementById("iaExtraido");
-  // Chave Nvidia configurada internamente (não visível no site)
-  const apiKey = "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";
-  if (!apiKey || !apiKey.startsWith("nvapi-")){ toast("⚠️ Chave Nvidia não configurada"); if(status) status.textContent="❌ Chave não configurada."; return; }
-  if (!input || !input.files || input.files.length===0){ toast("⚠️ Selecione uma foto ou PDF"); if(status) status.textContent="❌ Nenhum arquivo selecionado."; return; }
-  const file = input.files[0];
-  if (status) status.textContent = `⏳ Lendo ${file.name} (${(file.size/1024).toFixed(1)}KB)...`;
-  if (extraidoDiv){ extraidoDiv.style.display="none"; extraidoDiv.textContent=""; }
-  try{
-    const base64 = await new Promise((res,rej)=>{
-      const fr = new FileReader();
-      fr.onload = ()=> res(String(fr.result).split(",")[1]);
-      fr.onerror = rej;
-      fr.readAsDataURL(file);
-    });
-    const isPdf = file.type.includes("pdf") || file.name.toLowerCase().endsWith(".pdf");
-    if (status) status.textContent = `🤖 Enviando para DeepSeek (${isPdf?"PDF":"imagem"})...`;
-    const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem/PDF do volante/comprovante Lotofácil e extraia TODOS os jogos apostados. Para cada jogo, retorne os números marcados (15 a 20 números entre 01 e 25). Ignore números sorteados ou cabeçalhos. Retorne APENAS JSON válido no formato: {"jogos": [[1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], [2,5,7,10,11,12,13,14,15,16,17,20,21,24,25]]} onde cada sub-array é um jogo com números ordenados. Se não encontrar jogos, retorne {"jogos":[]}.`;
-    const messages = [];
-    if (isPdf){
-      // Para PDF, envia como texto base64 e pede para extrair
-      messages.push({role:"user", content: systemPrompt + `\n\nArquivo PDF base64 (primeiros 8000 chars): ${base64.slice(0,8000)}`});
-    } else {
-      messages.push({role:"user", content: [
-        {type:"text", text: systemPrompt},
-        {type:"image_url", image_url:{url:`data:${file.type};base64,${base64}`}}
-      ]});
-    }
-    if (status) status.innerHTML = `⏳ <b>Carregando arquivo...</b> ${file.name} (${(file.size/1024).toFixed(1)}KB) — enviando para Nvidia...<br><small style="color:var(--text-soft);">Aguarde, isso pode levar 10-20s</small>`;
-    const resp = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
-      method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":`Bearer ${apiKey}`},
-      body: JSON.stringify({model: isPdf ? "meta/llama-3.1-405b-instruct" : "meta/llama-3.2-90b-vision-instruct", messages, temperature:0.1, max_tokens:3000})
-    });
-    if (!resp.ok){
-      const txt = await resp.text();
-      // Se retornou HTML (ex: página de erro), trata como HTML
-      if (txt.trim().startsWith("<")){
-        throw new Error(`Nvidia retornou HTML em vez de JSON (HTTP ${resp.status}) — provavelmente CORS ou autenticação falhou. Verifique a chave em https://build.nvidia.com ou use extração manual abaixo. Trecho: ${txt.slice(0,120).replace(/\n/g," ")}`);
-      }
-      if (resp.status===402 || resp.status===401){
-        throw new Error(`Nvidia sem saldo/autenticação (${resp.status}): ${txt.slice(0,200)} — Verifique em https://build.nvidia.com ou use extração manual abaixo`);
-      }
-      throw new Error(`Nvidia HTTP ${resp.status}: ${txt.slice(0,300)}`);
-    }
-    let j;
-    try{
-      j = await resp.json();
-    }catch(err){
-      const txt2 = await resp.text().catch(()=> "");
-      if (txt2.trim().startsWith("<")){
-        throw new Error(`Nvidia retornou HTML (Unexpected token '<') — CORS ou chave inválida. Use extração manual. Trecho: ${txt2.slice(0,120).replace(/\n/g," ")}`);
-      }
-      throw new Error(`Falha ao parsear JSON Nvidia: ${err.message}`);
-    }
-    const content = j.choices?.[0]?.message?.content || "";
-    if (status) status.textContent = "🔍 Resposta DeepSeek recebida, parseando...";
-    // Tenta extrair JSON da resposta
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Resposta sem JSON: "+content.slice(0,500));
-    const parsed = JSON.parse(jsonMatch[0]);
-    const jogos = Array.isArray(parsed.jogos) ? parsed.jogos : [];
-    if (jogos.length===0) throw new Error("Nenhum jogo extraído. Tente uma foto mais nítida.");
-    if (extraidoDiv){
-      extraidoDiv.style.display="block";
-      extraidoDiv.innerHTML = `<b>✅ ${jogos.length} jogo(s) extraído(s):</b><br><pre style="white-space:pre-wrap; word-break:break-word; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos.map((nums,i)=>`Jogo ${i+1}: ${nums.map(n=>String(n).padStart(2,"0")).join(" ")}`).join("\n")}</pre><button class="chip on" style="margin-top:8px; width:100%; justify-content:center;" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos.length} aposta(s) na conferência</button>`;
-    }
-    // Guarda temporariamente para confirmação
-    window._jogosExtraidosIA = jogos;
-    if (status) status.textContent = `✅ ${jogos.length} jogo(s) extraído(s) com sucesso! Clique em Confirmar para lançar.`;
-    toast(`✅ ${jogos.length} jogo(s) extraído(s) via DeepSeek`);
-  }catch(e){
-    console.error("Nvidia erro", e);
-    const msg = String(e.message||"");
-    const isFetchFail = msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("Load failed") || msg.includes("Network error") || msg.includes("Unexpected token");
-    const is402 = msg.includes("402") || msg.includes("Insufficient Balance") || msg.includes("401");
-    if (isFetchFail){
-      if (status) status.innerHTML = `❌ <b>Falha de conexão (Failed to fetch)</b><br>${msg}<br><br>Isso é normal em <code>file://</code> ou sem HTTPS/CORS. Use <b>extração manual</b> abaixo (sempre funciona) ou hospede em HTTPS (Netlify/Vercel/GitHub Pages).<br><textarea id="fallbackManual" placeholder="Cole os números ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25 (um jogo por linha)" style="width:100%; min-height:70px; margin-top:8px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea><button onclick="usarExtracaoManual()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais</button>`;
-      toast(`❌ Falha de rede — use extração manual`, 5000);
-      return;
-    }
-    if (is402){
-      if (status) status.innerHTML = `❌ <b>Nvidia sem saldo/autenticação</b><br>${msg}<br><br>👉 Verifique em <a href="https://build.nvidia.com" target="_blank" style="color:var(--primary); font-weight:700;">build.nvidia.com</a> ou use <b>extração manual</b> abaixo:<br><textarea id="fallbackManual" placeholder="Cole os números ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25 (um jogo por linha)" style="width:100%; min-height:70px; margin-top:8px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea><button onclick="usarExtracaoManual()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais</button>`;
-      toast(`❌ Nvidia sem saldo — use extração manual`, 4000);
-      return;
-    }
-    if (status) status.innerHTML = `❌ Erro: ${msg}<br><br><div style="background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px; margin-top:8px;"><b>Use extração manual:</b><br><textarea id="fallbackManual" placeholder="Cole os números ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25 (um jogo por linha)" style="width:100%; min-height:70px; margin-top:8px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea><button onclick="usarExtracaoManual()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais</button></div>`;
-    toast(`❌ Falha: ${msg}`);
-  }
-}
-function usarExtracaoManualSempre(){
-  const ta = document.getElementById("fallbackManualSempre");
-  const status2 = document.getElementById("iaStatus");
-  const extraidoDiv2 = document.getElementById("iaExtraido");
-  if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números primeiro"); return; }
-  const linhas2 = ta.value.trim().split("\n");
-  const jogos2 = [];
-  for (const linha of linhas2){
-    const nums = (linha.match(/\d+/g)||[]).map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25);
-    const uniq = [...new Set(nums)].sort((a,b)=>a-b);
-    if (uniq.length>=15 && uniq.length<=20) jogos2.push(uniq);
-  }
-  if (jogos2.length===0){ toast("⚠️ Nenhum jogo válido (15-20 números)"); return; }
-  window._jogosExtraidosIA = jogos2;
-  if (extraidoDiv2){
-    extraidoDiv2.style.display="block";
-    extraidoDiv2.innerHTML = `<b>✅ ${jogos2.length} jogo(s) via manual (sempre funciona):</b><br><pre style="white-space:pre-wrap; word-break:break-word; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos2.map((nums,i)=>`Jogo ${i+1}: ${nums.map(n=>String(n).padStart(2,"0")).join(" ")}`).join("\n")}</pre><button class="chip on" style="margin-top:8px; width:100%; justify-content:center;" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos2.length} aposta(s)</button>`;
-  }
-  if (status2) status2.textContent = `✅ ${jogos2.length} jogo(s) pronto(s) via manual (sem IA)`;
-  toast(`✅ ${jogos2.length} jogo(s) via manual`);
-}
-function confirmarLancamentoIA(){
-  const jogos = window._jogosExtraidosIA;
-  if (!jogos || !jogos.length){ toast("⚠️ Nenhum jogo para lançar"); return; }
-  let adicionados=0;
-  jogos.forEach(nums=>{
-    const clean = [...new Set(nums.map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25))].sort((a,b)=>a-b);
-    if (clean.length<15 || clean.length>20) return;
-    const str = clean.map(n=>String(n).padStart(2,"0")).join(" ");
-    // Evita duplicatas exatas
-    const existe = state.grupos.some(g=> g.jogos.some(j=> j.dezenas.length===clean.length && j.dezenas.every((v,i)=>v===clean[i])));
-    if (existe) return;
-    const hash = "IA_"+Date.now()+"_"+adicionados+"_"+Math.random().toString(36).slice(2,6);
-    const grupo = {hash, pagina: 900+adicionados, tipo:"Simples", ordem: state.grupos.length+1, cota:0, totalCotas:0, valorCota:0, valorTotalGrupo:0, ehBolao:false, jogos:[{idx:1, dezenas:clean, set:new Set(clean), qtd:clean.length, ehBolao:false}]};
-    state.grupos.push(grupo);
-    adicionados++;
-  });
-  // Recalcula rawGamesData para persistir? Mantém em memória e salva no localStorage como dados extras
-  try{
-    const extras = JSON.parse(localStorage.getItem("jogosExtrasIA")||"[]");
-    extras.push(...jogos);
-    localStorage.setItem("jogosExtrasIA", JSON.stringify(extras));
-  }catch(_){}
-  forcarExibirTodos=true;
-  conferirTudo();
-  renderizarGrupos();
-  atualizarDashboard();
-  document.getElementById("jogosGrid").scrollIntoView({behavior:"smooth"});
-  toast(`✅ ${adicionados} aposta(s) lançada(s) com sucesso!`);
-  const status = document.getElementById("iaStatus");
-  if (status) status.textContent = `✅ ${adicionados} aposta(s) adicionada(s) à conferência (total agora ${state.grupos.reduce((s,g)=>s+g.jogos.length,0)} jogos)`;
-  window._jogosExtraidosIA = null;
-}
-window.addEventListener("DOMContentLoaded", carregarChaveDeepSeek);
-
-/* ─── 18. BOOT ───────────────────────────────────────────────────────── */
+/* ─── BOOT ───────────────────────────────────────────────────────────── */
 function boot(){
   try {
-    state.grupos = parseGames(rawGamesData);
-    const totalJogos = state.grupos.reduce((s, g) => s + g.jogos.length, 0);
-    console.info(`[Boot] ${state.grupos.length} grupos · ${totalJogos} jogos · ${state.grupos.filter(g=>g.ehBolao).length} bolões`);
+    const baseGrupos = parseGames(rawGamesData);
+    const customGrupos = carregarGruposCustom();
+    state.grupos = [...baseGrupos, ...customGrupos];
+    state.grupos.forEach((g, i) => { g.ordem = i + 1; });
 
-    if (state.grupos.length === 0) toast("⚠️ Nenhum jogo válido encontrado.");
+    const totalJogos = state.grupos.reduce((s, g) => s + g.jogos.length, 0);
+    console.info(`[Boot] ${state.grupos.length} grupos · ${totalJogos} jogos (base ${baseGrupos.length} + custom ${customGrupos.length})`);
 
     construirGridNumeros();
     restaurarHistorico();
     sincronizarUI();
     atualizarCronometro();
     carregarProximoSorteio();
+    renderParticipantesDB();
+    setModoPart("bolao");
+
+    if (state.grupos.length > 0){
+      forcarExibirTodos = true;
+      conferirTudo();
+      renderizarGrupos();
+    }
 
     setTimeout(() => {
-      if (state.sorteados.size === 0){
-        toast(`🍀 ${totalJogos} jogos em ${state.grupos.length} grupos prontos!`, 3200);
+      if (state.sorteados.size === 0 && totalJogos > 0){
+        toast(`🍀 ${totalJogos} jogo(s) em ${state.grupos.length} grupo(s) prontos!`, 3200);
       }
     }, 900);
   } catch (err){
@@ -2361,7 +2101,6 @@ function boot(){
     toast("⚠️ Erro ao carregar. Recarregue a página.");
   }
 }
-
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
 else boot();
 </script>
