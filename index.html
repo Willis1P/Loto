@@ -2219,6 +2219,7 @@ async function analisarComDeepSeek(){
         {type:"image_url", image_url:{url:`data:${file.type};base64,${base64}`}}
       ]});
     }
+    if (status) status.innerHTML = `⏳ <b>Carregando arquivo...</b> ${file.name} (${(file.size/1024).toFixed(1)}KB) — enviando para Nvidia...<br><small style="color:var(--text-soft);">Aguarde, isso pode levar 10-20s</small>`;
     const resp = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method:"POST",
       headers:{"Content-Type":"application/json","Authorization":`Bearer ${apiKey}`},
@@ -2226,12 +2227,25 @@ async function analisarComDeepSeek(){
     });
     if (!resp.ok){
       const txt = await resp.text();
+      // Se retornou HTML (ex: página de erro), trata como HTML
+      if (txt.trim().startsWith("<")){
+        throw new Error(`Nvidia retornou HTML em vez de JSON (HTTP ${resp.status}) — provavelmente CORS ou autenticação falhou. Verifique a chave em https://build.nvidia.com ou use extração manual abaixo. Trecho: ${txt.slice(0,120).replace(/\n/g," ")}`);
+      }
       if (resp.status===402 || resp.status===401){
         throw new Error(`Nvidia sem saldo/autenticação (${resp.status}): ${txt.slice(0,200)} — Verifique em https://build.nvidia.com ou use extração manual abaixo`);
       }
       throw new Error(`Nvidia HTTP ${resp.status}: ${txt.slice(0,300)}`);
     }
-    const j = await resp.json();
+    let j;
+    try{
+      j = await resp.json();
+    }catch(err){
+      const txt2 = await resp.text().catch(()=> "");
+      if (txt2.trim().startsWith("<")){
+        throw new Error(`Nvidia retornou HTML (Unexpected token '<') — CORS ou chave inválida. Use extração manual. Trecho: ${txt2.slice(0,120).replace(/\n/g," ")}`);
+      }
+      throw new Error(`Falha ao parsear JSON Nvidia: ${err.message}`);
+    }
     const content = j.choices?.[0]?.message?.content || "";
     if (status) status.textContent = "🔍 Resposta DeepSeek recebida, parseando...";
     // Tenta extrair JSON da resposta
