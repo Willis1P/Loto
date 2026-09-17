@@ -559,6 +559,9 @@ footer.app-footer strong{color:var(--primary)}
 </main>
 
 <div class="action-bar">
+  <button class="btn" id="btnLimparJogos" onclick="limparTodosJogos()" aria-label="Limpar todos os jogos" style="flex:0 0 auto; background:linear-gradient(145deg,#6c757d,#495057); color:#fff; padding:14px 12px; font-size:0.78rem;">
+    🗑️ Jogos
+  </button>
   <button class="btn btn-primary" id="btnExport" aria-label="Exportar resultados">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M4 4h16"/></svg>
     Exportar
@@ -1925,6 +1928,25 @@ document.getElementById("btnLimpar").addEventListener("click", () => {
   vibrar([45, 35, 45]);
   toast("🧹 Seleção limpa");
 });
+function limparTodosJogos(){
+  if (!confirm("Tem certeza que deseja limpar TODOS os 176 jogos? Isso ocultará a conferência. Recarregue a página para restaurar.")) return;
+  state.grupos = [];
+  state.resultados = [];
+  state.sorteados.clear();
+  try{ localStorage.removeItem(LS_KEY); }catch(_){}
+  forcarExibirTodos = false;
+  buscaApostaNumeros = [];
+  const elBusca = document.getElementById("buscaAposta");
+  if (elBusca) elBusca.value = "";
+  const infoBusca = document.getElementById("buscaInfo");
+  if (infoBusca) infoBusca.textContent = "";
+  jogosGrid.innerHTML = "";
+  emptyState.style.display = "block";
+  document.getElementById("emptyMsg").textContent = "Todos os jogos foram limpos. Recarregue a página para restaurar os 176 jogos.";
+  atualizarDashboard();
+  toast("🗑️ Todos os jogos limpos");
+  vibrar([30,20,30]);
+}
 
 document.getElementById("btnExport").addEventListener("click", exportar);
 
