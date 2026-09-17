@@ -1231,8 +1231,19 @@ function renderParticipantesDB(){
   grid.innerHTML = "";
   db.forEach(p=>{
     const div = document.createElement("div");
-    div.style.cssText="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:6px;";
-    div.innerHTML = `<span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;">${p.nome}</span><button onclick="removerParticipanteDB('${p.id}')" style="flex:0 0 auto; background:#fff; border:1px solid var(--border); border-radius:999px; padding:2px 8px; font-size:0.7rem; cursor:pointer;" title="Excluir">✕</button>`;
+    div.style.cssText="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:6px; cursor:pointer;";
+    div.title = "Clique para adicionar este participante ao primeiro bolão visível";
+    div.onclick = ()=> {
+      // Adiciona ao primeiro bolão visível (útil para toque rápido)
+      const primeiroBolao = state.grupos.find(g=>g.ehBolao);
+      if (primeiroBolao){
+        toggleParticipanteNoBolao(primeiroBolao.hash, p.id);
+        toast(`👥 ${p.nome} ${getBolaoParticipantes(primeiroBolao.hash).includes(p.id) ? 'adicionado ao' : 'removido do'} bolão ${primeiroBolao.hash}`);
+      } else {
+        toast(`ℹ️ ${p.nome} — selecione um bolão abaixo e toque em + ${p.nome}`);
+      }
+    };
+    div.innerHTML = `<span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; pointer-events:none;">${p.nome}</span><button onclick="event.stopPropagation(); removerParticipanteDB('${p.id}')" style="flex:0 0 auto; background:#fff; border:1px solid var(--border); border-radius:999px; padding:2px 8px; font-size:0.7rem; cursor:pointer;" title="Excluir">✕</button>`;
     grid.appendChild(div);
   });
   if (info) info.innerHTML = `<b style="color:var(--primary);">${db.length} participantes no banco</b> • Cada bolão pode ter seu próprio subconjunto. Selecione participantes em cada bolão abaixo — a divisão por participante atualiza automaticamente.`;
