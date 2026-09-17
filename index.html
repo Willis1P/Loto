@@ -494,18 +494,19 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </section>
 
-  <!-- Banco de Participantes — dinâmico por bolão -->
+  <!-- Banco de Participantes — dinâmico por bolão + lateral -->
   <section class="panel" id="panelParticipantes" style="margin-top:18px">
     <div class="panel-title">
       <h2 style="font-size:0.95rem;">👥 Banco de Participantes</h2>
       <span class="counter-pill" id="contadorParticipantesDB" style="background:var(--primary); color:#fff;">38 nomes</span>
     </div>
     <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">
-      Cadastre pessoas no banco abaixo. Depois, em <b>cada bolão</b> selecione quem participa — a divisão <b>por participante</b> atualiza automaticamente conforme a quantidade adicionada. Nem todos precisam estar em todos os bolões.
+      Cadastre e selecione quem participa de <b>cada bolão</b> — a divisão <b>por participante</b> e a quantidade atualizam na hora. Use a <b>lateral</b> para selecionar rapidamente.
     </p>
     <div style="display:flex; gap:8px; margin-bottom:10px;">
       <input type="text" id="inputNovoParticipante" placeholder="Novo participante ex: João Silva" style="flex:1; padding:8px 10px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem;">
       <button class="chip on" onclick="adicionarParticipanteDB()" style="flex:0 0 auto;">➕ Adicionar</button>
+      <button class="chip" onclick="toggleSidebarParticipantes()" style="flex:0 0 auto; background:var(--primary); color:#fff;">☰ Lateral</button>
     </div>
     <button class="chip on" id="btnToggleParticipantes" onclick="toggleParticipantes()" style="width:100%; justify-content:center; margin-bottom:12px;">👁️ Mostrar / Editar Banco</button>
     <div id="listaParticipantes" style="display:none;">
@@ -513,6 +514,22 @@ footer.app-footer strong{color:var(--primary)}
       <div id="infoParticipantesDB" style="margin-top:12px; background:linear-gradient(135deg,rgba(147,0,137,0.07),rgba(255,235,59,0.06)); border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:0.72rem; color:var(--text-soft); line-height:1.6; text-align:center;"></div>
     </div>
   </section>
+  <!-- Lateral fixa para seleção rápida -->
+  <div id="sidebarParticipantes" style="position:fixed; top:0; right:-340px; width:320px; max-width:85vw; height:100dvh; background:var(--card); border-left:1px solid var(--border); box-shadow:-8px 0 24px rgba(0,0,0,0.18); z-index:90; transition:right 0.28s cubic-bezier(.34,1.56,.64,1); display:flex; flex-direction:column; overflow:hidden;">
+    <div style="padding:14px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:8px; background:linear-gradient(135deg,rgba(147,0,137,0.06),rgba(255,235,59,0.04));">
+      <b style="font-size:0.85rem; color:var(--primary);">👥 Selecionar participantes</b>
+      <button onclick="toggleSidebarParticipantes()" style="background:#fff; border:1px solid var(--border); border-radius:999px; width:28px; height:28px; font-size:0.9rem; cursor:pointer;">✕</button>
+    </div>
+    <div style="padding:10px 12px; border-bottom:1px solid var(--border); font-size:0.70rem; color:var(--text-soft);">
+      Toque no nome para <b>adicionar/remover</b> do bolão em foco. Quantidade e <b>R$/pessoa</b> atualizam na hora. Total jogos via IA (<span id="sidebarTotalJogos">0</span>).
+    </div>
+    <div id="sidebarLista" style="flex:1; overflow:auto; padding:10px 12px; display:flex; flex-direction:column; gap:6px;"></div>
+    <div style="padding:10px 12px; border-top:1px solid var(--border); display:flex; gap:8px;">
+      <input type="text" id="sidebarInputNovo" placeholder="Novo nome" style="flex:1; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.72rem;">
+      <button onclick="adicionarParticipanteSidebar()" style="padding:8px 10px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; font-size:0.72rem; cursor:pointer;">+ Criar</button>
+    </div>
+  </div>
+  <div id="sidebarOverlay" onclick="toggleSidebarParticipantes()" style="position:fixed; inset:0; background:rgba(0,0,0,0.28); backdrop-filter:blur(2px); z-index:89; display:none;"></div>
 
   <footer class="app-footer">
     <strong id="footerTitle">Lotofácil</strong> · Conferidor Inteligente<br>
@@ -582,9 +599,9 @@ function valorFaixa(pts){
 }
 function faixaEhEstimativa(pts){ return pts === 15 || pts === 14; }
 
-/* ─── 2. BASE DE DADOS — 119 grupos / 0 jogos ───────────────────────── */
+/* ─── 2. BASE DE DADOS — 0 jogos (IA atualiza quantidade) ────────────── */
 /* Formato por linha: PAGINA|TIPO|HASH|JOGO|DEZENAS|DEZENAS_QTD|VALOR|COTA|TOTAL_COTAS|VALOR_COTA */
-const rawGamesData = ``; // todas apostas removidas - 0 jogos
+const rawGamesData = ``; // 0 jogos por padrão — IA via anexos atualiza quantidade de apostas
 
 /* ─── 3. PARSER — agrupa por hash ────────────────────────────────────── */
 function numBR(s){ return parseFloat(String(s).replace(/\./g, "").replace(",", ".")) || 0; }
@@ -1221,7 +1238,76 @@ function getDivisorBolao(g){
     if (custom && custom.length>0) return custom.length;
   }catch(_){}
   return g.totalCotas && g.totalCotas>0 ? g.totalCotas : 1;
-  return g.totalCotas && g.totalCotas>0 ? g.totalCotas : 1;
+}
+let bolaoEmFoco = null;
+function toggleSidebarParticipantes(){
+  const sb = document.getElementById("sidebarParticipantes");
+  const ov = document.getElementById("sidebarOverlay");
+  if (!sb) return;
+  const isOpen = sb.style.right === "0px";
+  if (isOpen){
+    sb.style.right = "-340px";
+    if (ov) ov.style.display = "none";
+  } else {
+    const primeiro = state.grupos.find(g=>g.ehBolao);
+    if (primeiro) bolaoEmFoco = primeiro.hash;
+    renderSidebarParticipantes();
+    const totalEl = document.getElementById("sidebarTotalJogos");
+    if (totalEl) totalEl.textContent = state.grupos.reduce((s,g)=>s+g.jogos.length,0);
+    sb.style.right = "0px";
+    if (ov) ov.style.display = "block";
+  }
+}
+function renderSidebarParticipantes(){
+  const cont = document.getElementById("sidebarLista");
+  if (!cont) return;
+  const db = getParticipantesDB();
+  const hash = bolaoEmFoco || (state.grupos.find(g=>g.ehBolao)?.hash);
+  const ids = hash ? getBolaoParticipantes(hash) : [];
+  cont.innerHTML = "";
+  if (db.length===0){
+    cont.innerHTML = `<div style="font-size:0.72rem; color:var(--text-soft); text-align:center; padding:12px;">Nenhum participante no banco. Adicione abaixo.</div>`;
+    return;
+  }
+  db.forEach(p=>{
+    const isIn = ids.includes(p.id);
+    const div = document.createElement("div");
+    div.style.cssText = `display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border-radius:10px; border:1.5px solid ${isIn ? 'var(--primary)' : 'var(--border)'}; background:${isIn ? 'rgba(147,0,137,0.08)' : 'var(--bg)'}; cursor:pointer;`;
+    div.onclick = () => {
+      if (!hash){ toast("⚠️ Nenhum bolão em foco"); return; }
+      toggleParticipanteNoBolao(hash, p.id);
+      renderSidebarParticipantes();
+    };
+    div.innerHTML = `<span style="flex:1; font-size:0.78rem; font-weight:${isIn?'700':'500'}; color:${isIn?'var(--primary)':'var(--text)'};">${isIn?'✓ ':''}${p.nome}</span><span style="font-size:0.62rem; background:${isIn?'var(--primary)':'#fff'}; color:${isIn?'#fff':'var(--text-soft)'}; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">${isIn?'no bolão':'adicionar'}</span>`;
+    cont.appendChild(div);
+  });
+  const totalEl = document.getElementById("sidebarTotalJogos");
+  if (totalEl) totalEl.textContent = state.grupos.reduce((s,g)=>s+g.jogos.length,0);
+}
+function adicionarParticipanteSidebar(){
+  const el = document.getElementById("sidebarInputNovo");
+  const nome = el ? el.value.trim() : "";
+  if (!nome || nome.length<2){ toast("⚠️ Digite um nome"); return; }
+  let db = getParticipantesDB();
+  if (db.some(p=>p.nome.toLowerCase()===nome.toLowerCase())){ toast("⚠️ Já existe"); return; }
+  const novo = {id:"p"+Date.now(), nome};
+  db.push(novo);
+  setParticipantesDB(db);
+  renderParticipantesDB();
+  renderSidebarParticipantes();
+  if (el) el.value="";
+  toast(`✅ ${nome} criado`);
+  const hash = bolaoEmFoco || (state.grupos.find(g=>g.ehBolao)?.hash);
+  if (hash){
+    const ids = getBolaoParticipantes(hash);
+    if (!ids.includes(novo.id)){
+      ids.push(novo.id);
+      setBolaoParticipantes(hash, ids);
+      conferirTudo();
+      renderizarGrupos();
+      renderSidebarParticipantes();
+    }
+  }
 }
 function renderParticipantesDB(){
   const db = getParticipantesDB();
