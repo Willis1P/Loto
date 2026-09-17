@@ -450,14 +450,12 @@ footer.app-footer strong{color:var(--primary)}
       <h2 style="font-size:0.95rem;">🤖 IA — Verificar foto/PDF e lançar apostas</h2>
       <span class="counter-pill" style="background:var(--primary); color:#fff;">DeepSeek</span>
     </div>
-    <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">Anexe foto ou PDF do volante/comprovante. A IA DeepSeek extrai os números e lança as apostas automaticamente.</p>
+    <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">Anexe foto ou PDF do volante/comprovante. A IA extrai os números e lança as apostas automaticamente (chave já configurada).</p>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
-      <input type="file" id="inputIA" accept="image/*,application/pdf" style="flex:1; min-width:160px; padding:8px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem;">
-      <input type="password" id="inputDeepSeekKey" placeholder="DeepSeek API Key (sk-...)" style="flex:1; min-width:160px; padding:8px 10px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem;">
-      <button class="chip on" id="btnSaveKey" onclick="salvarChaveDeepSeek()" style="flex:0 0 auto;">Salvar chave</button>
+      <input type="file" id="inputIA" accept="image/*,application/pdf" style="flex:1; min-width:200px; padding:8px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem;">
     </div>
     <button id="btnAnalisarIA" onclick="analisarComDeepSeek()" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border:none; border-radius:12px; background:linear-gradient(145deg,#930089,#6d0066); color:#fff; font-weight:800; font-size:0.84rem; cursor:pointer; box-shadow:0 4px 14px rgba(147,0,137,0.28);">
-      🔍 Analisar com DeepSeek e lançar apostas
+      🔍 Analisar e lançar apostas
     </button>
     <div id="iaStatus" style="margin-top:10px; font-size:0.72rem; color:var(--text-soft); min-height:1.2em;"></div>
     <div id="iaExtraido" style="margin-top:10px; display:none; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px; font-size:0.78rem; line-height:1.5; max-height:220px; overflow:auto;"></div>
@@ -1957,27 +1955,15 @@ function restaurarHistorico(){
   } catch(_){}
 }
 const LS_DEEPSEEK_KEY = "deepseek_api_key";
-function salvarChaveDeepSeek(){
-  const el = document.getElementById("inputDeepSeekKey");
-  const v = el ? el.value.trim() : "";
-  if (!v || !v.startsWith("sk-")){ toast("⚠️ Chave DeepSeek inválida (deve começar com sk-)"); return; }
-  try{ localStorage.setItem(LS_DEEPSEEK_KEY, v); toast("✅ Chave DeepSeek salva!"); }catch(_){ toast("⚠️ Erro ao salvar chave"); }
-}
-function carregarChaveDeepSeek(){
-  try{
-    const k = localStorage.getItem(LS_DEEPSEEK_KEY);
-    const el = document.getElementById("inputDeepSeekKey");
-    if (k && el) el.value = k;
-  }catch(_){}
-}
+function salvarChaveDeepSeek(){ /* chave já configurada internamente, não visível no site */ toast("✅ Chave já configurada internamente"); }
+function carregarChaveDeepSeek(){ /* não precisa exibir chave */ }
 async function analisarComDeepSeek(){
   const input = document.getElementById("inputIA");
   const status = document.getElementById("iaStatus");
   const extraidoDiv = document.getElementById("iaExtraido");
-  const keyEl = document.getElementById("inputDeepSeekKey");
-  let apiKey = keyEl ? keyEl.value.trim() : "";
-  if (!apiKey) apiKey = localStorage.getItem(LS_DEEPSEEK_KEY) || "";
-  if (!apiKey || !apiKey.startsWith("sk-")){ toast("⚠️ Configure sua DeepSeek API Key primeiro"); if(status) status.textContent="❌ Chave DeepSeek não configurada. Cole sua sk-... e clique Salvar chave."; return; }
+  // Chave DeepSeek configurada internamente (não visível no site)
+  const apiKey = "sk-88803052750f4dada40a3ea6ef5decf1";
+  if (!apiKey || !apiKey.startsWith("sk-")){ toast("⚠️ Chave DeepSeek não configurada"); if(status) status.textContent="❌ Chave não configurada."; return; }
   if (!input || !input.files || input.files.length===0){ toast("⚠️ Selecione uma foto ou PDF"); if(status) status.textContent="❌ Nenhum arquivo selecionado."; return; }
   const file = input.files[0];
   if (status) status.textContent = `⏳ Lendo ${file.name} (${(file.size/1024).toFixed(1)}KB)...`;
