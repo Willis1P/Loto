@@ -590,20 +590,20 @@ footer.app-footer strong{color:var(--primary)}
    Arquitetura por GRUPO (hash) com rateio de cotas para bolões.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ─── 1. PRÊMIOS — FIXOS DO RELATÓRIO 176 (11=3,50 12=7,00 13=17,50, 14/15 rateio) ──
-   Conforme seu relatório completo 176 jogos com sorteio 01 02 03 04 05 06 07 12 15 16 17 19 21 22 23
-   Mantém 3,50/7/17,50 para bater com comprovantes (ex: Grupo A 10,50 = 7+3,5)
-   Bolão: C(H,P)×C(M,15-P) ÷ totalCotas — ex: 17dz 11pts =15×3,50=52,50/32=1,64
+/* ─── 1. PRÊMIOS — REGRA OFICIAL ATUALIZADA (43,79% + fixos 7/14/35) ──
+   Conforme especificação: 11=7,00 12=14,00 13=35,00 fixos; 14=13% e 15=62% do líquido (10% final0, 15% Independência)
+   Bolão: prêmio total = Σ apostas múltiplas C(S,j)×C(N-S,15-j) × valorFaixa(j) ÷ totalCotas
+   Ex: 17dz S=11 → 15×7=105/32=3,28 por cota
 */
 const PRIZES = Object.freeze({
-  15: 0,        // rateio
-  14: 0,        // variável
-  13: 17.50,    // ✅ FIXO relatório
-  12: 7.00,     // ✅ FIXO
-  11: 3.50      // ✅ FIXO
+  15: 0,        // rateio 62% (Independência 87%)
+  14: 0,        // rateio 13%
+  13: 35.00,    // ✅ FIXO atual Caixa
+  12: 14.00,    // ✅ FIXO atual
+  11: 7.00      // ✅ FIXO atual
 });
-const PRIZE_ESTIMADO_15 = 300000000.00; // ⚠️ R$300MI
-const PRIZE_ESTIMADO_14 = 0;           // 0 até oficial divulgar
+const PRIZE_ESTIMADO_15 = 300000000.00; // ⚠️ R$300MI Independência
+const PRIZE_ESTIMADO_14 = 1500.00;      // estimativa até rateio oficial
 
 /**
  * Retorna o valor unitário de cada faixa.
@@ -871,9 +871,9 @@ function C(n, k){
 }
 
 /**
- * Regra oficial combinatória para 16-20 dezenas: quantidade(P)=C(H,P)×C(M,15-P)
- * Ex: 17dz com 11 acertos e 6 erros → 15×11pts = 52,50 → ÷32 cotas = 1,64 por cota
- * Mantém fixos do relatório 3,50/7/17,50 para bater com comprovantes
+ * Módulo Aposta Múltipla — regra oficial:
+ * Para N apostados e S acertos, combinações premiadas na faixa j = C(S,j)×C(N-S,15-j)
+ * Ex: N=16 S=15 → 1×15 e 15×14 ; N=17 S=11 → 15×11
  */
 function analisarFaixas(hits, misses, qtdDezenas){
   const faixas = {};
