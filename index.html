@@ -1043,27 +1043,30 @@ async function carregarProximoSorteio(){
     ultimoConcursoVisto = j.numero;
     if (titulo) titulo.textContent = `⏰ Próximo Sorteio — Concurso ${proxNum} — ${proxDataStr} — 21h`;
     if (info) info.innerHTML = `Concurso <b>${j.numero}</b> em ${j.dataApuracao} — <b>${(j.listaDezenas||[]).join(" ")}</b> • Próximo <b>${proxNum}</b> em ${proxDataStr} • Estimativa <b>${fmtBRL.format(estimativa)}</b> • ${local}`;
-    // Atualiza cabeçalhos dinâmicos (remove Independência, usa nº do concurso da data)
+    // Atualiza cabeçalhos dinâmicos para PRÓXIMO concurso (mantém bolas manuais)
     const headerTitle = document.getElementById("headerTitle");
     const headerSub = document.getElementById("headerSub");
     const heroSub = document.getElementById("heroSub");
     const footerTitle = document.getElementById("footerTitle");
     const badgeInfo2 = document.getElementById("badgeInfo");
-    if (headerTitle) headerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
-    if (headerSub) headerSub.textContent = `Conferidor Inteligente · ${proxDataStr.split("/")[2] || "2026"}`;
-    if (heroSub) heroSub.textContent = `LOTOFÁCIL • CONCURSO ${j.numero} • ${j.dataApuracao} • ${fmtBRL.format(j.valorArrecadado || 0)}`;
-    if (badgeInfo2) badgeInfo2.textContent = `Concurso ${j.numero} · ${j.dataApuracao}`;
-    if (footerTitle) footerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
-    document.title = `Lotofácil — Concurso ${j.numero} — Conferidor Inteligente`;
-    // Auto-preenche resultado quando sair, se ainda não houver seleção
+    if (headerTitle) headerTitle.textContent = `Lotofácil — Concurso ${proxNum}`;
+    if (headerSub) headerSub.textContent = `Conferidor Inteligente · ${proxDataStr.split("/")[2] || "2026"} · Próx. ${proxDataStr}`;
+    if (heroSub) heroSub.textContent = `LOTOFÁCIL • PRÓXIMO CONCURSO ${proxNum} • ${proxDataStr} • Estimativa ${fmtBRL.format(estimativa)}`;
+    if (badgeInfo2) badgeInfo2.textContent = `Próx. Concurso ${proxNum} · ${proxDataStr} · ${fmtBRL.format(estimativa)}`;
+    if (footerTitle) footerTitle.textContent = `Lotofácil — Concurso ${proxNum}`;
+    document.title = `Lotofácil — Concurso ${proxNum} — Conferidor Inteligente`;
+    // Auto-preenche APENAS se ainda não houver seleção manual (preserva bolas manuais)
     if (j.listaDezenas && j.listaDezenas.length===15 && state.sorteados.size===0){
       const dezenasAuto = j.listaDezenas.map(s=>parseInt(s,10));
-      state.sorteados.clear();
-      dezenasAuto.forEach(n=> state.sorteados.add(n));
-      forcarExibirTodos = true;
-      sincronizarUI();
-      salvarHistorico();
-      toast(`✅ Resultado Concurso ${j.numero} preenchido automaticamente!`);
+      // Não sobrescreve se usuário já está preenchendo manualmente para o próximo concurso
+      if (state.sorteados.size===0){
+        state.sorteados.clear();
+        dezenasAuto.forEach(n=> state.sorteados.add(n));
+        forcarExibirTodos = true;
+        sincronizarUI();
+        salvarHistorico();
+        toast(`✅ Resultado Concurso ${j.numero} preenchido automaticamente!`);
+      }
     }
     atualizarCronometro();
   }catch(e){
