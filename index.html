@@ -782,6 +782,7 @@ function construirGridNumeros(){
   numbersGrid.appendChild(frag);
 }
 let rafPendente = null;
+let cardsRenderizados = false;
 function toggleNumero(n){
   if (state.sorteados.has(n)) state.sorteados.delete(n);
   else {
@@ -801,10 +802,12 @@ function sincronizarUI(){
   const counter = document.getElementById("counter");
   counter.textContent = `${qtd} / 15 selecionados`;
   counter.classList.toggle("full", qtd === 15);
-  document.getElementById("hintTexto").textContent = qtd === 15
+  const hint = document.getElementById("hintTexto");
+  if (hint) hint.textContent = qtd === 15
     ? "✅ Sorteio completo! Resultados calculados com rateio de cotas."
     : `Faltam ${15 - qtd} número(s) para completar o sorteio.`;
   conferirTudo();
+  atualizarCardsRapido();
 }
 
 async function buscarResultadoCaixa(){
@@ -878,7 +881,7 @@ function conferirTudo(){
 
   state.resumo = { bruto, liquido, premiados, ganhou14, ganhou15 };
   atualizarDashboard();
-  renderizarGrupos();
+  cardsRenderizados = true;
   talvezCelebrar();
 }
 
@@ -1051,6 +1054,7 @@ function limparBuscaAposta(){
 }
 function renderizarGrupos(){
   jogosGrid.innerHTML = "";
+  cardsRenderizados = false;
   if (state.grupos.length === 0){
     emptyState.style.display = "block";
     document.getElementById("emptyMsg").textContent = "Nenhum jogo cadastrado. Use a IA para anexar uma foto/PDF ou cole manualmente.";
@@ -1077,6 +1081,38 @@ function renderizarGrupos(){
   const frag = document.createDocumentFragment();
   lista.forEach(g => frag.appendChild(criarCardGrupo(g)));
   jogosGrid.appendChild(frag);
+  cardsRenderizados = true;
+}
+
+function atualizarCardsRapido(){
+  if (!cardsRenderizados) return;
+  const base = state.resultados.length > 0 ? state.resultados : state.grupos.map(g => ({...g, jogos: g.jogos.map(j=>({...j, hits:0, misses:j.qtd})), premioCota:0}));
+  const lista = aplicarFiltro(base);
+  const cards = jogosGrid.querySelectorAll(".jogo-card, .grupo-card");
+  lista.forEach((g, gi) => {
+    const card = cards[gi];
+    if (!card) return;
+    const box = card.querySelector(".jogos-internos");
+    const linhas = box ? box.querySelectorAll(".jogo-linha") : card.querySelectorAll(".jogo-linha");
+    g.jogos.forEach((j, ji) => {
+      if (!linhas[ji]) return;
+      const bolas = linhas[ji].querySelectorAll(".bola");
+      bolas.forEach((b, bi) => {
+        const num = parseInt(b.textContent, 10);
+        if (state.sorteados.has(num)) b.className = "bola hit";
+        else b.className = "bola miss";
+      });
+      const badge = linhas[ji].querySelector(".badge-pts");
+      if (badge) badge.textContent = `${j.hits} PTS`;
+      const premVal = linhas[ji].querySelector(".premio-val");
+      if (j.premiado && premVal){
+        const isBolaoJogo = g.totalCotas && g.totalCotas > 1;
+        const valorExibido = isBolaoJogo ? (j.premioBruto / g.totalCotas) : j.premioBruto;
+        if (isBolaoJogo) premVal.innerHTML = `${fmtBRL.format(valorExibido)}<span style="font-size:0.62rem; color:var(--text-soft); font-weight:600;"> ÷${g.totalCotas}</span>`;
+        else premVal.textContent = fmtBRL.format(j.premioBruto);
+      }
+    });
+  });
 }
 
 function montarBolas(jogo){
