@@ -941,6 +941,7 @@ function atualizarDashboard(){
   if (elDet39) elDet39.textContent = fmtBRL.format(por39);}
 // ─── 10b. CRONÔMETRO 21h — ajustado para próximo sorteio oficial Caixa (bate com dia do sorteio) ──
 let proximoAlvo = null;
+let ultimoConcursoVisto = null;
 function proximoDiaLotofacil(base){
   // Lotofácil: seg(1), qua(3), sex(5) às 21h
   const dias = [1,3,5];
@@ -990,6 +991,40 @@ function atualizarCronometro(){
   }
 }
 setInterval(atualizarCronometro, 1000);
+// A cada 15 min busca atualizações no site da Caixa: próximo concurso, horário premiação (se adiado) e resultados
+setInterval(async ()=>{
+  console.info("[Auto 15min] Verificando atualizações Caixa...");
+  const prevAlvo = proximoAlvo ? new Date(proximoAlvo).toISOString() : null;
+  await carregarProximoSorteio();
+  // Se próximo alvo mudou (adiamento ou novo concurso), notifica
+  if (proximoAlvo && prevAlvo && new Date(proximoAlvo).toISOString() !== prevAlvo){
+    toast(`🔄 Próximo sorteio atualizado para ${new Date(proximoAlvo).toLocaleDateString("pt-BR")} 21h`);
+  }
+  // Se resultado do concurso atual mudou e sorteados ainda é do concurso anterior, auto-atualiza silenciosamente
+  // carregarProximoSorteio já auto-preenche quando sorteados vazio; aqui força verificação mesmo com sorteados preenchido se concurso for novo
+  try{
+    const r = await fetch("https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil", {cache:"no-store"});
+    if (r.ok){
+      const j = await r.json();
+      const dezenasNovas = (j.listaDezenas||[]).map(s=>parseInt(s,10)).sort((a,b)=>a-b).join(",");
+      const atuais = [...state.sorteados].sort((a,b)=>a-b).join(",");
+      if (j.listaDezenas && j.listaDezenas.length===15 && dezenasNovas !== atuais && j.numero !== ultimoConcursoVisto){
+        ultimoConcursoVisto = j.numero;
+        // Só auto-atualiza se ainda não houver 15 selecionados ou se for o mesmo concurso
+        if (state.sorteados.size===0 || confirm(`Novo resultado Concurso ${j.numero} disponível (${j.dataApuracao}). Atualizar conferência automaticamente?`)){
+          state.sorteados.clear();
+          j.listaDezenas.forEach(s=> state.sorteados.add(parseInt(s,10)));
+          forcarExibirTodos = true;
+          sincronizarUI();
+          salvarHistorico();
+          toast(`✅ Resultado ${j.numero} atualizado automaticamente!`);
+        }
+      } else if (j.numero){
+        ultimoConcursoVisto = j.numero;
+      }
+    }
+  }catch(e){ console.warn("Auto verificação 15min falhou", e); }
+}, 15*60*1000);
 async function carregarProximoSorteio(){
   const titulo = document.getElementById("cronometroTitulo");
   const info = document.getElementById("proximoInfo");
@@ -1013,6 +1048,7 @@ async function carregarProximoSorteio(){
       proxDataStr = `${dd2}/${mm2}/${yyyy2}`;
     }
     proximoAlvo = dt;
+    ultimoConcursoVisto = j.numero;
     if (titulo) titulo.textContent = `⏰ Próximo Sorteio — Concurso ${proxNum} — ${proxDataStr} — 21h`;
     if (info) info.innerHTML = `Concurso <b>${j.numero}</b> em ${j.dataApuracao} — <b>${(j.listaDezenas||[]).join(" ")}</b> • Próximo <b>${proxNum}</b> em ${proxDataStr} • Estimativa <b>${fmtBRL.format(estimativa)}</b> • ${local}`;
     // Atualiza cabeçalhos dinâmicos (remove Independência, usa nº do concurso da data)
