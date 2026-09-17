@@ -514,8 +514,8 @@ footer.app-footer strong{color:var(--primary)}
       <div id="infoParticipantesDB" style="margin-top:12px; background:linear-gradient(135deg,rgba(147,0,137,0.07),rgba(255,235,59,0.06)); border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:0.72rem; color:var(--text-soft); line-height:1.6; text-align:center;"></div>
     </div>
   </section>
-  <!-- Lateral fixa para seleção rápida -->
-  <div id="sidebarParticipantes" style="position:fixed; top:0; right:-340px; width:320px; max-width:85vw; height:100dvh; background:var(--card); border-left:1px solid var(--border); box-shadow:-8px 0 24px rgba(0,0,0,0.18); z-index:90; transition:right 0.28s cubic-bezier(.34,1.56,.64,1); display:flex; flex-direction:column; overflow:hidden;">
+  <!-- Lateral fixa para seleção rápida — invertida para esquerda -->
+  <div id="sidebarParticipantes" style="position:fixed; top:0; left:-340px; width:320px; max-width:85vw; height:100dvh; background:var(--card); border-right:1px solid var(--border); box-shadow:8px 0 24px rgba(0,0,0,0.18); z-index:90; transition:left 0.28s cubic-bezier(.34,1.56,.64,1); display:flex; flex-direction:column; overflow:hidden;">
     <div style="padding:14px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:8px; background:linear-gradient(135deg,rgba(147,0,137,0.06),rgba(255,235,59,0.04));">
       <b style="font-size:0.85rem; color:var(--primary);">👥 Selecionar participantes</b>
       <button onclick="toggleSidebarParticipantes()" style="background:#fff; border:1px solid var(--border); border-radius:999px; width:28px; height:28px; font-size:0.9rem; cursor:pointer;">✕</button>
@@ -1244,9 +1244,9 @@ function toggleSidebarParticipantes(){
   const sb = document.getElementById("sidebarParticipantes");
   const ov = document.getElementById("sidebarOverlay");
   if (!sb) return;
-  const isOpen = sb.style.right === "0px";
+  const isOpen = sb.style.left === "0px";
   if (isOpen){
-    sb.style.right = "-340px";
+    sb.style.left = "-340px";
     if (ov) ov.style.display = "none";
   } else {
     const primeiro = state.grupos.find(g=>g.ehBolao);
@@ -1254,7 +1254,7 @@ function toggleSidebarParticipantes(){
     renderSidebarParticipantes();
     const totalEl = document.getElementById("sidebarTotalJogos");
     if (totalEl) totalEl.textContent = state.grupos.reduce((s,g)=>s+g.jogos.length,0);
-    sb.style.right = "0px";
+    sb.style.left = "0px";
     if (ov) ov.style.display = "block";
   }
 }
