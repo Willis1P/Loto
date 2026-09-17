@@ -1,25 +1,32 @@
 {
   "name": "Lotofácil Independência 2026 — Conferidor Inteligente",
   "short_name": "Lotofácil 2026",
-  "description": "Simulador de conferência de apostas da Lotofácil da Independência 2026 - Concurso 3780",
-  "start_url": "./index.html",
+  "description": "Conferidor Inteligente da Lotofácil da Independência 2026 — Concurso 3780. 176 jogos e 11 bolões com rateio por cota. Funciona offline.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1a73e8",
-  "theme_color": "#1a73e8",
+  "background_color": "#1a0033",
+  "theme_color": "#930089",
   "lang": "pt-BR",
   "categories": ["games", "entertainment", "utilities"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%231a73e8'/><text x='256' y='340' font-size='280' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>LF</text></svg>",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%231a73e8'/><circle cx='256' cy='256' r='200' fill='none' stroke='%23ffc107' stroke-width='12'/><text x='256' y='340' font-size='280' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>LF</text></svg>",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ]
