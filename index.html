@@ -959,8 +959,15 @@ function atualizarCronometro(){
   if (!el) return;
   if (diff <= 0){
     el.textContent = "00:00:00";
-    if (leg) leg.textContent = "🔔 Resultado liberado!";
+    if (leg) leg.textContent = "🔔 Sorteio em apuração — buscando resultado...";
+    // Quando zerar, prevalece conferência do dia: busca novo concurso e atualiza
+    if (!el.dataset.zerou){
+      el.dataset.zerou = "1";
+      setTimeout(()=>{ carregarProximoSorteio(); buscarResultadoCaixa(); }, 3000);
+    }
     return;
+  } else {
+    if (el.dataset.zerou) delete el.dataset.zerou;
   }
   const h = Math.floor(diff/3600000);
   const m = Math.floor((diff%3600000)/60000);
