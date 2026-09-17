@@ -459,6 +459,11 @@ footer.app-footer strong{color:var(--primary)}
     </button>
     <div id="iaStatus" style="margin-top:10px; font-size:0.72rem; color:var(--text-soft); min-height:1.2em;"></div>
     <div id="iaExtraido" style="margin-top:10px; display:none; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px; font-size:0.78rem; line-height:1.5; max-height:220px; overflow:auto;"></div>
+    <div style="margin-top:12px; background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px;">
+      <div style="font-size:0.72rem; font-weight:800; color:var(--text); margin-bottom:6px;">✏️ Ou cole manualmente (sem DeepSeek):</div>
+      <textarea id="fallbackManualSempre" placeholder="Cole um jogo por linha ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25" style="width:100%; min-height:60px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea>
+      <button onclick="usarExtracaoManualSempre()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--secondary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais (sempre funciona)</button>
+    </div>
   </section>
 
   <section class="panel" style="margin-top:18px" aria-labelledby="tituloResultados">
@@ -2246,19 +2251,28 @@ async function analisarComDeepSeek(){
   }catch(e){
     console.error("DeepSeek erro", e);
     const is402 = String(e.message).includes("402") || String(e.message).includes("Insufficient Balance");
-    if (is402){
-      if (status) status.innerHTML = `❌ <b>DeepSeek sem saldo (402)</b><br>${e.message}<br><br>👉 <a href="https://platform.deepseek.com/api-keys" target="_blank" style="color:var(--primary); font-weight:700;">Adicionar créditos</a> ou use <b>extração manual</b> abaixo:<br><textarea id="fallbackManual" placeholder="Cole os números ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25 (um jogo por linha)" style="width:100%; min-height:70px; margin-top:8px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea><button onclick="usarExtracaoManual()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais</button>`;
-      toast(`❌ DeepSeek sem saldo — use extração manual`, 4000);
-      // Tenta extração local simples como fallback (lê nome do arquivo)
-      try{
-        const numsLocal = (file.name.match(/\d+/g)||[]).map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25);
-        if (numsLocal.length>=15){
-          if (status) status.innerHTML += `<br><small>Tentativa local: encontrados ${numsLocal.length} números no nome do arquivo — cole manualmente acima se precisar.</small>`;
+    const showManualFallback = ()=>{
+      if (status){
+        const alreadyHasFallback = document.getElementById("fallbackManual");
+        if (!alreadyHasFallback){
+          status.innerHTML += `<br><br><div style="background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px; margin-top:8px;">
+            <b style="color:var(--primary);">✏️ Extração manual (sem DeepSeek):</b><br>
+            <span style="font-size:0.70rem; color:var(--text-soft);">Cole os números abaixo (um jogo por linha) e clique em Usar:</span><br>
+            <textarea id="fallbackManual" placeholder="Ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25&#10;02 05 07 10 11 12 13 14 15 16 17 20 21 24 25" style="width:100%; min-height:70px; margin-top:8px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea>
+            <button onclick="usarExtracaoManual()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais</button>
+          </div>`;
         }
-      }catch(_){}
+      }
+    };
+    if (is402){
+      if (status) status.innerHTML = `❌ <b>DeepSeek sem saldo (402)</b><br>${e.message}<br><br>👉 <a href="https://platform.deepseek.com/api-keys" target="_blank" style="color:var(--primary); font-weight:700;">Adicionar créditos</a> ou use extração manual abaixo:`;
+      toast(`❌ DeepSeek sem saldo — use extração manual`, 5000);
+      showManualFallback();
       return;
     }
-    if (status) status.textContent = `❌ Erro: ${e.message}`;
+    if (status) status.innerHTML = `❌ Erro: ${e.message}<br><br>`;
+    showManualFallback();
+    if (status) status.innerHTML += `<small style="color:var(--text-soft);">Tente novamente ou use a extração manual acima.</small>`;
     toast(`❌ Falha DeepSeek: ${e.message}`);
   }
 }
@@ -2281,6 +2295,27 @@ function usarExtracaoManual(){
     extraidoDiv.innerHTML = `<b>✅ ${jogos.length} jogo(s) via manual:</b><br><pre style="white-space:pre-wrap; word-break:break-word; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos.map((nums,i)=>`Jogo ${i+1}: ${nums.map(n=>String(n).padStart(2,"0")).join(" ")}`).join("\n")}</pre><button class="chip on" style="margin-top:8px; width:100%; justify-content:center;" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos.length} aposta(s)</button>`;
   }
   if (status) status.textContent = `✅ ${jogos.length} jogo(s) pronto(s) via manual`;
+  toast(`✅ ${jogos.length} jogo(s) via manual`);
+}
+function usarExtracaoManualSempre(){
+  const ta = document.getElementById("fallbackManualSempre");
+  const status = document.getElementById("iaStatus");
+  const extraidoDiv = document.getElementById("iaExtraido");
+  if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números primeiro"); return; }
+  const linhas = ta.value.trim().split("\n");
+  const jogos = [];
+  for (const linha of linhas){
+    const nums = (linha.match(/\d+/g)||[]).map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25);
+    const uniq = [...new Set(nums)].sort((a,b)=>a-b);
+    if (uniq.length>=15 && uniq.length<=20) jogos.push(uniq);
+  }
+  if (jogos.length===0){ toast("⚠️ Nenhum jogo válido (15-20 números)"); return; }
+  window._jogosExtraidosIA = jogos;
+  if (extraidoDiv){
+    extraidoDiv.style.display="block";
+    extraidoDiv.innerHTML = `<b>✅ ${jogos.length} jogo(s) via manual (sempre funciona):</b><br><pre style="white-space:pre-wrap; word-break:break-word; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos.map((nums,i)=>`Jogo ${i+1}: ${nums.map(n=>String(n).padStart(2,"0")).join(" ")}`).join("\n")}</pre><button class="chip on" style="margin-top:8px; width:100%; justify-content:center;" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos.length} aposta(s)</button>`;
+  }
+  if (status) status.textContent = `✅ ${jogos.length} jogo(s) pronto(s) via manual (sem DeepSeek)`;
   toast(`✅ ${jogos.length} jogo(s) via manual`);
 }
 function confirmarLancamentoIA(){
