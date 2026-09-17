@@ -2280,6 +2280,28 @@ async function analisarComDeepSeek(){
     if (status) status.innerHTML = `❌ Erro: ${msg}<br><br><div style="background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px; margin-top:8px;"><b>Use extração manual:</b><br><textarea id="fallbackManual" placeholder="Cole os números ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25 (um jogo por linha)" style="width:100%; min-height:70px; margin-top:8px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea><button onclick="usarExtracaoManual()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais</button></div>`;
     toast(`❌ Falha: ${msg}`);
   }
+}
+function usarExtracaoManualSempre(){
+  const ta = document.getElementById("fallbackManualSempre");
+  const status2 = document.getElementById("iaStatus");
+  const extraidoDiv2 = document.getElementById("iaExtraido");
+  if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números primeiro"); return; }
+  const linhas2 = ta.value.trim().split("\n");
+  const jogos2 = [];
+  for (const linha of linhas2){
+    const nums = (linha.match(/\d+/g)||[]).map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25);
+    const uniq = [...new Set(nums)].sort((a,b)=>a-b);
+    if (uniq.length>=15 && uniq.length<=20) jogos2.push(uniq);
+  }
+  if (jogos2.length===0){ toast("⚠️ Nenhum jogo válido (15-20 números)"); return; }
+  window._jogosExtraidosIA = jogos2;
+  if (extraidoDiv2){
+    extraidoDiv2.style.display="block";
+    extraidoDiv2.innerHTML = `<b>✅ ${jogos2.length} jogo(s) via manual (sempre funciona):</b><br><pre style="white-space:pre-wrap; word-break:break-word; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos2.map((nums,i)=>`Jogo ${i+1}: ${nums.map(n=>String(n).padStart(2,"0")).join(" ")}`).join("\n")}</pre><button class="chip on" style="margin-top:8px; width:100%; justify-content:center;" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos2.length} aposta(s)</button>`;
+  }
+  if (status2) status2.textContent = `✅ ${jogos2.length} jogo(s) pronto(s) via manual (sem IA)`;
+  toast(`✅ ${jogos2.length} jogo(s) via manual`);
+}
 function confirmarLancamentoIA(){
   const jogos = window._jogosExtraidosIA;
   if (!jogos || !jogos.length){ toast("⚠️ Nenhum jogo para lançar"); return; }
