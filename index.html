@@ -360,7 +360,6 @@ footer.app-footer strong{color:var(--primary)}
 </style>
 </head>
 <body>
-<button onclick="toggleSidebarParticipantes()" aria-label="Abrir lateral de participantes" style="position:fixed; left:10px; top:46%; z-index:85; background:var(--primary); color:#fff; border:none; border-radius:999px; padding:10px 12px; font-size:0.78rem; font-weight:800; box-shadow:0 4px 14px rgba(0,0,0,0.22); cursor:pointer; display:flex; align-items:center; gap:6px;">☰ Participantes</button>
 <!-- HERO banner lotofacil-capa-2.webp - mantido conforme pedido -->
 <div style="position:relative; width:100%; overflow:hidden; background:#1a0033; border-bottom:4px solid #ff00a0; box-shadow:0 8px 28px rgba(255,0,160,0.35);">
   <img src="loteria-lotofacil.jpg.optimal.jpg" alt="Lotofácil" style="width:100%; height:auto; max-height:380px; object-fit:cover; object-position:center; display:block;" onerror="this.style.display='none'">
@@ -508,8 +507,7 @@ footer.app-footer strong{color:var(--primary)}
       <input type="text" id="inputNovoParticipante" placeholder="Novo participante ex: João Silva" style="flex:1; padding:8px 10px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem;">
       <button class="chip on" onclick="adicionarParticipanteDB()" style="flex:0 0 auto;">➕ Adicionar</button>
     </div>
-    <button class="chip" onclick="toggleSidebarParticipantes()" style="width:100%; justify-content:center; margin-bottom:10px; background:var(--primary); color:#fff;">☰ Abrir lateral esquerda</button>
-    <button class="chip on" id="btnToggleParticipantes" onclick="toggleParticipantes()" style="width:100%; justify-content:center; margin-bottom:12px;">👁️ Mostrar / Editar Banco</button>
+    <button class="chip on" id="btnToggleParticipantes" onclick="toggleSidebarParticipantes()" style="width:100%; justify-content:center; margin-bottom:12px; background:var(--primary); color:#fff;">👥 Participantes</button>
     <div id="listaParticipantes" style="display:none;">
       <div id="gridParticipantesDB" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:7px; font-size:0.74rem; line-height:1.45;"></div>
       <div id="infoParticipantesDB" style="margin-top:12px; background:linear-gradient(135deg,rgba(147,0,137,0.07),rgba(255,235,59,0.06)); border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:0.72rem; color:var(--text-soft); line-height:1.6; text-align:center;"></div>
