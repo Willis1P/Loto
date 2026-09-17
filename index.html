@@ -1202,16 +1202,25 @@ function setParticipantesDB(arr){
 function getBolaoParticipantes(hash){
   try{
     const raw = localStorage.getItem(LS_BOLAO_KEY+"_"+hash);
-    if (raw) return JSON.parse(raw);
+    if (raw){
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
   }catch(_){}
   return [];
 }
 function setBolaoParticipantes(hash, ids){
   try{ localStorage.setItem(LS_BOLAO_KEY+"_"+hash, JSON.stringify(ids)); }catch(_){}
+  // Atualiza divisor no grupo em memória se já carregado
+  const g = state.grupos.find(x=>x.hash===hash);
+  if (g) g._divisorCache = ids.length>0 ? ids.length : (g.totalCotas||1);
 }
 function getDivisorBolao(g){
-  const custom = getBolaoParticipantes(g.hash);
-  if (custom && custom.length>0) return custom.length;
+  try{
+    const custom = getBolaoParticipantes(g.hash);
+    if (custom && custom.length>0) return custom.length;
+  }catch(_){}
+  return g.totalCotas && g.totalCotas>0 ? g.totalCotas : 1;
   return g.totalCotas && g.totalCotas>0 ? g.totalCotas : 1;
 }
 function renderParticipantesDB(){
