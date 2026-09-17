@@ -494,61 +494,23 @@ footer.app-footer strong{color:var(--primary)}
     </div>
   </section>
 
-  <!-- Lista de Participantes — 38 nomes / 39 cotas (1 dividida) -->
+  <!-- Banco de Participantes — dinâmico por bolão -->
   <section class="panel" id="panelParticipantes" style="margin-top:18px">
     <div class="panel-title">
-      <h2 style="font-size:0.95rem;">👥 Participantes do Bolão</h2>
-      <span class="counter-pill" style="background:var(--primary); color:#fff;">39 cotas • 38 nomes • 1 dividida</span>
+      <h2 style="font-size:0.95rem;">👥 Banco de Participantes</h2>
+      <span class="counter-pill" id="contadorParticipantesDB" style="background:var(--primary); color:#fff;">38 nomes</span>
     </div>
     <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">
-      Grupo de participantes da conferência abaixo. Toque em <b>Mostrar Lista</b> para ver todos. <b style="color:var(--primary);">Joilson Bonomo possui 2 cotas</b> e <b>Marcio RC / Reinaldo</b> dividem 1 cota ao meio (0,5 cada).
+      Cadastre pessoas no banco abaixo. Depois, em <b>cada bolão</b> selecione quem participa — a divisão <b>por participante</b> atualiza automaticamente conforme a quantidade adicionada. Nem todos precisam estar em todos os bolões.
     </p>
-    <button class="chip on" id="btnToggleParticipantes" onclick="toggleParticipantes()" style="width:100%; justify-content:center; margin-bottom:12px;">👁️ Mostrar Lista de Participantes</button>
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+      <input type="text" id="inputNovoParticipante" placeholder="Novo participante ex: João Silva" style="flex:1; padding:8px 10px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); font-size:0.78rem;">
+      <button class="chip on" onclick="adicionarParticipanteDB()" style="flex:0 0 auto;">➕ Adicionar</button>
+    </div>
+    <button class="chip on" id="btnToggleParticipantes" onclick="toggleParticipantes()" style="width:100%; justify-content:center; margin-bottom:12px;">👁️ Mostrar / Editar Banco</button>
     <div id="listaParticipantes" style="display:none;">
-      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:7px; font-size:0.74rem; line-height:1.45;">
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>01. Carlos Rodrigues</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>02. Edson Borghi</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>03. José Elias</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>04. Alexsandro Silva</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>05. Nelson UTGC</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>06. Sérgio Mendonça</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>07. Nilson Dias</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>08. Anderson Silva</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>09. Geilson Miranda</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>10. Wagner Divino</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>11. Marcus Vinícius</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>12. Izabete Silva</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,rgba(255,235,59,0.18),#fff); border-color:rgba(212,175,55,0.55);"><span>13. Joilson Bonomo <b style="color:#a67c00;">(2 cotas)</b></span><span style="font-size:0.62rem; background:var(--gold); color:#fff; padding:2px 6px; border-radius:999px; font-weight:800;">2 cotas</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>14. Wellington Capelini</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>15. Giovane Costa</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>16. Reginaldo Biancardi</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>17. Marcio RC</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>18. Elisio Neto</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>19. Gustavo CS Vix</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>20. Valdir Gonzaga</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>21. Adriano Kiko</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>22. Antonio de Jesus</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>23. Lidiana Rodrigues</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>24. Manoel Paulinho</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>25. Anderson Barros</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>26. Jarbas Baiôcco</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>27. Edgard Broca</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>28. Jocemar Augusto</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>29. Willis dos Anjos</span><span style="font-size:0.62rem; background:var(--primary); color:#fff; padding:2px 6px; border-radius:999px; font-weight:800;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>30. Elicassio dos Santos</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>31. Aldair Brunharas</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>32. Ana Lilia</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>33. Cristiane Coutinho</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>34. Jair Rodrigues</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:linear-gradient(135deg,rgba(147,0,137,0.08),rgba(46,204,113,0.08)); border:1px solid rgba(147,0,137,0.22); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>35. Marcio RC / Reinaldo <b style="color:var(--primary);">(dividida)</b></span><span style="font-size:0.62rem; background:linear-gradient(145deg,var(--primary),var(--secondary)); color:#fff; padding:2px 6px; border-radius:999px; font-weight:800;">0,5 + 0,5</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>36. Vantuil</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>37. David de Oliveira</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;"><span>38. Alessandro do TABR</span><span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:2px 6px; border-radius:999px;">1 cota</span></div>
-      </div>
-      <div style="margin-top:12px; background:linear-gradient(135deg,rgba(147,0,137,0.07),rgba(255,235,59,0.06)); border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:0.72rem; color:var(--text-soft); line-height:1.6; text-align:center;">
-        <b style="color:var(--primary);">Total: 38 nomes • 39 cotas • 1 cota dividida ao meio</b><br>
-        Joilson Bonomo = 2 cotas • Marcio RC/Reinaldo = 0,5 cada • Demais = 1 cota cada • Soma = 39 cotas
-      </div>
+      <div id="gridParticipantesDB" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:7px; font-size:0.74rem; line-height:1.45;"></div>
+      <div id="infoParticipantesDB" style="margin-top:12px; background:linear-gradient(135deg,rgba(147,0,137,0.07),rgba(255,235,59,0.06)); border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:0.72rem; color:var(--text-soft); line-height:1.6; text-align:center;"></div>
     </div>
   </section>
 
@@ -859,9 +821,9 @@ function conferirTudo(){
 
     // Soma o prêmio bruto do grupo (todos os jogos internos)
     const premioBrutoGrupo = jogos.reduce((s, j) => s + j.premioBruto, 0);
-    // ⚠️ RATEIO: divide pelo total de cotas (regra da Caixa)
-    const divisor = g.ehBolao && g.totalCotas > 0 ? g.totalCotas : 1;
-    const premioCota = premioBrutoGrupo / divisor;
+    // RATEIO: se bolão tem lista custom de participantes, divide por ela, senão pela Caixa (totalCotas)
+    const divisor = g.ehBolao ? getDivisorBolao(g) : 1;
+    const premioCota = divisor>0 ? premioBrutoGrupo / divisor : 0;
     const tem14 = jogos.some(j => j.hits === 14);
     const tem15 = jogos.some(j => j.hits === 15);
 
@@ -1205,17 +1167,140 @@ function toggleParticipantes(){
   const btn = document.getElementById("btnToggleParticipantes");
   if (!el || !btn) return;
   const isHidden = el.style.display === "none" || !el.style.display || el.style.display === "";
-  // el initially has display:none inline, so first click shows
-  if (el.style.display === "none"){
+  if (isHidden){
+    renderParticipantesDB();
     el.style.display = "block";
-    btn.textContent = "🙈 Ocultar Lista de Participantes";
+    btn.textContent = "🙈 Ocultar / Editar Banco";
     btn.classList.remove("on");
     el.scrollIntoView({behavior:"smooth", block:"start"});
   } else {
     el.style.display = "none";
-    btn.textContent = "👁️ Mostrar Lista de Participantes";
+    btn.textContent = "👁️ Mostrar / Editar Banco";
     btn.classList.add("on");
   }
+}
+// ─── BANCO DE PARTICIPANTES (por bolão) ───────────────────────────────
+const PARTICIPANTES_INICIAIS = ["Carlos Rodrigues","Edson Borghi","José Elias","Alexsandro Silva","Nelson UTGC","Sérgio Mendonça","Nilson Dias","Anderson Silva","Geilson Miranda","Wagner Divino","Marcus Vinícius","Izabete Silva","Joilson Bonomo","Wellington Capelini","Giovane Costa","Reginaldo Biancardi","Marcio RC","Elisio Neto","Gustavo CS Vix","Valdir Gonzaga","Adriano Kiko","Antonio de Jesus","Lidiana Rodrigues","Manoel Paulinho","Anderson Barros","Jarbas Baiôcco","Edgard Broca","Jocemar Augusto","Willis dos Anjos","Elicassio dos Santos","Aldair Brunharas","Ana Lilia","Cristiane Coutinho","Jair Rodrigues","Vantuil","David de Oliveira","Alessandro do TABR","Reinaldo"];
+const LS_DB_KEY = "participantesDB_v2";
+const LS_BOLAO_KEY = "bolaoParticipantes_v2";
+function getParticipantesDB(){
+  try{
+    const raw = localStorage.getItem(LS_DB_KEY);
+    if (raw){
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr.length>0) return arr;
+    }
+  }catch(_){}
+  // inicializa com 38 nomes (1 cota cada, sem divisões fixas)
+  return PARTICIPANTES_INICIAIS.map((nome,i)=>({id:"p"+(i+1), nome}));
+}
+function setParticipantesDB(arr){
+  try{ localStorage.setItem(LS_DB_KEY, JSON.stringify(arr)); }catch(_){}
+  const contador = document.getElementById("contadorParticipantesDB");
+  if (contador) contador.textContent = `${arr.length} nomes`;
+}
+function getBolaoParticipantes(hash){
+  try{
+    const raw = localStorage.getItem(LS_BOLAO_KEY+"_"+hash);
+    if (raw) return JSON.parse(raw);
+  }catch(_){}
+  return [];
+}
+function setBolaoParticipantes(hash, ids){
+  try{ localStorage.setItem(LS_BOLAO_KEY+"_"+hash, JSON.stringify(ids)); }catch(_){}
+}
+function getDivisorBolao(g){
+  const custom = getBolaoParticipantes(g.hash);
+  if (custom && custom.length>0) return custom.length;
+  return g.totalCotas && g.totalCotas>0 ? g.totalCotas : 1;
+}
+function renderParticipantesDB(){
+  const db = getParticipantesDB();
+  const grid = document.getElementById("gridParticipantesDB");
+  const info = document.getElementById("infoParticipantesDB");
+  if (!grid) return;
+  grid.innerHTML = "";
+  db.forEach(p=>{
+    const div = document.createElement("div");
+    div.style.cssText="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:6px;";
+    div.innerHTML = `<span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;">${p.nome}</span><button onclick="removerParticipanteDB('${p.id}')" style="flex:0 0 auto; background:#fff; border:1px solid var(--border); border-radius:999px; padding:2px 8px; font-size:0.7rem; cursor:pointer;" title="Excluir">✕</button>`;
+    grid.appendChild(div);
+  });
+  if (info) info.innerHTML = `<b style="color:var(--primary);">${db.length} participantes no banco</b> • Cada bolão pode ter seu próprio subconjunto. Selecione participantes em cada bolão abaixo — a divisão por participante atualiza automaticamente.`;
+  const contador = document.getElementById("contadorParticipantesDB");
+  if (contador) contador.textContent = `${db.length} nomes`;
+}
+function adicionarParticipanteDB(){
+  const input = document.getElementById("inputNovoParticipante");
+  const nome = input ? input.value.trim() : "";
+  if (!nome || nome.length<2){ toast("⚠️ Digite um nome válido"); return; }
+  const db = getParticipantesDB();
+  if (db.some(p=> p.nome.toLowerCase()===nome.toLowerCase())){ toast("⚠️ Participante já existe no banco"); return; }
+  const novo = {id:"p"+Date.now(), nome};
+  db.push(novo);
+  setParticipantesDB(db);
+  if (input) input.value="";
+  renderParticipantesDB();
+  toast(`✅ ${nome} adicionado ao banco`);
+}
+function removerParticipanteDB(id){
+  if (!confirm("Remover este participante do banco? Ele também será removido de todos os bolões onde está.")) return;
+  let db = getParticipantesDB();
+  const alvo = db.find(p=>p.id===id);
+  db = db.filter(p=>p.id!==id);
+  setParticipantesDB(db);
+  // Remove de todos os bolões
+  try{
+    state.grupos.forEach(g=>{
+      if (!g.ehBolao) return;
+      const ids = getBolaoParticipantes(g.hash);
+      if (ids.includes(id)){
+        setBolaoParticipantes(g.hash, ids.filter(x=>x!==id));
+      }
+    });
+  }catch(_){}
+  renderParticipantesDB();
+  // Re-renderiza bolões para atualizar divisão
+  conferirTudo();
+  toast(`🗑️ ${alvo?alvo.nome:"Participante"} removido`);
+}
+function toggleParticipanteNoBolao(hash, participanteId){
+  const ids = getBolaoParticipantes(hash);
+  const idx = ids.indexOf(participanteId);
+  if (idx>=0) ids.splice(idx,1);
+  else ids.push(participanteId);
+  setBolaoParticipantes(hash, ids);
+  conferirTudo();
+  renderizarGrupos();
+}
+function criarParticipanteEAdicionarAoBolao(hash){
+  const inputId = "inputNovoBolao_"+hash;
+  const el = document.getElementById(inputId);
+  const nome = el ? el.value.trim() : "";
+  if (!nome || nome.length<2){ toast("⚠️ Digite um nome"); return; }
+  let db = getParticipantesDB();
+  let existente = db.find(p=> p.nome.toLowerCase()===nome.toLowerCase());
+  let pid;
+  if (existente){
+    pid = existente.id;
+  } else {
+    const novo = {id:"p"+Date.now(), nome};
+    db.push(novo);
+    setParticipantesDB(db);
+    pid = novo.id;
+    renderParticipantesDB();
+  }
+  const ids = getBolaoParticipantes(hash);
+  if (!ids.includes(pid)){
+    ids.push(pid);
+    setBolaoParticipantes(hash, ids);
+    conferirTudo();
+    renderizarGrupos();
+    toast(`✅ ${nome} adicionado ao bolão`);
+  } else {
+    toast("⚠️ Já está neste bolão");
+  }
+  if (el) el.value="";
 }
 function mostrarTodosJogos(){
   const grid = document.getElementById("jogosGrid");
@@ -1405,15 +1490,21 @@ function criarCardGrupo(g){
   const tit = document.createElement("span");
   tit.className = "grupo-titulo";
   tit.textContent = `Grupo ${String(g.ordem).padStart(3,"0")}`;
+  const divisorAtual = getDivisorBolao(g);
   const meta = document.createElement("span");
   meta.className = "grupo-meta";
-  meta.textContent = `${g.jogos.length} jogo${g.jogos.length>1?"s":""} · ${g.jogos[0].qtd} dezenas · ${g.totalCotas} cotas`;
+  const baseCotasTxt = `${g.totalCotas} cotas (Caixa)`;
+  const customTxt = divisorAtual !== g.totalCotas ? ` → ${divisorAtual} participantes` : "";
+  meta.textContent = `${g.jogos.length} jogo${g.jogos.length>1?"s":""} · ${g.jogos[0].qtd} dezenas · ${baseCotasTxt}${customTxt}`;
   hl.append(tag, tit, meta);
   head.appendChild(hl);
 
   const tot = document.createElement("div");
   tot.className = "grupo-total" + (g.premioCota > 0 ? "" : " zero");
   tot.textContent = g.premioCota > 0 ? fmtBRL.format(g.premioCota) : "Sem prêmio";
+  if (g.ehBolao && divisorAtual !== g.totalCotas){
+    tot.title = `Dividido por ${divisorAtual} participantes (custom) em vez de ${g.totalCotas} cotas Caixa`;
+  }
   head.appendChild(tot);
   card.appendChild(head);
 
@@ -1447,12 +1538,45 @@ function criarCardGrupo(g){
     const retPart = document.createElement("div");
     retPart.style.cssText="background:linear-gradient(135deg,rgba(46,204,113,0.07),rgba(255,255,255,0.9)); border:1px solid rgba(46,204,113,0.22); border-left:4px solid var(--success); border-radius:10px; padding:10px 14px; margin:0 15px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;";
     const rpL = document.createElement("div");
-    rpL.innerHTML = `<div style="font-size:0.68rem; font-weight:800; color:var(--success-dark); text-transform:uppercase; letter-spacing:0.5px;">Retorno dos Participantes</div><div style="font-size:0.72rem; color:var(--text-soft);">Grupo de <b>${g.totalCotas} participantes</b> • cada um com 1 cota • <span style="color:var(--text); font-weight:700;">${premiados.length} jogo${premiados.length>1?'s':''} premiado${premiados.length>1?'s':''}</span></div>`;
+    rpL.innerHTML = `<div style="font-size:0.68rem; font-weight:800; color:var(--success-dark); text-transform:uppercase; letter-spacing:0.5px;">Retorno dos Participantes</div><div style="font-size:0.72rem; color:var(--text-soft);">Grupo de <b>${divisorAtual} participante${divisorAtual>1?'s':''}</b> • cada 1 cota • <span style="color:var(--text); font-weight:700;">${premiados.length} jogo${premiados.length>1?'s':''} premiado${premiados.length>1?'s':''}</span></div>`;
     const rpR = document.createElement("div");
     rpR.style.cssText="text-align:right;";
     rpR.innerHTML = `<div style="font-size:0.62rem; font-weight:700; text-transform:uppercase; color:var(--text-soft); letter-spacing:0.4px;">Por participante</div><div style="font-size:1.15rem; font-weight:900; color:var(--success-dark);">${fmtBRL.format(g.premioCota)}</div><div style="font-size:0.6rem; color:var(--text-soft);">Retorno das Cotas: total ${fmtBRL.format(g.premioBrutoGrupo)} ÷ ${g.totalCotas}</div>`;
     retPart.append(rpL, rpR);
     card.appendChild(retPart);
+    // Gerenciamento de participantes por bolão
+    const partSec = document.createElement("div");
+    partSec.style.cssText="margin:0 15px 12px; background:#f8f5ff; border:1px solid rgba(147,0,137,0.12); border-radius:10px; padding:10px 12px;";
+    const idsBolao = getBolaoParticipantes(g.hash);
+    const dbAll = getParticipantesDB();
+    const qtdPart = idsBolao.length;
+    const perPart = qtdPart>0 ? g.premioBrutoGrupo/qtdPart : 0;
+    partSec.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+        <div style="font-size:0.72rem; font-weight:800; color:var(--primary);">👥 Participantes deste bolão: <b>${qtdPart}</b> ${qtdPart===1?'pessoa':'pessoas'} ${qtdPart>0?`• <span style="color:var(--success-dark);">${fmtBRL.format(perPart)}/pessoa</span>`:``}</div>
+        <span style="font-size:0.62rem; background:#fff; border:1px solid var(--border); padding:3px 7px; border-radius:999px;">${qtdPart>0?`÷${qtdPart}`:`vazio`}</span>
+      </div>
+      <div id="listaBolao_${g.hash}" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; min-height:22px;">
+        ${idsBolao.length===0?`<span style="font-size:0.68rem; color:var(--text-soft);">Nenhum participante ainda. Adicione abaixo.</span>`:
+          idsBolao.map(pid=>{
+            const p = dbAll.find(x=>x.id===pid);
+            const nome = p ? p.nome : pid;
+            return `<span style="display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--border); border-radius:999px; padding:4px 8px; font-size:0.72rem;">${nome}<button onclick="toggleParticipanteNoBolao('${g.hash}','${pid}')" style="background:var(--danger); color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:0.65rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button></span>`;
+          }).join("")}
+      </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+        <select id="selectAddBolao_${g.hash}" style="flex:1; min-width:140px; padding:7px 8px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); font-size:0.72rem;">
+          <option value="">— Selecione do banco —</option>
+          ${dbAll.filter(p=> !idsBolao.includes(p.id)).map(p=>`<option value="${p.id}">${p.nome}</option>`).join("")}
+        </select>
+        <button onclick="const sel=document.getElementById('selectAddBolao_${g.hash}'); if(sel&&sel.value) toggleParticipanteNoBolao('${g.hash}', sel.value);" style="padding:7px 10px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; font-size:0.72rem; cursor:pointer;">+ Adicionar</button>
+      </div>
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <input type="text" id="inputNovoBolao_${g.hash}" placeholder="Novo nome e já adicionar" style="flex:1; padding:7px 8px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); font-size:0.72rem;">
+        <button onclick="criarParticipanteEAdicionarAoBolao('${g.hash}')" style="padding:7px 10px; border:1px solid var(--primary); border-radius:8px; background:#fff; color:var(--primary); font-weight:700; font-size:0.72rem; cursor:pointer;">Criar e adicionar</button>
+      </div>
+    `;
+    card.appendChild(partSec);
   }
 
   // Jogos internos — TODOS visíveis
