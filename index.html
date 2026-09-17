@@ -1076,7 +1076,24 @@ async function carregarProximoSorteio(){
     atualizarCronometro();
   }catch(e){
     console.warn("Falha ao buscar próximo sorteio Caixa", e);
-    // Fallback usa próximo dia Lotofácil a partir de agora
+    // Fallback usa próximo dia Lotofácil a partir de agora e tenta proxy CORS
+    try{
+      const proxyUrl = "https://api.allorigins.win/get?url="+encodeURIComponent("https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil");
+      const rp = await fetch(proxyUrl, {cache:"no-store"});
+      const jp = await rp.json();
+      const jd = JSON.parse(jp.contents);
+      if (jd && jd.dataProximoConcurso){
+        const proxDataStr2 = jd.dataProximoConcurso;
+        const [d2,m2,y2] = proxDataStr2.split("/").map(Number);
+        const dtP = new Date(y2, m2-1, d2, 21,0,0);
+        proximoAlvo = dtP;
+        if (titulo) titulo.textContent = `⏰ Próximo Sorteio — Concurso ${jd.numeroConcursoProximo} — ${proxDataStr2} — 21h`;
+        if (info) info.innerHTML = `Concurso <b>${jd.numero}</b> em ${jd.dataApuracao} — <b>${(jd.listaDezenas||[]).join(" ")}</b> • Próximo <b>${jd.numeroConcursoProximo}</b> em ${proxDataStr2} • Estimativa <b>${fmtBRL.format(jd.valorEstimadoProximoConcurso||2000000)}</b> • ${jd.localSorteio||"ESPAÇO DA SORTE"}`;
+        ultimoConcursoVisto = jd.numero;
+        atualizarCronometro();
+        return;
+      }
+    }catch(e2){ console.warn("Proxy também falhou", e2); }
     let dt2 = proximoDiaLotofacil(new Date());
     proximoAlvo = dt2;
     const ddF = String(dt2.getDate()).padStart(2,"0");
@@ -1084,6 +1101,7 @@ async function carregarProximoSorteio(){
     const yyyyF = dt2.getFullYear();
     if (info) info.textContent = `Próximo sorteio: ${ddF}/${mmF}/${yyyyF} às 21h — Estimativa R$2.000.000,00 (dados locais)`;
     if (titulo) titulo.textContent = `⏰ Próximo Sorteio — ${ddF}/${mmF}/${yyyyF} — 21h`;
+    atualizarCronometro();
     if (titulo) titulo.textContent = "⏰ Próximo Sorteio — Concurso 3781 — 16/09/2026 — 21h";
   }
 }

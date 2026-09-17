@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lotofacil-v13';
+const CACHE_NAME = 'lotofacil-v14';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-512-maskable.png', './lotofacil-capa-2.webp'];
 
 self.addEventListener('install', (e) => {
