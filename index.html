@@ -780,10 +780,11 @@ async function buscarResultadoCaixa(){
   const btn = document.getElementById("btnResultado");
   const info = document.getElementById("resultadoInfo");
   if (btn){ btn.disabled=true; btn.textContent="⏳ Buscando no site da Caixa..."; }
-  if (info) info.textContent="Consultando https://servicebus2.caixa.gov.br ... (Concurso 3780)";
+  if (info) info.textContent="Consultando https://servicebus2.caixa.gov.br ... (concurso atual)";
   const urls = [
-    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3780",
-    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil"
+    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil",
+    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3781",
+    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3782"
   ];
   let dados=null;
   for (const url of urls){
@@ -797,7 +798,7 @@ async function buscarResultadoCaixa(){
   }
   if (!dados){
     try{
-      const proxy = "https://api.allorigins.win/get?url="+encodeURIComponent("https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3780");
+      const proxy = "https://api.allorigins.win/get?url="+encodeURIComponent("https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil");
       const r2 = await fetch(proxy);
       const j2 = await r2.json();
       const cand2 = JSON.parse(j2.contents);
