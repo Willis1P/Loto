@@ -2221,6 +2221,9 @@ async function analisarComDeepSeek(){
     });
     if (!resp.ok){
       const txt = await resp.text();
+      if (resp.status===402){
+        throw new Error(`DeepSeek sem saldo (402 Insufficient Balance): ${txt.slice(0,200)} — Adicione créditos em https://platform.deepseek.com/api-keys/billing ou use extração manual abaixo`);
+      }
       throw new Error(`DeepSeek HTTP ${resp.status}: ${txt.slice(0,300)}`);
     }
     const j = await resp.json();
@@ -2242,9 +2245,43 @@ async function analisarComDeepSeek(){
     toast(`✅ ${jogos.length} jogo(s) extraído(s) via DeepSeek`);
   }catch(e){
     console.error("DeepSeek erro", e);
+    const is402 = String(e.message).includes("402") || String(e.message).includes("Insufficient Balance");
+    if (is402){
+      if (status) status.innerHTML = `❌ <b>DeepSeek sem saldo (402)</b><br>${e.message}<br><br>👉 <a href="https://platform.deepseek.com/api-keys" target="_blank" style="color:var(--primary); font-weight:700;">Adicionar créditos</a> ou use <b>extração manual</b> abaixo:<br><textarea id="fallbackManual" placeholder="Cole os números ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25 (um jogo por linha)" style="width:100%; min-height:70px; margin-top:8px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea><button onclick="usarExtracaoManual()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais</button>`;
+      toast(`❌ DeepSeek sem saldo — use extração manual`, 4000);
+      // Tenta extração local simples como fallback (lê nome do arquivo)
+      try{
+        const numsLocal = (file.name.match(/\d+/g)||[]).map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25);
+        if (numsLocal.length>=15){
+          if (status) status.innerHTML += `<br><small>Tentativa local: encontrados ${numsLocal.length} números no nome do arquivo — cole manualmente acima se precisar.</small>`;
+        }
+      }catch(_){}
+      return;
+    }
     if (status) status.textContent = `❌ Erro: ${e.message}`;
     toast(`❌ Falha DeepSeek: ${e.message}`);
   }
+}
+function usarExtracaoManual(){
+  const ta = document.getElementById("fallbackManual");
+  const status = document.getElementById("iaStatus");
+  const extraidoDiv = document.getElementById("iaExtraido");
+  if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números primeiro"); return; }
+  const linhas = ta.value.trim().split("\n");
+  const jogos = [];
+  for (const linha of linhas){
+    const nums = (linha.match(/\d+/g)||[]).map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25);
+    const uniq = [...new Set(nums)].sort((a,b)=>a-b);
+    if (uniq.length>=15 && uniq.length<=20) jogos.push(uniq);
+  }
+  if (jogos.length===0){ toast("⚠️ Nenhum jogo válido (15-20 números)"); return; }
+  window._jogosExtraidosIA = jogos;
+  if (extraidoDiv){
+    extraidoDiv.style.display="block";
+    extraidoDiv.innerHTML = `<b>✅ ${jogos.length} jogo(s) via manual:</b><br><pre style="white-space:pre-wrap; word-break:break-word; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos.map((nums,i)=>`Jogo ${i+1}: ${nums.map(n=>String(n).padStart(2,"0")).join(" ")}`).join("\n")}</pre><button class="chip on" style="margin-top:8px; width:100%; justify-content:center;" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos.length} aposta(s)</button>`;
+  }
+  if (status) status.textContent = `✅ ${jogos.length} jogo(s) pronto(s) via manual`;
+  toast(`✅ ${jogos.length} jogo(s) via manual`);
 }
 function confirmarLancamentoIA(){
   const jogos = window._jogosExtraidosIA;
