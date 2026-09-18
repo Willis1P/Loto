@@ -6,7 +6,7 @@ const PROVIDERS = [
     url: 'https://integrate.api.nvidia.com/v1/chat/completions',
     keyEnv: 'NVIDIA_API_KEY',
     model: 'meta/llama-3.2-11b-vision-instruct',
-    timeout: 9000  // Aumentado para 9s (limite Vercel 10s)
+    timeout: 9000
   },
   {
     name: 'deepseek',
@@ -14,6 +14,17 @@ const PROVIDERS = [
     keyEnv: 'DEEPSEEK_API_KEY',
     model: 'deepseek-flash',
     timeout: 8000
+  },
+  {
+    name: 'openrouter',
+    url: 'https://openrouter.ai/api/v1/chat/completions',
+    keyEnv: 'OPENROUTER_API_KEY',
+    model: 'openai/gpt-4o-mini',  // vision, barato, rápido
+    timeout: 9000,
+    extraHeaders: {
+      'HTTP-Referer': 'https://loto-coral.vercel.app',
+      'X-Title': 'Lotofácil Conferidor'
+    }
   }
 ];
 
@@ -33,7 +44,8 @@ export default async function handler(req) {
       const headers = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
-        "Accept": useStream ? "text/event-stream" : "application/json"
+        "Accept": useStream ? "text/event-stream" : "application/json",
+        ...(provider.extraHeaders || {})
       };
 
       const providerPayload = {
