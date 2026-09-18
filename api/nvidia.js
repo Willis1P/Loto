@@ -16,7 +16,7 @@ export default async function handler(req) {
     if (reasoning_effort) nvidiaPayload.reasoning_effort = reasoning_effort;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 55000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const resp = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",

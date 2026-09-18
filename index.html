@@ -1607,10 +1607,24 @@ async function analisarComIA(){
       try{ imgDataUrl = await pdfParaImagem(dataUrl); }
       catch(e){ throw new Error("Falha ao converter PDF. Tente uma foto (JPG/PNG)."); }
     }
-    const base64 = imgDataUrl.split(",")[1];
+    // Comprime imagem para reduzir tamanho
+    const img = new Image();
+    img.src = imgDataUrl;
+    await new Promise(r => img.onload = r);
+    const canvas = document.createElement("canvas");
+    const maxW = 800, maxH = 800;
+    let w = img.width, h = img.height;
+    if (w > maxW || h > maxH){
+      const ratio = Math.min(maxW/w, maxH/h);
+      w *= ratio; h *= ratio;
+    }
+    canvas.width = w; canvas.height = h;
+    canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+    const comprimido = canvas.toDataURL("image/jpeg", 0.5);
+    const base64 = comprimido.split(",")[1];
     const mime = isPdf ? "image/png" : (file.type || "image/jpeg");
 
-    if (status) status.innerHTML = "🤖 Enviando para IA (via Vercel Function)...<br><small>Aguarde 10-25s</small>";
+    if (status) status.innerHTML = "🤖 Enviando para IA (via Vercel Function)...<br><small>Aguarde 10-30s</small>";
 
     const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem do volante/comprovante e extraia TODOS os jogos apostados. Cada jogo tem 15 a 20 números entre 01 e 25. Ignore cabeçalhos, valores, datas e números sorteados. Responda APENAS com JSON válido: {"jogos": [[1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], ...]}. Se não encontrar jogos, responda {"jogos":[]}.`;
 
@@ -1623,11 +1637,11 @@ async function analisarComIA(){
           { type: "image_url", image_url: { url: `data:${mime};base64,${base64}` } }
         ]
       }],
-      temperature: 1,
-      max_tokens: 2048,
+      temperature: 0.1,
+      max_tokens: 512,
       seed: 0,
-      stream: true,
-      reasoning_effort: "max"
+      stream: false,
+      reasoning_effort: "low"
     };
 
     // Chama a Function do Vercel (mesma origem, sem CORS, chave protegida no servidor)
@@ -1644,49 +1658,14 @@ async function analisarComIA(){
       throw new Error(`HTTP ${resp.status}: ${detalhe}`);
     }
 
-    const contentType = resp.headers.get("content-type");
-    let conteudo = "";
-
-    if (contentType && contentType.includes("text/event-stream")){
-      // Streaming SSE
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const linhas = buffer.split("\n\n");
-        buffer = linhas.pop();
-        for (const linha of linhas){
-          if (linha.startsWith("data: ")){
-            const dados = linha.slice(6);
-            if (dados === "[DONE]") continue;
-            try {
-              const j = JSON.parse(dados);
-              const delta = j.choices?.[0]?.delta?.content || "";
-              conteudo += delta;
-              if (status) status.textContent = `⏳ Extraindo... ${conteudo.length} chars`;
-            } catch(_){}
-          }
-        }
-      }
-      if (buffer) {
-        if (buffer.startsWith("data: ")){
-          const dados = buffer.slice(6);
-          if (dados !== "[DONE]") try { conteudo += JSON.parse(dados).choices?.[0]?.delta?.content || ""; }catch(_){}
-        }
-      }
-    } else {
-      const textoBruto = await resp.text();
-      if (textoBruto.trim().startsWith("<")){
-        throw new Error(`Function retornou HTML (HTTP ${resp.status}). Verifique logs do Vercel.`);
-      }
-      let j;
-      try{ j = JSON.parse(textoBruto); }
-      catch(err){ throw new Error("Resposta não é JSON: " + textoBruto.slice(0, 200)); }
-      conteudo = j.choices?.[0]?.message?.content || "";
+    const textoBruto = await resp.text();
+    if (textoBruto.trim().startsWith("<")){
+      throw new Error(`Function retornou HTML (HTTP ${resp.status}). Verifique logs do Vercel.`);
     }
+    let j;
+    try{ j = JSON.parse(textoBruto); }
+    catch(err){ throw new Error("Resposta não é JSON: " + textoBruto.slice(0, 200)); }
+    const conteudo = j.choices?.[0]?.message?.content || "";
 
     const jsonMatch = conteudo.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("IA não retornou JSON. Resposta: " + conteudo.slice(0, 300));
