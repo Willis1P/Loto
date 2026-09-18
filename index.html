@@ -1867,130 +1867,8 @@ function removerDuplicatas(jogos){
       chaves.add(key);
       unicos.push(j);
     }
-  }
+}
   return unicos;
-}
-
-/* ─── DEBUG OCR + FORÇAR IA NVIDIA ─────────────────────────────────────── */
-function criarPainelDebugOCR(jogos, info){
-  // Remove painel anterior se existir
-  const antigo = document.getElementById("ocrDebugPanel");
-  if (antigo) antigo.remove();
-  
-  const panel = document.createElement("div");
-  panel.id = "ocrDebugPanel";
-  panel.style.cssText = "position:fixed; bottom:120px; right:10px; left:10px; max-height:40vh; background:#1a1a2e; border:2px solid var(--primary); border-radius:12px; padding:12px; z-index:9999; overflow:auto; color:#fff; font-size:0.7rem; font-family:monospace; box-shadow:0 8px 32px rgba(0,0,0,0.5);";
-  panel.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-      <b>🔍 Debug OCR Local</b>
-      <button onclick="this.parentElement.parentElement.remove()" style="background:var(--danger); color:#fff; border:none; border-radius:50%; width:24px; height:24px; font-size:0.7rem; cursor:pointer;">✕</button>
-    </div>
-    <div style="margin-bottom:8px; color:var(--accent);">${info}</div>
-    <div><b>Jogos extraídos (${jogos.length}):</b></div>
-    <pre style="background:#0f0f1a; padding:8px; border-radius:6px; max-height:200px; overflow:auto; white-space:pre-wrap;">${jogos.map((j,i)=>`Jogo ${i+1}: ${j.map(n=>String(n).padStart(2,'0')).join(' ')}`).join('\n') || 'Nenhum'}</pre>
-    <button onclick="forcarIANvidia(window._lastBase64, window._lastMime)" class="chip" style="margin-top:8px; width:100%;">🤖 Forçar IA Nvidia Agora</button>
-  `;
-  document.body.appendChild(panel);
-}
-
-function mostrarDebugOCR(){
-  const panel = document.getElementById("ocrDebugPanel");
-  if (panel) panel.scrollIntoView({behavior:"smooth"});
-}
-
-async function forcarIANvidia(base64, mime){
-  const status = document.getElementById("iaStatus");
-  const extraidoDiv = document.getElementById("iaExtraido");
-  const panel = document.getElementById("ocrDebugPanel");
-  if (panel) panel.remove();
-  
-  if (status) status.innerHTML = "🤖 <b>Forçando IA Nvidia...</b><br><small>Aguarde 10-30s</small>";
-  
-  const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem do volante/comprovante com ATENÇÃO MÁXIMA e extraia TODOS os jogos apostados.
-
-REGRAS OBRIGATÓRIAS:
-- Cada jogo da Lotofácil tem 15 a 20 números entre 01 e 25
-- Um volante pode ter MÚLTIPLOS jogos (até 10+ jogos por volante)
-- Procure por TODOS os conjuntos de números marcados (bolinhas preenchidas)
-- Ignore: cabeçalhos, valores em R$, datas, números SORTEADOS (resultado), códigos de barras, QR codes
-- Foque APENAS nos números APOSTADOS (marcados pelo apostador)
-- Números podem estar em linhas, colunas, grades ou tabelas
-
-Responda APENAS com JSON válido: {"jogos": [[n1,n2,...n15-20], [n1,n2,...], ...]}.
-Ordene cada jogo crescente. Se não encontrar jogos, responda {"jogos":[]}.
-Exemplo: {"jogos": [[1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], [2,5,6,8,10,11,13,16,17,19,21,22,24,25,12]]}`;
-
-  const payload = {
-    model: "meta/llama-3.2-11b-vision-instruct",
-    messages: [{
-      role: "user",
-      content: [
-        { type: "text", text: systemPrompt },
-        { type: "image_url", image_url: { url: `data:${mime};base64,${base64}`, detail: "high" } }
-      ]
-    }],
-    temperature: 0.05,
-    max_tokens: 1024,
-    seed: 0,
-    stream: false,
-    reasoning_effort: "low"
-  };
-
-  try{
-    const resp = await fetch("/api/nvidia", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    if (!resp.ok){
-      const errText = await resp.text();
-      throw new Error(`HTTP ${resp.status}: ${errText.slice(0,200)}`);
-    }
-
-    const contentType = resp.headers.get("content-type") || "";
-    let conteudo = "";
-    if (contentType.includes("text/event-stream")){
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const linhas = buffer.split("\n\n");
-        buffer = linhas.pop();
-        for (const linha of linhas){
-          if (linha.startsWith("data: ")){
-            const dados = linha.slice(6).trim();
-            if (dados === "[DONE]") continue;
-            try { conteudo += JSON.parse(dados).choices?.[0]?.delta?.content || JSON.parse(dados).choices?.[0]?.message?.content || ""; }catch(_){}
-          }
-        }
-      }
-    } else {
-      const j = await resp.json();
-      conteudo = j.choices?.[0]?.message?.content || j.choices?.[0]?.delta?.content || "";
-    }
-
-    if (!conteudo) throw new Error("IA não retornou conteúdo");
-
-    const jsonMatch = conteudo.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("IA não retornou JSON: " + conteudo.slice(0,200));
-
-    const parsed = JSON.parse(jsonMatch[0]);
-    const jogos = Array.isArray(parsed.jogos) ? parsed.jogos : [];
-    if (jogos.length === 0) throw new Error("Nenhum jogo extraído pela IA");
-
-    await processarJogosExtraidos(jogos, extraidoDiv, status);
-    toast(`✅ IA Nvidia extraiu ${jogos.length} jogo(s)!`);
-  }catch(e){
-    console.error("IA forçada erro:", e);
-    if (status) status.innerHTML = `❌ <b>Erro IA:</b> ${e.message}<br><br>Use <b>extração manual</b> abaixo.`;
-    const fallbackSempre = document.getElementById("fallbackManualSempre");
-    if (fallbackSempre) fallbackSempre.scrollIntoView({behavior:"smooth", block:"center"});
-    toast("❌ IA falhou — use manual");
-  }
 }
 
 async function analisarComIA(){
@@ -2040,44 +1918,39 @@ async function analisarComIA(){
     const base64 = comprimido.split(",")[1];
     const mime = "image/jpeg";
 
-    // Guarda global para forçar IA depois
+    // Guarda global para fallback
     window._lastBase64 = base64;
     window._lastMime = mime;
 
     // 1️⃣ TENTA OCR LOCAL PRIMEIRO (offline, sem timeout, sem API key)
     let jogosOCR = [];
-    let ocrDebugInfo = "";
     try{
       if (status) status.innerHTML = "🔍 <b>1/2</b> OCR Local (Tesseract) analisando...";
       jogosOCR = await extrairComOCR(imgDataUrl); // usa imagem original (melhor qualidade)
       
-      // Debug info para o painel
-      ocrDebugInfo = `OCR tentou 5 configurações. Melhor: ${jogosOCR.length} jogo(s).`;
+      console.log("[AUTO] OCR encontrou:", jogosOCR.length, "jogos");
       
-      // Se OCR achou POUCO (menos que 3), mostra debug e oferece forçar IA
-      if (jogosOCR.length > 0 && jogosOCR.length < 3){
-        if (status) status.innerHTML = `⚠️ OCR achou só ${jogosOCR.length} jogo(s) — pode ter perdido jogos.<br>
-          <button class="chip" onclick="forcarIANvidia('${base64}','${mime}')" style="margin-top:8px;">🤖 Forçar IA Nvidia</button>
-          <button class="chip" onclick="mostrarDebugOCR()" style="margin-top:8px; background:var(--bg);">🔍 Ver debug OCR</button>`;
-        // Cria painel debug oculto
-        criarPainelDebugOCR(jogosOCR, ocrDebugInfo);
-        // NÃO retorna — deixa cair pra Nvidia automaticamente após 3s
-        await new Promise(r => setTimeout(r, 3000));
-      }
-      
-      if (jogosOCR.length >= 3){
+      // SUCESSO OCR: 5+ jogos = confia no OCR (rápido, offline)
+      if (jogosOCR.length >= 5){
         if (status) status.innerHTML = `✅ <b>OCR Local</b> encontrou ${jogosOCR.length} jogo(s)!`;
         await processarJogosExtraidos(jogosOCR, extraidoDiv, status);
-        return; // Sucesso bom!
+        return;
       }
       
-      if (status) status.innerHTML = "⚠️ OCR não achou jogos claros → tentando IA Nvidia...";
+      // OCR MEDÍOCRE (1-4 jogos): tenta Nvidia automaticamente
+      if (jogosOCR.length > 0){
+        if (status) status.innerHTML = `⚠️ OCR achou ${jogosOCR.length} jogo(s) — complementando com IA Nvidia...`;
+      } else {
+        if (status) status.innerHTML = "⚠️ OCR não achou jogos — tentando IA Nvidia...";
+      }
+      
     }catch(e){
-      if (status) status.innerHTML = `⚠️ OCR falhou (${e.message}) → tentando IA Nvidia...`;
       console.warn("OCR falhou:", e);
+      if (status) status.innerHTML = `⚠️ OCR erro (${e.message}) → tentando IA Nvidia...`;
     }
 
-    // 2️⃣ FALLBACK: IA Nvidia (precisa de rede, tem timeout 10s Vercel)
+    // 2️⃣ FALLBACK AUTOMÁTICO: IA Nvidia (rede, timeout 10s Vercel)
+    // Usa imagem original em alta qualidade para IA
     if (status) status.innerHTML = "🤖 <b>2/2</b> Enviando para IA Nvidia...<br><small>Aguarde 10-30s</small>";
 
     const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem do volante/comprovante com ATENÇÃO MÁXIMA e extraia TODOS os jogos apostados.
