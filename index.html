@@ -1569,7 +1569,8 @@ async function extrairComOCR(imgDataUrl){
   }
   if (status) status.innerHTML = "🔍 <b>OCR Local (Tesseract)</b> analisando imagem...<br><small>Primeira vez carrega ~2MB WASM; próximas são instantâneas</small>";
   
-  const { data: { text } } = await Tesseract.recognize(imgDataUrl, 'por', {
+  // Usa recognize com retorno detalhado (linhas, palavras, bounding boxes)
+  const { data: { text, lines, words } } = await Tesseract.recognize(imgDataUrl, 'por', {
     logger: m => {
       if (m.status === 'recognizing text' && status){
         status.innerHTML = `🔍 <b>OCR Local</b> ${(m.progress * 100).toFixed(0)}%...`;
@@ -1577,65 +1578,125 @@ async function extrairComOCR(imgDataUrl){
     }
   });
   
-  if (status) status.textContent = "📝 Processando texto extraído...";
+  if (status) status.textContent = "📝 Processando estrutura do texto...";
   
-  // Parse do texto para encontrar jogos Lotofácil (15-20 números 01-25)
-  const jogos = parseTextoLotofacil(text);
+  // Parse inteligente usando linhas/blocos preservados
+  const jogos = parseTextoLotofacilAvancado(text, lines, words);
   return jogos;
 }
 
-function parseTextoLotofacil(texto){
-  // Normaliza: remove acentos, quebras, múltiplos espaços
+function parseTextoLotofacilAvancado(texto, lines, words){
+  // Estratégia 1: Usa LINHAS do Tesseract (preserva estrutura visual)
+  const jogosPorLinhas = extrairPorLinhas(lines);
+  if (jogosPorLinhas.length > 0) return jogosPorLinhas;
+  
+  // Estratégia 2: Usa PALAVRAS com bounding boxes (agrupa por proximidade Y)
+  const jogosPorPalavras = extrairPorPalavras(words);
+  if (jogosPorPalavras.length > 0) return jogosPorPalavras;
+  
+  // Estratégia 3: Texto bruto com múltiplos algoritmos
+  const jogosBruto = extrairPorTextoBruto(texto);
+  return jogosBruto;
+}
+
+function extrairPorLinhas(lines){
+  if (!lines || !lines.length) return [];
+  
+  const jogos = [];
+  for (const line of lines){
+    const nums = extrairNumerosValidos(line.text || "");
+    if (nums.length >= 15 && nums.length <= 20){
+      const uniq = [...new Set(nums)];
+      if (uniq.length === nums.length){ // sem repetidos na linha
+        jogos.push(uniq.sort((a,b)=>a-b));
+      }
+    }
+  }
+  return removerDuplicatas(jogos);
+}
+
+function extrairPorPalavras(words){
+  if (!words || !words.length) return [];
+  
+  // Agrupa palavras por linha (baseado em bbox Y)
+  const linhas = {};
+  for (const w of words){
+    if (w.confidence < 30) continue; // ignora ruído
+    const nums = extrairNumerosValidos(w.text || "");
+    if (nums.length === 0) continue;
+    
+    const yCenter = (w.bbox?.y0 + w.bbox?.y1) / 2 || 0;
+    const linhaKey = Math.round(yCenter / 10) * 10; // agrupa em faixas de 10px
+    
+    if (!linhas[linhaKey]) linhas[linhaKey] = { nums: [], y: yCenter };
+    linhas[linhaKey].nums.push(...nums);
+  }
+  
+  const jogos = [];
+  for (const key in linhas){
+    const { nums } = linhas[key];
+    const uniq = [...new Set(nums)];
+    if (uniq.length >= 15 && uniq.length <= 20){
+      jogos.push(uniq.sort((a,b)=>a-b));
+    }
+  }
+  return removerDuplicatas(jogos);
+}
+
+function extrairPorTextoBruto(texto){
+  // Normaliza preservando quebras de linha
   const limpo = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\d\s]/g, " ")
-    .replace(/\s+/g, " ")
+    .replace(/[^\d\s\n]/g, " ")
+    .replace(/[ \t]+/g, " ")
     .trim();
   
-  // Extrai todos os números 01-25 (com ou sem zero à esquerda)
-  const nums = limpo.split(" ")
-    .map(s => s.replace(/^0+/, "")) // remove zeros à esquerda
+  const jogos = [];
+  
+  // Tenta por quebras de linha primeiro
+  const linhas = limpo.split("\n");
+  for (const linha of linhas){
+    const nums = linha.trim().split(" ")
+      .map(s => s.replace(/^0+/, ""))
+      .map(s => parseInt(s, 10))
+      .filter(n => !isNaN(n) && n >= 1 && n <= 25);
+    const uniq = [...new Set(nums)];
+    if (uniq.length >= 15 && uniq.length <= 20){
+      jogos.push(uniq.sort((a,b)=>a-b));
+    }
+  }
+  if (jogos.length > 0) return removerDuplicatas(jogos);
+  
+  // Fallback: sliding window no texto todo
+  const allNums = limpo.split(" ")
+    .map(s => s.replace(/^0+/, ""))
     .map(s => parseInt(s, 10))
     .filter(n => !isNaN(n) && n >= 1 && n <= 25);
   
-  if (nums.length === 0) return [];
+  if (allNums.length < 15) return [];
   
-  // Agrupa em jogos de 15-20 números (heurística: quebras de linha, padrões repetidos)
-  // Estratégia: tenta achar grupos de 15 números consecutivos únicos
-  const jogos = [];
-  let buffer = [];
-  const seen = new Set();
-  
-  for (const n of nums){
-    if (!seen.has(n)){
-      buffer.push(n);
-      seen.add(n);
-    } else {
-      // Número repetido = possível fim de jogo
-      if (buffer.length >= 15 && buffer.length <= 20){
-        jogos.push([...buffer].sort((a,b)=>a-b));
-      }
-      buffer = [n];
-      seen.clear();
-      seen.add(n);
-    }
-  }
-  // Último buffer
-  if (buffer.length >= 15 && buffer.length <= 20){
-    jogos.push([...buffer].sort((a,b)=>a-b));
-  }
-  
-  // Fallback: se não achou grupos, tenta dividir em chunks de 15
-  if (jogos.length === 0 && nums.length >= 15){
-    for (let i = 0; i < nums.length; i += 15){
-      const chunk = nums.slice(i, i + 15);
-      if (chunk.length === 15){
-        const unique = [...new Set(chunk)];
-        if (unique.length === 15) jogos.push(unique.sort((a,b)=>a-b));
+  // Tenta janelas de 15-20 números
+  for (let size = 15; size <= 20; size++){
+    for (let i = 0; i <= allNums.length - size; i++){
+      const window = allNums.slice(i, i + size);
+      const uniq = [...new Set(window)];
+      if (uniq.length === size){
+        jogos.push(uniq.sort((a,b)=>a-b));
+        i += size - 1; // pula para depois deste jogo
       }
     }
+    if (jogos.length > 0) break;
   }
   
-  // Remove duplicatas de jogos
+  return removerDuplicatas(jogos);
+}
+
+function extrairNumerosValidos(str){
+  return (str.match(/\b(?:0?[1-9]|1\d|2[0-5])\b/g) || [])
+    .map(s => parseInt(s.replace(/^0+/, ""), 10))
+    .filter(n => n >= 1 && n <= 25);
+}
+
+function removerDuplicatas(jogos){
   const unicos = [];
   const chaves = new Set();
   for (const j of jogos){
