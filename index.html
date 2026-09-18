@@ -1587,7 +1587,7 @@ async function analisarComIA(){
     const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem do volante/comprovante e extraia TODOS os jogos apostados. Cada jogo tem 15 a 20 números entre 01 e 25. Ignore cabeçalhos, valores, datas e números sorteados. Responda APENAS com JSON válido: {"jogos": [[1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], ...]}. Se não encontrar jogos, responda {"jogos":[]}.`;
 
     const payload = {
-      model: "meta/llama-3.2-11b-vision-instruct",
+      model: "moonshotai/kimi-k3",
       messages: [{
         role: "user",
         content: [
@@ -1595,8 +1595,11 @@ async function analisarComIA(){
           { type: "image_url", image_url: { url: `data:${mime};base64,${base64}` } }
         ]
       }],
-      temperature: 0.1,
-      max_tokens: 3000
+      temperature: 1,
+      max_tokens: 16384,
+      seed: 0,
+      stream: false,
+      reasoning_effort: "max"
     };
 
     // Chama a Function do Vercel (mesma origem, sem CORS, chave protegida no servidor)
