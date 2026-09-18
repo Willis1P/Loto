@@ -1658,14 +1658,40 @@ async function analisarComIA(){
       throw new Error(`HTTP ${resp.status}: ${detalhe}`);
     }
 
-    const textoBruto = await resp.text();
-    if (textoBruto.trim().startsWith("<")){
-      throw new Error(`Function retornou HTML (HTTP ${resp.status}). Verifique logs do Vercel.`);
+    // Streaming SSE
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let conteudo = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const linhas = buffer.split("\n\n");
+      buffer = linhas.pop();
+      for (const linha of linhas){
+        if (linha.startsWith("data: ")){
+          const dados = linha.slice(6).trim();
+          if (dados === "[DONE]") continue;
+          try {
+            const j = JSON.parse(dados);
+            const delta = j.choices?.[0]?.delta?.content || "";
+            conteudo += delta;
+            if (status) status.textContent = `⏳ Extraindo... ${conteudo.length} chars`;
+          } catch(_){}
+        }
+      }
     }
-    let j;
-    try{ j = JSON.parse(textoBruto); }
-    catch(err){ throw new Error("Resposta não é JSON: " + textoBruto.slice(0, 200)); }
-    const conteudo = j.choices?.[0]?.message?.content || "";
+    if (buffer) {
+      const linhas = buffer.split("\n\n");
+      for (const linha of linhas){
+        if (linha.startsWith("data: ")){
+          const dados = linha.slice(6).trim();
+          if (dados === "[DONE]") continue;
+          try { conteudo += JSON.parse(dados).choices?.[0]?.delta?.content || ""; }catch(_){}
+        }
+      }
+    }
 
     const jsonMatch = conteudo.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("IA não retornou JSON. Resposta: " + conteudo.slice(0, 300));
