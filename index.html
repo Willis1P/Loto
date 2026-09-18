@@ -1590,12 +1590,12 @@ async function analisarComIA(){
       try{ imgDataUrl = await pdfParaImagem(dataUrl); }
       catch(e){ throw new Error("Falha ao converter PDF. Tente uma foto (JPG/PNG)."); }
     }
-    // Comprime imagem para reduzir tamanho
+    // Comprime imagem mantendo legibilidade dos números
     const img = new Image();
     img.src = imgDataUrl;
     await new Promise(r => img.onload = r);
     const canvas = document.createElement("canvas");
-    const maxW = 600, maxH = 600;
+    const maxW = 1200, maxH = 1200;  // Aumentado de 600 para 1200
     let w = img.width, h = img.height;
     if (w > maxW || h > maxH){
       const ratio = Math.min(maxW/w, maxH/h);
@@ -1603,13 +1603,25 @@ async function analisarComIA(){
     }
     canvas.width = w; canvas.height = h;
     canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-    const comprimido = canvas.toDataURL("image/jpeg", 0.4);
+    const comprimido = canvas.toDataURL("image/jpeg", 0.7);  // Qualidade 0.7 em vez de 0.4
     const base64 = comprimido.split(",")[1];
     const mime = "image/jpeg";
 
     if (status) status.innerHTML = "🤖 Enviando para IA (via Vercel Function)...<br><small>Aguarde 10-30s</small>";
 
-    const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem do volante/comprovante e extraia TODOS os jogos apostados. Cada jogo tem 15 a 20 números entre 01 e 25. Ignore cabeçalhos, valores, datas e números sorteados. Responda APENAS com JSON válido: {"jogos": [[1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], ...]}. Se não encontrar jogos, responda {"jogos":[]}.`;
+    const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem do volante/comprovante com ATENÇÃO MÁXIMA e extraia TODOS os jogos apostados.
+
+REGRAS OBRIGATÓRIAS:
+- Cada jogo da Lotofácil tem 15 a 20 números entre 01 e 25
+- Um volante pode ter MÚLTIPLOS jogos (até 10+ jogos por volante)
+- Procure por TODOS os conjuntos de números marcados (bolinhas preenchidas)
+- Ignore: cabeçalhos, valores em R$, datas, números SORTEADOS (resultado), códigos de barras, QR codes
+- Foque APENAS nos números APOSTADOS (marcados pelo apostador)
+- Números podem estar em linhas, colunas, grades ou tabelas
+
+Responda APENAS com JSON válido: {"jogos": [[n1,n2,...n15-20], [n1,n2,...], ...]}.
+Ordene cada jogo crescente. Se não encontrar jogos, responda {"jogos":[]}.
+Exemplo: {"jogos": [[1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], [2,5,6,8,10,11,13,16,17,19,21,22,24,25,12]]}`;
 
     const payload = {
       model: "meta/llama-3.2-11b-vision-instruct",
@@ -1617,11 +1629,11 @@ async function analisarComIA(){
         role: "user",
         content: [
           { type: "text", text: systemPrompt },
-          { type: "image_url", image_url: { url: `data:${mime};base64,${base64}` } }
+          { type: "image_url", image_url: { url: `data:${mime};base64,${base64}`, detail: "high" } }
         ]
       }],
-      temperature: 0.1,
-      max_tokens: 512,
+      temperature: 0.05,
+      max_tokens: 1024,
       seed: 0,
       stream: false,
       reasoning_effort: "low"

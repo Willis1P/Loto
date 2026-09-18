@@ -5,8 +5,8 @@ export default async function handler(req) {
     const apiKey = process.env.NVIDIA_API_KEY;
     if (!apiKey) return new Response(JSON.stringify({ error: "NVIDIA_API_KEY não configurada" }), { status: 401, headers: { "Content-Type": "application/json" } });
 
-    const { model, messages, temperature, max_tokens } = payload;
-    const useStream = payload.stream === true;
+    const { model, messages, temperature, max_tokens, stream } = payload;
+    const useStream = stream === true;
 
     const nvidiaHeaders = {
       "Content-Type": "application/json",
@@ -17,13 +17,13 @@ export default async function handler(req) {
     const nvidiaPayload = { 
       model: model || "meta/llama-3.2-11b-vision-instruct", 
       messages, 
-      temperature: 0, 
-      max_tokens: 512, 
+      temperature: temperature ?? 0.05, 
+      max_tokens: max_tokens ?? 1024, 
       stream: useStream 
     };
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 7000);
+    const timeoutId = setTimeout(() => controller.abort(), 9000);
 
     const resp = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
