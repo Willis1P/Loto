@@ -1,11 +1,11 @@
 {
   "functions": {
     "api/nvidia.js": {
-      "runtime": "edge",
-      "maxDuration": 30
+      "maxDuration": 30,
+      "memory": 1024
     }
   },
-  "env": {
-    "NVIDIA_API_KEY": "@nvidia_api_key"
-  }
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" }
+  ]
 }
