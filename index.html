@@ -1306,24 +1306,8 @@ function criarCardGrupo(g){
 
   if (g.ehBolao){
     const idsBolao = getBolaoParticipantes(g.hash);
-    const dbAll = getParticipantesDB();
     const qtdPart = idsBolao.length;
-    const partSec = document.createElement("div");
-    partSec.style.cssText="margin:0 15px 12px; background:#f8f5ff; border:1px solid rgba(147,0,137,0.12); border-radius:10px; padding:10px 12px;";
-    partSec.innerHTML = `
-      <div style="font-size:0.72rem; font-weight:800; color:var(--primary); margin-bottom:8px;">👥 Participantes deste grupo: <b>${qtdPart}</b></div>
-      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; min-height:22px;">
-        ${idsBolao.length===0?`<span style="font-size:0.68rem; color:var(--text-soft);">Nenhum participante. Toque abaixo para adicionar.</span>`:
-          idsBolao.map(pid=>{
-            const p = dbAll.find(x=>x.id===pid);
-            return `<span style="display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--border); border-radius:999px; padding:4px 8px; font-size:0.72rem;">${p?p.nome:pid}<button onclick="event.stopPropagation();toggleParticipanteNoBolao('${g.hash}','${pid}')" style="background:var(--danger); color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:0.65rem; cursor:pointer;">✕</button></span>`;
-          }).join("")}
-      </div>
-      <div style="display:flex; flex-wrap:wrap; gap:6px;">
-        ${dbAll.filter(p=> !idsBolao.includes(p.id)).slice(0,8).map(p=>`<button onclick="event.stopPropagation();toggleParticipanteNoBolao('${g.hash}','${p.id}')" style="background:#fff; border:1px solid var(--border); border-radius:999px; padding:4px 8px; font-size:0.68rem; cursor:pointer;">+ ${p.nome}</button>`).join("")}
-      </div>
-    `;
-    card.appendChild(partSec);
+    // Participantes agora só no banco lateral (sidebar)
   }
   return card;
 }
