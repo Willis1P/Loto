@@ -323,6 +323,8 @@ footer.app-footer strong{color:var(--primary)}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 :focus-visible{outline:3px solid var(--accent-deep);outline-offset:3px;border-radius:6px}
 </style>
+<!-- Tesseract.js OCR local (offline, sem timeout, sem API key) -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 <div style="position:relative; width:100%; overflow:hidden; background:#1a0033; border-bottom:4px solid #ff00a0; box-shadow:0 8px 28px rgba(255,0,160,0.35);">
@@ -1560,6 +1562,92 @@ async function pdfParaImagem(dataUrl){
   return canvas.toDataURL("image/png");
 }
 
+/* ─── OCR LOCAL (Tesseract.js) — OFFLINE, SEM TIMEOUT, SEM API KEY ─────── */
+async function extrairComOCR(imgDataUrl){
+  if (!window.Tesseract){
+    throw new Error("Tesseract.js não carregado");
+  }
+  if (status) status.innerHTML = "🔍 <b>OCR Local (Tesseract)</b> analisando imagem...<br><small>Primeira vez carrega ~2MB WASM; próximas são instantâneas</small>";
+  
+  const { data: { text } } = await Tesseract.recognize(imgDataUrl, 'por', {
+    logger: m => {
+      if (m.status === 'recognizing text' && status){
+        status.innerHTML = `🔍 <b>OCR Local</b> ${(m.progress * 100).toFixed(0)}%...`;
+      }
+    }
+  });
+  
+  if (status) status.textContent = "📝 Processando texto extraído...";
+  
+  // Parse do texto para encontrar jogos Lotofácil (15-20 números 01-25)
+  const jogos = parseTextoLotofacil(text);
+  return jogos;
+}
+
+function parseTextoLotofacil(texto){
+  // Normaliza: remove acentos, quebras, múltiplos espaços
+  const limpo = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\d\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  
+  // Extrai todos os números 01-25 (com ou sem zero à esquerda)
+  const nums = limpo.split(" ")
+    .map(s => s.replace(/^0+/, "")) // remove zeros à esquerda
+    .map(s => parseInt(s, 10))
+    .filter(n => !isNaN(n) && n >= 1 && n <= 25);
+  
+  if (nums.length === 0) return [];
+  
+  // Agrupa em jogos de 15-20 números (heurística: quebras de linha, padrões repetidos)
+  // Estratégia: tenta achar grupos de 15 números consecutivos únicos
+  const jogos = [];
+  let buffer = [];
+  const seen = new Set();
+  
+  for (const n of nums){
+    if (!seen.has(n)){
+      buffer.push(n);
+      seen.add(n);
+    } else {
+      // Número repetido = possível fim de jogo
+      if (buffer.length >= 15 && buffer.length <= 20){
+        jogos.push([...buffer].sort((a,b)=>a-b));
+      }
+      buffer = [n];
+      seen.clear();
+      seen.add(n);
+    }
+  }
+  // Último buffer
+  if (buffer.length >= 15 && buffer.length <= 20){
+    jogos.push([...buffer].sort((a,b)=>a-b));
+  }
+  
+  // Fallback: se não achou grupos, tenta dividir em chunks de 15
+  if (jogos.length === 0 && nums.length >= 15){
+    for (let i = 0; i < nums.length; i += 15){
+      const chunk = nums.slice(i, i + 15);
+      if (chunk.length === 15){
+        const unique = [...new Set(chunk)];
+        if (unique.length === 15) jogos.push(unique.sort((a,b)=>a-b));
+      }
+    }
+  }
+  
+  // Remove duplicatas de jogos
+  const unicos = [];
+  const chaves = new Set();
+  for (const j of jogos){
+    const key = j.join(",");
+    if (!chaves.has(key)){
+      chaves.add(key);
+      unicos.push(j);
+    }
+  }
+  return unicos;
+}
+
 async function analisarComIA(){
   const input = document.getElementById("inputIA");
   const status = document.getElementById("iaStatus");
@@ -1607,7 +1695,24 @@ async function analisarComIA(){
     const base64 = comprimido.split(",")[1];
     const mime = "image/jpeg";
 
-    if (status) status.innerHTML = "🤖 Enviando para IA (via Vercel Function)...<br><small>Aguarde 10-30s</small>";
+    // 1️⃣ TENTA OCR LOCAL PRIMEIRO (offline, sem timeout, sem API key)
+    let jogosOCR = [];
+    try{
+      if (status) status.innerHTML = "🔍 <b>1/2</b> OCR Local (Tesseract) analisando...";
+      jogosOCR = await extrairComOCR(imgDataUrl); // usa imagem original (melhor qualidade)
+      if (jogosOCR.length > 0){
+        if (status) status.innerHTML = `✅ <b>OCR Local</b> encontrou ${jogosOCR.length} jogo(s)!`;
+        await processarJogosExtraidos(jogosOCR, extraidoDiv, status);
+        return; // Sucesso! Não precisa chamar Nvidia
+      }
+      if (status) status.innerHTML = "⚠️ OCR não achou jogos claros → tentando IA Nvidia...";
+    }catch(e){
+      if (status) status.innerHTML = `⚠️ OCR falhou (${e.message}) → tentando IA Nvidia...`;
+      console.warn("OCR falhou:", e);
+    }
+
+    // 2️⃣ FALLBACK: IA Nvidia (precisa de rede, tem timeout 10s Vercel)
+    if (status) status.innerHTML = "🤖 <b>2/2</b> Enviando para IA Nvidia...<br><small>Aguarde 10-30s</small>";
 
     const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem do volante/comprovante com ATENÇÃO MÁXIMA e extraia TODOS os jogos apostados.
 
@@ -1707,15 +1812,7 @@ Exemplo: {"jogos": [[1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], [2,5,6,8,10,11,13,
     const jogos = Array.isArray(parsed.jogos) ? parsed.jogos : [];
     if (jogos.length === 0) throw new Error("Nenhum jogo extraído. Tente foto mais nítida ou use extração manual.");
 
-    window._jogosExtraidosIA = jogos;
-    if (extraidoDiv){
-      extraidoDiv.style.display = "block";
-      extraidoDiv.innerHTML = `<b>✅ ${jogos.length} jogo(s) extraído(s):</b>
-        <pre style="white-space:pre-wrap; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos.map((n,i)=>`Jogo ${i+1}: ${n.map(x=>String(x).padStart(2,"0")).join(" ")}`).join("\n")}</pre>
-        <button class="chip on" style="margin-top:8px; width:100%; justify-content:center; background:var(--success); border-color:var(--success);" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos.length} aposta(s)</button>`;
-    }
-    if (status) status.textContent = `✅ ${jogos.length} jogo(s) extraído(s)! Clique em Confirmar.`;
-    toast(`✅ ${jogos.length} jogo(s) extraído(s)`);
+    await processarJogosExtraidos(jogos, extraidoDiv, status);
   } catch(e){
     console.error("IA erro", e);
     const msg = String(e.message || "");
@@ -1770,6 +1867,19 @@ function processarJogosManuais(texto){
   const status = document.getElementById("iaStatus");
   if (status) status.textContent = `✅ ${jogos.length} jogo(s) pronto(s)`;
   toast(`✅ ${jogos.length} jogo(s) pronto(s)`);
+}
+
+/* Função comum para processar jogos extraídos (OCR ou Nvidia) */
+async function processarJogosExtraidos(jogos, extraidoDiv, status){
+  window._jogosExtraidosIA = jogos;
+  if (extraidoDiv){
+    extraidoDiv.style.display = "block";
+    extraidoDiv.innerHTML = `<b>✅ ${jogos.length} jogo(s) extraído(s):</b>
+      <pre style="white-space:pre-wrap; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos.map((n,i)=>`Jogo ${i+1}: ${n.map(x=>String(x).padStart(2,"0")).join(" ")}`).join("\n")}</pre>
+      <button class="chip on" style="margin-top:8px; width:100%; justify-content:center; background:var(--success); border-color:var(--success);" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos.length} aposta(s)</button>`;
+  }
+  if (status) status.textContent = `✅ ${jogos.length} jogo(s) extraído(s)! Clique em Confirmar.`;
+  toast(`✅ ${jogos.length} jogo(s) extraído(s)`);
 }
 
 function confirmarLancamentoIA(){
