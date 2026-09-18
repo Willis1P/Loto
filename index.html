@@ -821,7 +821,12 @@ async function buscarResultadoCaixa(){
     "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil",
     "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3781"
   ];
+  const proxies = [
+    "https://corsproxy.io/?",
+    "https://api.allorigins.win/raw?url="
+  ];
   let dados=null;
+  // Tenta direto com CORS
   for (const url of urls){
     try{
       const r = await fetch(url, {cache:"no-store", mode:"cors"});
@@ -831,8 +836,25 @@ async function buscarResultadoCaixa(){
       if (cand && cand.listaDezenas && cand.listaDezenas.length===15){ dados=cand; break; }
     }catch(e){}
   }
+  // Se falhar, tenta com proxy
+  if (!dados){
+    if (info) info.textContent="⚠️ CORS bloqueado. Tentando proxy...";
+    for (const url of urls){
+      for (const proxy of proxies){
+        try{
+          const proxUrl = proxy + encodeURIComponent(url);
+          const r = await fetch(proxUrl, {cache:"no-store"});
+          if (!r.ok) throw new Error("HTTP "+r.status);
+          const j = await r.json();
+          const cand = Array.isArray(j) ? j[0] : j;
+          if (cand && cand.listaDezenas && cand.listaDezenas.length===15){ dados=cand; break; }
+        }catch(e){}
+      }
+      if (dados) break;
+    }
+  }
   if (!dados || !dados.listaDezenas){
-    if (info) info.textContent="⚠️ Resultado indisponível. Marque manualmente.";
+    if (info) info.textContent="⚠️ Resultado indisponível. Use extração manual.";
     if (btn){ btn.disabled=false; btn.innerHTML="🎯 Resultado — Buscar Oficial Caixa (auto)"; }
     toast("⚠️ Não foi possível buscar o resultado.");
     return;
