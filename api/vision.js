@@ -2,29 +2,11 @@ export const config = { runtime: 'edge' };
 
 const PROVIDERS = [
   {
-    name: 'nvidia',
-    url: 'https://integrate.api.nvidia.com/v1/chat/completions',
-    keyEnv: 'NVIDIA_API_KEY',
-    model: 'meta/llama-3.2-11b-vision-instruct',
-    timeout: 9000
-  },
-  {
     name: 'deepseek',
     url: 'https://api.deepseek.com/chat/completions',
     keyEnv: 'DEEPSEEK_API_KEY',
     model: 'deepseek-flash',
     timeout: 8000
-  },
-  {
-    name: 'openrouter',
-    url: 'https://openrouter.ai/api/v1/chat/completions',
-    keyEnv: 'OPENROUTER_API_KEY',
-    model: 'openai/gpt-4o-mini',  // vision, barato, rápido
-    timeout: 9000,
-    extraHeaders: {
-      'HTTP-Referer': 'https://loto-coral.vercel.app',
-      'X-Title': 'Lotofácil Conferidor'
-    }
   }
 ];
 
