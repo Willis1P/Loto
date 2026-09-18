@@ -6,7 +6,7 @@ const PROVIDERS = [
     url: 'https://integrate.api.nvidia.com/v1/chat/completions',
     keyEnv: 'NVIDIA_API_KEY',
     model: 'meta/llama-3.2-11b-vision-instruct',
-    timeout: 7000
+    timeout: 9000  // Aumentado para 9s (limite Vercel 10s)
   },
   {
     name: 'deepseek',
