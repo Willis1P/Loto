@@ -1590,12 +1590,12 @@ async function analisarComIA(){
       try{ imgDataUrl = await pdfParaImagem(dataUrl); }
       catch(e){ throw new Error("Falha ao converter PDF. Tente uma foto (JPG/PNG)."); }
     }
-    // Comprime imagem mantendo legibilidade dos números
+    // Comprime imagem mantendo legibilidade dos números (otimizado para Vercel 10s)
     const img = new Image();
     img.src = imgDataUrl;
     await new Promise(r => img.onload = r);
     const canvas = document.createElement("canvas");
-    const maxW = 1200, maxH = 1200;  // Aumentado de 600 para 1200
+    const maxW = 800, maxH = 800;  // 800px = equilíbrio legibilidade/tempo
     let w = img.width, h = img.height;
     if (w > maxW || h > maxH){
       const ratio = Math.min(maxW/w, maxH/h);
@@ -1603,7 +1603,7 @@ async function analisarComIA(){
     }
     canvas.width = w; canvas.height = h;
     canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-    const comprimido = canvas.toDataURL("image/jpeg", 0.7);  // Qualidade 0.7 em vez de 0.4
+    const comprimido = canvas.toDataURL("image/jpeg", 0.5);  // 0.5 = bom tamanho/qualidade
     const base64 = comprimido.split(",")[1];
     const mime = "image/jpeg";
 

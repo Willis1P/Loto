@@ -18,12 +18,12 @@ export default async function handler(req) {
       model: model || "meta/llama-3.2-11b-vision-instruct", 
       messages, 
       temperature: temperature ?? 0.05, 
-      max_tokens: max_tokens ?? 1024, 
+      max_tokens: max_tokens ?? 768, 
       stream: useStream 
     };
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 9000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const resp = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
