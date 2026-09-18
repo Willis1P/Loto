@@ -1735,12 +1735,11 @@ async function analisarComIA(){
     } else {
       dica = "ℹ️ Tente foto mais nítida ou use extração manual.";
     }
-    if (status) status.innerHTML = `❌ <b>Erro:</b> ${msg.slice(0, 220)}<br><br>${dica}
-      <div style="background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px; margin-top:10px;">
-        <b>Extração manual (sempre funciona):</b>
-        <textarea id="fallbackManual" placeholder="Cole os números ex: 01 03 04 05 07 09 12 14 15 18 20 21 23 24 25 (um jogo por linha)" style="width:100%; min-height:70px; margin-top:8px; padding:8px; border:1.5px solid var(--border); border-radius:8px; font-size:0.78rem;"></textarea>
-        <button onclick="usarExtracaoManual()" style="margin-top:6px; width:100%; padding:8px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;">Usar números manuais</button>
-      </div>`;
+        if (status) {
+      status.innerHTML = `❌ <b>Erro:</b> ${msg.slice(0, 220)}<br><br>${dica}<br><small style="color:var(--text-soft);">Role até <b>✏️ Ou cole manualmente</b> abaixo (sempre visível).</small>`;
+      const fallbackSempre = document.getElementById("fallbackManualSempre");
+      if (fallbackSempre) fallbackSempre.scrollIntoView({behavior:"smooth", block:"center"});
+    }
     toast("❌ Falha na IA — use extração manual");
   }
 }
