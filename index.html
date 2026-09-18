@@ -1569,20 +1569,90 @@ async function extrairComOCR(imgDataUrl){
   }
   if (status) status.innerHTML = "🔍 <b>OCR Local (Tesseract)</b> analisando imagem...<br><small>Primeira vez carrega ~2MB WASM; próximas são instantâneas</small>";
   
-  // Usa recognize com retorno detalhado (linhas, palavras, bounding boxes)
-  const { data: { text, lines, words } } = await Tesseract.recognize(imgDataUrl, 'por', {
-    logger: m => {
-      if (m.status === 'recognizing text' && status){
-        status.innerHTML = `🔍 <b>OCR Local</b> ${(m.progress * 100).toFixed(0)}%...`;
+  // Múltiplas tentativas com diferentes configurações para maximizar extração
+  let melhorResultado = { jogos: [], detalhes: "" };
+  
+  const configs = [
+    { lang: 'por', dpi: 300, desc: "Português 300 DPI" },
+    { lang: 'por+eng', dpi: 300, desc: "Português+Inglês 300 DPI" },
+    { lang: 'por', dpi: 400, desc: "Português 400 DPI (melhor para números pequenos)" },
+    { lang: 'eng', dpi: 300, desc: "Inglês 300 DPI (números)" }
+  ];
+  
+  for (const cfg of configs){
+    try{
+      if (status) status.innerHTML = `🔍 <b>OCR Local</b> tentando: ${cfg.desc}...`;
+      
+      // Pré-processa imagem para melhorar contraste
+      const enhancedImg = await preProcessarImagemOCR(imgDataUrl);
+      
+      const { data: { text, lines, words } } = await Tesseract.recognize(enhancedImg, cfg.lang, {
+        logger: m => {
+          if (m.status === 'recognizing text' && status){
+            status.innerHTML = `🔍 <b>OCR Local (${cfg.desc})</b> ${(m.progress * 100).toFixed(0)}%...`;
+          }
+        },
+        // Configurações para melhorar reconhecimento de números
+        tessedit_char_whitelist: '0123456789\n\r ',
+        tessedit_pageseg_mode: '6', // Bloco uniforme de texto
+      });
+      
+      if (status) status.textContent = `📝 Processando (${cfg.desc})...`;
+      
+      const jogos = parseTextoLotofacilAvancado(text, lines, words);
+      
+      // Debug: mostra o que foi extraído
+      console.log(`[OCR ${cfg.desc}] Texto bruto (500 chars):`, text.slice(0,500));
+      console.log(`[OCR ${cfg.desc}] Jogos encontrados:`, jogos.length, jogos);
+      
+      if (jogos.length > melhorResultado.jogos.length){
+        melhorResultado = { jogos, detalhes: cfg.desc, text, lines, words };
+        if (status) status.innerHTML = `✅ <b>OCR (${cfg.desc})</b> achou <b>${jogos.length} jogo(s)</b> — melhor até agora`;
       }
+      
+      // Se achou muitos jogos, para aqui (ótimo resultado)
+      if (jogos.length >= 10) break;
+      
+    }catch(e){
+      console.warn(`OCR ${cfg.desc} falhou:`, e);
     }
+  }
+  
+  // Log final para debug
+  console.log(`[OCR FINAL] Melhor: ${melhorResultado.detalhes} → ${melhorResultado.jogos.length} jogos`);
+  if (melhorResultado.text){
+    console.log("[OCR TEXTO COMPLETO]:", melhorResultado.text);
+  }
+  
+  return melhorResultado.jogos;
+}
+
+// Pré-processamento da imagem: aumenta contraste, remove ruído
+async function preProcessarImagemOCR(dataUrl){
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = 2; // 2x para números pequenos
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Aumenta contraste e binariza
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4){
+        const gray = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+        // Threshold adaptativo simples
+        const val = gray > 128 ? 255 : 0;
+        data[i] = data[i+1] = data[i+2] = val;
+      }
+      ctx.putImageData(imageData, 0, 0);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.src = dataUrl;
   });
-  
-  if (status) status.textContent = "📝 Processando estrutura do texto...";
-  
-  // Parse inteligente usando linhas/blocos preservados
-  const jogos = parseTextoLotofacilAvancado(text, lines, words);
-  return jogos;
 }
 
 function parseTextoLotofacilAvancado(texto, lines, words){
@@ -1611,6 +1681,19 @@ function extrairPorLinhas(lines){
         jogos.push(uniq.sort((a,b)=>a-b));
       }
     }
+    // Também tenta combinações parciais na linha (pode ter lixo no meio)
+    if (nums.length > 20){
+      // Sliding window na linha
+      for (let size = 15; size <= 20; size++){
+        for (let i = 0; i <= nums.length - size; i++){
+          const window = nums.slice(i, i + size);
+          const uniq = [...new Set(window)];
+          if (uniq.length === size){
+            jogos.push(uniq.sort((a,b)=>a-b));
+          }
+        }
+      }
+    }
   }
   return removerDuplicatas(jogos);
 }
@@ -1618,29 +1701,91 @@ function extrairPorLinhas(lines){
 function extrairPorPalavras(words){
   if (!words || !words.length) return [];
   
-  // Agrupa palavras por linha (baseado em bbox Y)
-  const linhas = {};
+  // Estratégia A: Agrupa por Y (linhas horizontais)
+  const jogosY = agruparPorCoordenada(words, 'y');
+  
+  // Estratégia B: Agrupa por X (colunas verticais) - para volantes em grade
+  const jogosX = agruparPorCoordenada(words, 'x');
+  
+  // Estratégia C: Grade 5x5 (padrão Lotofácil)
+  const jogosGrade = detectarGradeLotofacil(words);
+  
+  return removerDuplicatas([...jogosY, ...jogosX, ...jogosGrade]);
+}
+
+function agruparPorCoordenada(words, eixo){
+  // eixo: 'y' para linhas, 'x' para colunas
+  const grupos = {};
   for (const w of words){
-    if (w.confidence < 30) continue; // ignora ruído
+    if ((w.confidence || 0) < 25) continue; // mais permissivo
     const nums = extrairNumerosValidos(w.text || "");
     if (nums.length === 0) continue;
     
-    const yCenter = (w.bbox?.y0 + w.bbox?.y1) / 2 || 0;
-    const linhaKey = Math.round(yCenter / 10) * 10; // agrupa em faixas de 10px
+    const coord = eixo === 'y' 
+      ? (w.bbox?.y0 + w.bbox?.y1) / 2 
+      : (w.bbox?.x0 + w.bbox?.x1) / 2;
+    if (!coord) continue;
     
-    if (!linhas[linhaKey]) linhas[linhaKey] = { nums: [], y: yCenter };
-    linhas[linhaKey].nums.push(...nums);
+    // Faixa adaptativa baseada na dispersão
+    const faixa = eixo === 'y' ? 15 : 20; // Y mais preciso, X mais largo
+    const key = Math.round(coord / faixa) * faixa;
+    
+    if (!grupos[key]) grupos[key] = { nums: [], coords: [] };
+    grupos[key].nums.push(...nums);
+    grupos[key].coords.push(coord);
   }
   
   const jogos = [];
-  for (const key in linhas){
-    const { nums } = linhas[key];
+  for (const key in grupos){
+    const { nums } = grupos[key];
     const uniq = [...new Set(nums)];
-    if (uniq.length >= 15 && uniq.length <= 20){
+    // Aceita 14-20 (às vezes OCR perde 1 número)
+    if (uniq.length >= 14 && uniq.length <= 20){
       jogos.push(uniq.sort((a,b)=>a-b));
     }
   }
-  return removerDuplicatas(jogos);
+  return jogos;
+}
+
+function detectarGradeLotofacil(words){
+  // Procura padrão de grade 5x5 ou similar (25 números organizados)
+  // Agrupa por X e Y para formar células
+  const células = {};
+  for (const w of words){
+    if ((w.confidence || 0) < 20) continue;
+    const nums = extrairNumerosValidos(w.text || "");
+    if (nums.length === 0) continue;
+    
+    const cx = (w.bbox?.x0 + w.bbox?.x1) / 2;
+    const cy = (w.bbox?.y0 + w.bbox?.y1) / 2;
+    if (!cx || !cy) continue;
+    
+    const gx = Math.round(cx / 30); // grade X ~30px
+    const gy = Math.round(cy / 30); // grade Y ~30px
+    const key = `${gx},${gy}`;
+    
+    if (!células[key]) células[key] = [];
+    células[key].push(...nums);
+  }
+  
+  // Tenta formar jogos de 15 números a partir da grade
+  const todosNums = [];
+  for (const key in células){
+    const nums = [...new Set(células[key])];
+    todosNums.push(...nums);
+  }
+  
+  const uniq = [...new Set(todosNums)];
+  if (uniq.length >= 15){
+    // Divide em jogos de 15
+    const jogos = [];
+    for (let i = 0; i <= uniq.length - 15; i += 15){
+      const chunk = uniq.slice(i, i + 15);
+      if (chunk.length === 15) jogos.push(chunk.sort((a,b)=>a-b));
+    }
+    return jogos;
+  }
+  return [];
 }
 
 function extrairPorTextoBruto(texto){
@@ -1655,45 +1800,74 @@ function extrairPorTextoBruto(texto){
   // Tenta por quebras de linha primeiro
   const linhas = limpo.split("\n");
   for (const linha of linhas){
-    const nums = linha.trim().split(" ")
-      .map(s => s.replace(/^0+/, ""))
-      .map(s => parseInt(s, 10))
-      .filter(n => !isNaN(n) && n >= 1 && n <= 25);
+    const nums = extrairNumerosValidos(linha);
     const uniq = [...new Set(nums)];
-    if (uniq.length >= 15 && uniq.length <= 20){
+    if (uniq.length >= 14 && uniq.length <= 20){ // 14-20 mais permissivo
       jogos.push(uniq.sort((a,b)=>a-b));
     }
   }
   if (jogos.length > 0) return removerDuplicatas(jogos);
   
-  // Fallback: sliding window no texto todo
-  const allNums = limpo.split(" ")
-    .map(s => s.replace(/^0+/, ""))
-    .map(s => parseInt(s, 10))
-    .filter(n => !isNaN(n) && n >= 1 && n <= 25);
+  // Fallback: sliding window mais agressivo no texto todo
+  const allNums = extrairNumerosValidos(limpo);
   
-  if (allNums.length < 15) return [];
+  if (allNums.length < 14) return [];
   
-  // Tenta janelas de 15-20 números
+  // Múltiplas estratégias de janela
+  // 1. Janelas fixas 15-20
   for (let size = 15; size <= 20; size++){
     for (let i = 0; i <= allNums.length - size; i++){
       const window = allNums.slice(i, i + size);
       const uniq = [...new Set(window)];
-      if (uniq.length === size){
+      if (uniq.length >= 14 && uniq.length <= 20){ // permite 14 se OCR perdeu 1
         jogos.push(uniq.sort((a,b)=>a-b));
-        i += size - 1; // pula para depois deste jogo
+        i += Math.max(14, uniq.length - 1);
       }
     }
     if (jogos.length > 0) break;
+  }
+  
+  // 2. Se ainda vazio, tenta chunks de 15 consecutivos únicos
+  if (jogos.length === 0){
+    let buffer = [];
+    const seen = new Set();
+    for (const n of allNums){
+      if (!seen.has(n)){
+        buffer.push(n);
+        seen.add(n);
+      } else {
+        if (buffer.length >= 14 && buffer.length <= 20){
+          jogos.push([...buffer].sort((a,b)=>a-b));
+        }
+        buffer = [n];
+        seen.clear();
+        seen.add(n);
+      }
+    }
+    if (buffer.length >= 14 && buffer.length <= 20){
+      jogos.push([...buffer].sort((a,b)=>a-b));
+    }
   }
   
   return removerDuplicatas(jogos);
 }
 
 function extrairNumerosValidos(str){
-  return (str.match(/\b(?:0?[1-9]|1\d|2[0-5])\b/g) || [])
-    .map(s => parseInt(s.replace(/^0+/, ""), 10))
-    .filter(n => n >= 1 && n <= 25);
+  // Regex mais robusta: pega 01-25, 1-25, ignora O/I/l confusões comuns
+  const matches = str.match(/\b(?:0?[1-9]|1\d|2[0-5]|[OIl]?[1-9]|1[OIl]|2[OIl])\b/gi) || [];
+  const nums = [];
+  for (const m of matches){
+    // Corrige OCR comum: O→0, I/l→1
+    let corrigido = m
+      .replace(/O/g, '0')
+      .replace(/[Il]/g, '1')
+      .replace(/^0+/, '');
+    const n = parseInt(corrigido, 10);
+    if (!isNaN(n) && n >= 1 && n <= 25){
+      nums.push(n);
+    }
+  }
+  return nums;
 }
 
 function removerDuplicatas(jogos){
