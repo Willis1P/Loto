@@ -1657,45 +1657,47 @@ async function analisarComIA(){
       throw new Error(`HTTP ${resp.status}: ${detalhe}`);
     }
 
-    // Streaming SSE
-    const contentType = resp.headers.get("content-type");
-    if (!contentType || !contentType.includes("text/event-stream")){
-      const textoBruto = await resp.text();
-      throw new Error("IA indisponível. Use extração manual. " + textoBruto.slice(150));
-    }
-
-    const reader = resp.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
+    // Suporta tanto stream (SSE) quanto JSON direto (stream:false) — corrige Unexpected token '<' quando volta HTML
+    const contentType = resp.headers.get("content-type") || "";
     let conteudo = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const linhas = buffer.split("\n\n");
-      buffer = linhas.pop();
-      for (const linha of linhas){
-        if (linha.startsWith("data: ")){
-          const dados = linha.slice(6).trim();
-          if (dados === "[DONE]") continue;
-          try {
-            const j = JSON.parse(dados);
-            const delta = j.choices?.[0]?.delta?.content || "";
-            conteudo += delta;
-            if (status) status.textContent = `⏳ Extraindo... ${conteudo.length} chars`;
-          } catch(_){}
+    if (contentType.includes("text/event-stream")){
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const linhas = buffer.split("\n\n");
+        buffer = linhas.pop();
+        for (const linha of linhas){
+          if (linha.startsWith("data: ")){
+            const dados = linha.slice(6).trim();
+            if (dados === "[DONE]") continue;
+            try {
+              const j = JSON.parse(dados);
+              const delta = j.choices?.[0]?.delta?.content || j.choices?.[0]?.message?.content || "";
+              conteudo += delta;
+              if (status) status.textContent = `⏳ Extraindo... ${conteudo.length} chars`;
+            } catch(_){}
+          }
         }
       }
-    }
-    if (buffer) {
-      const linhas = buffer.split("\n\n");
-      for (const linha of linhas){
-        if (linha.startsWith("data: ")){
-          const dados = linha.slice(6).trim();
-          if (dados === "[DONE]") continue;
-          try { conteudo += JSON.parse(dados).choices?.[0]?.delta?.content || ""; }catch(_){}
+      if (buffer) {
+        const linhas = buffer.split("\n\n");
+        for (const linha of linhas){
+          if (linha.startsWith("data: ")){
+            const dados = linha.slice(6).trim();
+            if (dados === "[DONE]") continue;
+            try { conteudo += JSON.parse(dados).choices?.[0]?.delta?.content || JSON.parse(dados).choices?.[0]?.message?.content || ""; }catch(_){}
+          }
         }
       }
+    } else {
+      // JSON direto (stream:false) — backend retorna {choices:[{message:{content}}]}
+      const j = await resp.json();
+      conteudo = j.choices?.[0]?.message?.content || j.choices?.[0]?.delta?.content || "";
+      if (!conteudo && j.error) throw new Error(j.error);
     }
 
     if (!conteudo){
