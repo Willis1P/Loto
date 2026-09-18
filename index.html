@@ -819,31 +819,37 @@ async function buscarResultadoCaixa(){
 
   const urls = [
     "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil",
-    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3781"
+    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3782"
   ];
   const proxies = [
     "https://corsproxy.io/?",
     "https://api.allorigins.win/raw?url="
   ];
   let dados=null;
-  // Tenta direto com CORS
+  // Tenta direto com CORS (com timeout)
   for (const url of urls){
     try{
-      const r = await fetch(url, {cache:"no-store", mode:"cors"});
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const r = await fetch(url, {cache:"no-store", mode:"cors", signal: controller.signal});
+      clearTimeout(timeoutId);
       if (!r.ok) throw new Error("HTTP "+r.status);
       const j = await r.json();
       const cand = Array.isArray(j) ? j[0] : j;
       if (cand && cand.listaDezenas && cand.listaDezenas.length===15){ dados=cand; break; }
     }catch(e){}
   }
-  // Se falhar, tenta com proxy
+  // Se falhar, tenta com proxy (com timeout)
   if (!dados){
     if (info) info.textContent="⚠️ CORS bloqueado. Tentando proxy...";
     for (const url of urls){
       for (const proxy of proxies){
         try{
           const proxUrl = proxy + encodeURIComponent(url);
-          const r = await fetch(proxUrl, {cache:"no-store"});
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+          const r = await fetch(proxUrl, {cache:"no-store", signal: controller.signal});
+          clearTimeout(timeoutId);
           if (!r.ok) throw new Error("HTTP "+r.status);
           const j = await r.json();
           const cand = Array.isArray(j) ? j[0] : j;
@@ -854,13 +860,13 @@ async function buscarResultadoCaixa(){
     }
   }
   if (!dados || !dados.listaDezenas){
-    if (info) info.textContent="⚠️ Resultado indisponível. Use extração manual.";
+    if (info) info.textContent="⚠️ Site Caixa não acessível. Marque os números manualmente.";
     if (btn){ btn.disabled=false; btn.innerHTML="🎯 Resultado — Buscar Oficial Caixa (auto)"; }
     toast("⚠️ Não foi possível buscar o resultado.");
     return;
   }
   const dezenas = dados.listaDezenas.map(s=>parseInt(s,10));
-  const concurso = dados.numero || "3781";
+  const concurso = dados.numero || "3782";
   state.sorteados.clear();
   dezenas.forEach(n=> state.sorteados.add(n));
   forcarExibirTodos = true;
@@ -1618,9 +1624,9 @@ async function analisarComIA(){
         ]
       }],
       temperature: 1,
-      max_tokens: 16384,
+      max_tokens: 2048,
       seed: 0,
-      stream: false,
+      stream: true,
       reasoning_effort: "max"
     };
 
@@ -1631,24 +1637,59 @@ async function analisarComIA(){
       body: JSON.stringify(payload)
     });
 
-    const textoBruto = await resp.text();
-
-    if (textoBruto.trim().startsWith("<")){
-      throw new Error(`Function retornou HTML (HTTP ${resp.status}). Verifique logs do Vercel.`);
-    }
     if (!resp.ok){
-      let detalhe = textoBruto.slice(0, 250);
-      try{ const j = JSON.parse(textoBruto); detalhe = j.error || detalhe; }catch(_){}
+      const errText = await resp.text();
+      let detalhe = errText.slice(0, 250);
+      try{ const j = JSON.parse(errText); detalhe = j.error || detalhe; }catch(_){}
       throw new Error(`HTTP ${resp.status}: ${detalhe}`);
     }
 
-    let j;
-    try{ j = JSON.parse(textoBruto); }
-    catch(err){ throw new Error("Resposta não é JSON: " + textoBruto.slice(0, 200)); }
+    const contentType = resp.headers.get("content-type");
+    let conteudo = "";
 
-    const content = j.choices?.[0]?.message?.content || "";
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("IA não retornou JSON. Resposta: " + content.slice(0, 300));
+    if (contentType && contentType.includes("text/event-stream")){
+      // Streaming SSE
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const linhas = buffer.split("\n\n");
+        buffer = linhas.pop();
+        for (const linha of linhas){
+          if (linha.startsWith("data: ")){
+            const dados = linha.slice(6);
+            if (dados === "[DONE]") continue;
+            try {
+              const j = JSON.parse(dados);
+              const delta = j.choices?.[0]?.delta?.content || "";
+              conteudo += delta;
+              if (status) status.textContent = `⏳ Extraindo... ${conteudo.length} chars`;
+            } catch(_){}
+          }
+        }
+      }
+      if (buffer) {
+        if (buffer.startsWith("data: ")){
+          const dados = buffer.slice(6);
+          if (dados !== "[DONE]") try { conteudo += JSON.parse(dados).choices?.[0]?.delta?.content || ""; }catch(_){}
+        }
+      }
+    } else {
+      const textoBruto = await resp.text();
+      if (textoBruto.trim().startsWith("<")){
+        throw new Error(`Function retornou HTML (HTTP ${resp.status}). Verifique logs do Vercel.`);
+      }
+      let j;
+      try{ j = JSON.parse(textoBruto); }
+      catch(err){ throw new Error("Resposta não é JSON: " + textoBruto.slice(0, 200)); }
+      conteudo = j.choices?.[0]?.message?.content || "";
+    }
+
+    const jsonMatch = conteudo.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("IA não retornou JSON. Resposta: " + conteudo.slice(0, 300));
 
     const parsed = JSON.parse(jsonMatch[0]);
     const jogos = Array.isArray(parsed.jogos) ? parsed.jogos : [];
