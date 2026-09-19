@@ -1902,60 +1902,108 @@ async function extrairComOCR(imgDataUrl, status){
   if (!window.Tesseract){
     throw new Error("Tesseract.js não carregado");
   }
-  if (status) status.innerHTML = "🔍 <b>OCR Local (Tesseract)</b> analisando imagem...<br><small>Primeira vez carrega ~2MB WASM; próximas são instantâneas</small>";
-  
+  if (status) status.innerHTML = "🔍 <b>OCR Local (Tesseract)</b> analisando imagem...<br><small>Primeira vez carrega ~2MB; próximas são instantâneas</small>";
+
+  // Reduz imagem gigante (foto de celular) — OCR fica 3-5x mais rápido sem perder dígitos
+  let baseImg = imgDataUrl;
+  try { baseImg = await reduzirImagemOCR(imgDataUrl, 1600); } catch(_){}
+
   // Múltiplas tentativas com diferentes configurações
   let melhorResultado = { jogos: [], detalhes: "" };
-  
-  const configs = [
-    // Sem pré-processamento primeiro (preserva qualidade original)
-    { lang: 'por', enhance: false, desc: "Original Português" },
-    { lang: 'por+eng', enhance: false, desc: "Original Por+Eng" },
-    { lang: 'eng', enhance: false, desc: "Original Inglês" },
-    // Com pré-processamento leve
-    { lang: 'por', enhance: true, desc: "Enhanced Português" },
-    { lang: 'eng', enhance: true, desc: "Enhanced Inglês" },
+
+  // Passada rápida (resolve a maioria dos casos em ~1 passada)
+  const fastConfigs = [
+    { lang: 'por', enhance: false, desc: "Português" },
+    { lang: 'por+eng', enhance: false, desc: "Por+Eng" },
   ];
-  
-  for (const cfg of configs){
+  // Passada funda: só se a rápida achou ZERO jogos
+  const deepConfigs = [
+    { lang: 'por', enhance: true, desc: "Realçado PT" },
+    { lang: 'eng', enhance: true, desc: "Realçado EN" },
+  ];
+
+  async function tentar(cfg){
+    if (status) status.innerHTML = `🔍 <b>OCR Local</b> tentando: ${cfg.desc}...`;
+
+    const workImg = cfg.enhance ? await preProcessarImagemOCR(baseImg) : baseImg;
+
+    const { data: { text, lines, words } } = await Tesseract.recognize(workImg, cfg.lang, {
+      logger: m => {
+        if (m.status === 'recognizing text' && status){
+          status.innerHTML = `🔍 <b>OCR Local (${cfg.desc})</b> ${(m.progress * 100).toFixed(0)}%...`;
+        }
+      },
+      // PSM 6 = bloco uniforme, 11 = texto esparso, 12 = palavra única
+      tessedit_pageseg_mode: '11', // Texto esparso funciona melhor para volantes
+    });
+
+    if (status) status.textContent = `📝 Processando (${cfg.desc})...`;
+
+    const jogos = parseTextoLotofacilAvancado(text, lines, words);
+
+    console.log(`[OCR ${cfg.desc}] Texto (200):`, text.slice(0,200));
+    console.log(`[OCR ${cfg.desc}] Jogos:`, jogos.length, jogos);
+
+    if (jogos.length > melhorResultado.jogos.length){
+      melhorResultado = { jogos, detalhes: cfg.desc, text, lines, words };
+      if (status) status.innerHTML = `✅ <b>OCR (${cfg.desc})</b> achou <b>${jogos.length} jogo(s)</b> — melhor`;
+    }
+    return jogos.length;
+  }
+
+  for (const cfg of fastConfigs){
     try{
-      if (status) status.innerHTML = `🔍 <b>OCR Local</b> tentando: ${cfg.desc}...`;
-      
-      const workImg = cfg.enhance ? await preProcessarImagemOCR(imgDataUrl) : imgDataUrl;
-      
-      const { data: { text, lines, words } } = await Tesseract.recognize(workImg, cfg.lang, {
-        logger: m => {
-          if (m.status === 'recognizing text' && status){
-            status.innerHTML = `🔍 <b>OCR Local (${cfg.desc})</b> ${(m.progress * 100).toFixed(0)}%...`;
-          }
-        },
-        // PSM 6 = bloco uniforme, 11 = texto esparso, 12 = palavra única
-        tessedit_pageseg_mode: '11', // Texto esparso funciona melhor para volantes
-      });
-      
-      if (status) status.textContent = `📝 Processando (${cfg.desc})...`;
-      
-      const jogos = parseTextoLotofacilAvancado(text, lines, words);
-      
-      console.log(`[OCR ${cfg.desc}] Texto (200):`, text.slice(0,200));
-      console.log(`[OCR ${cfg.desc}] Jogos:`, jogos.length, jogos);
-      
-      if (jogos.length > melhorResultado.jogos.length){
-        melhorResultado = { jogos, detalhes: cfg.desc, text, lines, words };
-        if (status) status.innerHTML = `✅ <b>OCR (${cfg.desc})</b> achou <b>${jogos.length} jogo(s)</b> — melhor`;
-      }
-      
-      if (jogos.length >= 8) break; // Bom o suficiente
-      
+      await tentar(cfg);
+      if (melhorResultado.jogos.length >= 8) break; // Bom o suficiente
     }catch(e){
       console.warn(`OCR ${cfg.desc} falhou:`, e);
     }
   }
-  
+  // Só aprofunda se não achou nada — evita minutos de processamento à toa
+  if (melhorResultado.jogos.length === 0){
+    for (const cfg of deepConfigs){
+      try{ await tentar(cfg); }
+      catch(e){ console.warn(`OCR ${cfg.desc} falhou:`, e); }
+      if (melhorResultado.jogos.length > 0) break;
+    }
+  }
+
   console.log(`[OCR FINAL] ${melhorResultado.detalhes} → ${melhorResultado.jogos.length} jogos`);
   if (melhorResultado.text) console.log("[TEXTO]:", melhorResultado.text);
-  
+
   return melhorResultado.jogos;
+}
+
+// Reduz imagem para no máximo N px (mantém proporção) — acelera o OCR
+function reduzirImagemOCR(dataUrl, maxLado){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        let w = img.width, h = img.height;
+        if (w > maxLado || h > maxLado){
+          const r = Math.min(maxLado / w, maxLado / h);
+          w = Math.round(w * r); h = Math.round(h * r);
+        }
+        if (w === img.width && h === img.height) return resolve(dataUrl);
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL("image/jpeg", 0.85));
+      } catch(e){ reject(e); }
+    };
+    img.onerror = () => reject(new Error("Falha ao ler imagem para OCR"));
+    img.src = dataUrl;
+  });
+}
+
+// Timeout genérico: evita a tela travar se uma etapa pendurar
+function comTimeout(promise, ms, rotulo){
+  let timer = null;
+  const limite = new Promise((_, rej) => {
+    timer = setTimeout(() => rej(new Error((rotulo || "Etapa") + " demorou demais (> " + Math.round(ms / 1000) + "s)")), ms);
+  });
+  return Promise.race([promise, limite]).finally(() => { if (timer) clearTimeout(timer); });
 }
 
 // Pré-processamento LEVE: só aumenta escala, não binariza (preserva cinza)
@@ -2280,17 +2328,20 @@ async function analisarComIA(){
     window._lastBase64 = base64;
     window._lastMime = mime;
 
-    // 1️⃣ TENTA OCR LOCAL PRIMEIRO (offline, sem timeout, sem API key)
+    // 1️⃣ TENTA OCR LOCAL PRIMEIRO (offline, sem API key)
     // PDF: lê TODAS as páginas e une os jogos (antes só lia a página 1).
+    // Com timeout global de 60s: se o OCR pendurar, cai para a IA em vez de travar a tela.
     let jogosOCR = [];
     try{
       if (status) status.innerHTML = "🔍 <b>1/2</b> OCR Local (Tesseract) analisando...";
-      for (let pi = 0; pi < paginas.length; pi++){
-        if (paginas.length > 1 && status) status.innerHTML = `🔍 <b>1/2</b> OCR Local — página ${pi + 1}/${paginas.length}...`;
-        const parcial = await extrairComOCR(paginas[pi], status); // usa imagem original (melhor qualidade)
-        jogosOCR = unirJogos(jogosOCR, parcial);
-        if (jogosOCR.length >= 8) break;
-      }
+      await comTimeout((async () => {
+        for (let pi = 0; pi < paginas.length; pi++){
+          if (paginas.length > 1 && status) status.innerHTML = `🔍 <b>1/2</b> OCR Local — página ${pi + 1}/${paginas.length}...`;
+          const parcial = await extrairComOCR(paginas[pi], status); // usa imagem original (melhor qualidade)
+          jogosOCR = unirJogos(jogosOCR, parcial);
+          if (jogosOCR.length >= 8) break;
+        }
+      })(), 60000, "OCR local");
       jogosOCR = validarJogosExtraidos(jogosOCR);
 
       console.log("[AUTO] OCR encontrou:", jogosOCR.length, "jogos");
@@ -2348,19 +2399,44 @@ content: [
       reasoning_effort: "low"
     };
 
-    // Chama a Function do Vercel multi-provedor (Nvidia → DeepSeek fallback automático)
-    const resp = await fetch("/api/vision", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    if (!resp.ok){
-      const errText = await resp.text();
-      let detalhe = errText.slice(0, 250);
-      try{ const j = JSON.parse(errText); detalhe = j.error || detalhe; }catch(_){}
-      throw new Error(`HTTP ${resp.status}: ${detalhe}`);
+    // Chama a Function do Vercel UM provedor por vez (cascata no cliente).
+    // Motivo: o plano Hobby limita cada execução a ~10s, então a cascata
+    // dentro de uma única chamada estourava 504. Aqui cada provedor ganha
+    // uma execução própria: DeepSeek → Nvidia → OpenRouter.
+    const provedores = [
+      { id: "deepseek", rotulo: "DeepSeek" },
+      { id: "nvidia", rotulo: "Nvidia" },
+      { id: "openrouter", rotulo: "OpenRouter" }
+    ];
+    let resp = null, provedorOk = "", ultimoErro = "";
+    for (let pi = 0; pi < provedores.length; pi++){
+      const pv = provedores[pi];
+      try {
+        if (status) status.innerHTML = `🤖 <b>2/2</b> IA ${pi + 1}/${provedores.length} (${pv.rotulo})...<br><small>Aguarde ~10s</small>`;
+        const ctl = new AbortController();
+        const tId = setTimeout(() => ctl.abort(), 25000);
+        const r = await fetch("/api/vision", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...payload, provider: pv.id }),
+          signal: ctl.signal
+        });
+        clearTimeout(tId);
+        if (!r.ok){
+          const errText = await r.text();
+          let detalhe = errText.slice(0, 200);
+          try{ const j = JSON.parse(errText); detalhe = j.error || detalhe; }catch(_){}
+          throw new Error(`HTTP ${r.status}: ${detalhe}`);
+        }
+        resp = r; provedorOk = pv.rotulo;
+        break;
+      } catch(e){
+        ultimoErro = e.name === "AbortError" ? "tempo esgotado (25s)" : String(e.message || e);
+        console.warn(`[IA] ${pv.rotulo} falhou:`, ultimoErro);
+      }
     }
+    if (!resp) throw new Error("Todas as IAs falharam (" + ultimoErro.slice(0, 150) + "). Use extração manual.");
+    if (status) status.innerHTML = `✅ <b>${provedorOk}</b> respondeu — lendo resultado...`;
 
     // Suporta tanto stream (SSE) quanto JSON direto (stream:false) — corrige Unexpected token '<' quando volta HTML
     const contentType = resp.headers.get("content-type") || "";

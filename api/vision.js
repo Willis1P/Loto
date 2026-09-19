@@ -1,17 +1,21 @@
 export const config = { runtime: 'edge' };
 
 // Cascata de provedores vision (padrão hackerai: fallback automático).
-// Cada provedor é tentado em ordem; sem chave configurada ele é pulado.
+// O CLIENTE dirige a cascata (um provedor por chamada) porque o plano
+// Hobby limita cada execução a ~10s — 3 tentativas numa chamada só = 504.
+// Cada provedor é tentado com timeout próprio; sem chave, é pulado.
 // Env vars no Vercel: DEEPSEEK_API_KEY, NVIDIA_API_KEY, OPENROUTER_API_KEY
 const PROVIDERS = [
   {
+    id: 'deepseek',
     name: 'deepseek',
     url: 'https://api.deepseek.com/chat/completions',
     keyEnv: 'DEEPSEEK_API_KEY',
     model: 'deepseek-flash',
-    timeout: 8000
+    timeout: 9000
   },
   {
+    id: 'nvidia',
     name: 'nvidia',
     url: 'https://integrate.api.nvidia.com/v1/chat/completions',
     keyEnv: 'NVIDIA_API_KEY',
@@ -19,6 +23,7 @@ const PROVIDERS = [
     timeout: 9000
   },
   {
+    id: 'openrouter',
     name: 'openrouter',
     url: 'https://openrouter.ai/api/v1/chat/completions',
     keyEnv: 'OPENROUTER_API_KEY',
@@ -31,78 +36,105 @@ const PROVIDERS = [
   }
 ];
 
+async function tentarProvedor(provider, payload, useStream) {
+  const apiKey = process.env[provider.keyEnv];
+  if (!apiKey) {
+    console.log(`${provider.name}: chave não configurada (${provider.keyEnv})`);
+    return { skipped: true };
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${apiKey}`,
+    "Accept": useStream ? "text/event-stream" : "application/json",
+    ...(provider.extraHeaders || {})
+  };
+
+  const providerPayload = {
+    model: provider.model,
+    messages: payload.messages,
+    temperature: payload.temperature ?? 0.05,
+    max_tokens: payload.max_tokens ?? 768,
+    stream: useStream
+  };
+
+  console.log(`Tentando ${provider.name}...`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), provider.timeout);
+
+  try {
+    const resp = await fetch(provider.url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(providerPayload),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      console.warn(`${provider.name} erro ${resp.status}:`, errText.slice(0, 200));
+      return { error: `${provider.name}: HTTP ${resp.status} — ${errText.slice(0, 150)}` };
+    }
+
+    console.log(`${provider.name} OK`);
+
+    if (useStream) {
+      return {
+        ok: true,
+        streamed: true,
+        response: new Response(resp.body, {
+          headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "Access-Control-Allow-Origin": "*" }
+        })
+      };
+    }
+    const data = await resp.json();
+    return {
+      ok: true,
+      response: new Response(JSON.stringify(data), {
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      })
+    };
+  } catch (e) {
+    clearTimeout(timeoutId);
+    console.warn(`${provider.name} falhou:`, e.message);
+    return { error: `${provider.name}: ${e.name === 'AbortError' ? 'timeout' : e.message}` };
+  }
+}
+
 export default async function handler(req) {
   try {
     const payload = await req.json();
-    const { model, messages, temperature, max_tokens, stream } = payload;
-    const useStream = stream === true;
+    const useStream = payload.stream === true;
+    const erros = [];
 
-    for (const provider of PROVIDERS) {
-      const apiKey = process.env[provider.keyEnv];
-      if (!apiKey) {
-        console.log(`${provider.name}: chave não configurada (${provider.keyEnv})`);
-        continue;
-      }
-
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "Accept": useStream ? "text/event-stream" : "application/json",
-        ...(provider.extraHeaders || {})
-      };
-
-      const providerPayload = {
-        model: provider.model,
-        messages,
-        temperature: temperature ?? 0.05,
-        max_tokens: max_tokens ?? 768,
-        stream: useStream
-      };
-
-      console.log(`Tentando ${provider.name}...`);
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), provider.timeout);
-
-      try {
-        const resp = await fetch(provider.url, {
-          method: "POST",
-          headers,
-          body: JSON.stringify(providerPayload),
-          signal: controller.signal
+    // Modo dirigido pelo cliente: tenta UM provedor (cada chamada tem 10s próprios)
+    if (payload.provider && payload.provider !== 'auto') {
+      const provider = PROVIDERS.find(p => p.id === payload.provider || p.name === payload.provider);
+      if (!provider) {
+        return new Response(JSON.stringify({ error: `Provedor desconhecido: ${payload.provider}` }), {
+          status: 400, headers: { "Content-Type": "application/json" }
         });
-        clearTimeout(timeoutId);
-
-        if (!resp.ok) {
-          const errText = await resp.text();
-          console.warn(`${provider.name} erro ${resp.status}:`, errText.slice(0,200));
-          continue; // tenta próximo provedor
-        }
-
-        console.log(`${provider.name} OK`);
-
-        if (useStream) {
-          return new Response(resp.body, {
-            headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "Access-Control-Allow-Origin": "*" }
-          });
-        } else {
-          const data = await resp.json();
-          return new Response(JSON.stringify(data), {
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-          });
-        }
-      } catch(e) {
-        clearTimeout(timeoutId);
-        console.warn(`${provider.name} falhou:`, e.message);
-        continue; // tenta próximo provedor
       }
+      const r = await tentarProvedor(provider, payload, useStream);
+      if (r.ok) return r.response;
+      return new Response(JSON.stringify({ error: r.error || `${provider.name} indisponível` }), {
+        status: r.skipped ? 501 : 502, headers: { "Content-Type": "application/json" }
+      });
     }
 
-    // Todos falharam
-    return new Response(JSON.stringify({ error: "Todos provedores falharam (DeepSeek + Nvidia + OpenRouter). Use extração manual." }), {
+    // Modo auto (compat): tenta em ordem até o primeiro OK
+    for (const provider of PROVIDERS) {
+      const r = await tentarProvedor(provider, payload, useStream);
+      if (r.ok) return r.response;
+      if (!r.skipped && r.error) erros.push(r.error);
+    }
+
+    return new Response(JSON.stringify({ error: "Todos provedores falharam (DeepSeek + Nvidia + OpenRouter). Use extração manual." + (erros.length ? " Detalhes: " + erros.join(" | ").slice(0, 200) : "") }), {
       status: 502, headers: { "Content-Type": "application/json" }
     });
 
-  } catch(e) {
+  } catch (e) {
     const msg = e.name === 'AbortError' ? "Timeout em todos provedores" : e.message;
     return new Response(JSON.stringify({ error: msg }), { status: 504, headers: { "Content-Type": "application/json" } });
   }
