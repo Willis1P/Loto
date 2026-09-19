@@ -2028,10 +2028,11 @@ async function extrairComOCR(imgDataUrl, status){
     console.log(`[OCR ${cfg.desc}] Texto (200):`, text.slice(0,200));
     console.log(`[OCR ${cfg.desc}] Jogos:`, jogos.length, jogos);
 
-    if (jogos.length > melhorResultado.jogos.length){
-      melhorResultado = { jogos, detalhes: cfg.desc, text, lines, words };
-      if (status) status.innerHTML = `✅ <b>OCR (${cfg.desc})</b> achou <b>${jogos.length} jogo(s)</b> — melhor`;
-    }
+      if (jogos.length > melhorResultado.jogos.length){
+        melhorResultado = { jogos, detalhes: cfg.desc, text, lines, words };
+        try { window._debugOCRTexto = String(text || "").slice(0, 900); } catch(_){}
+        if (status) status.innerHTML = `✅ <b>OCR (${cfg.desc})</b> achou <b>${jogos.length} jogo(s)</b> — melhor`;
+      }
     return jogos.length;
   }
 
@@ -2112,22 +2113,41 @@ async function preProcessarImagemOCR(dataUrl){
 }
 
 function parseTextoLotofacilAvancado(texto, lines, words){
-  // Estratégia 0: RECIBO DA CAIXA — jogos com letra (A, B, C...) e cada jogo
-  // pode estar em 2 linhas (ex: 8 + 7 números). Maior precisão: vai primeiro.
-  // Estratégia 1: linhas do Tesseract com 15-20 números (volante de mesa).
-  const precisos = removerDuplicatas([
-    ...extrairPorBlocosComLetras(texto),
-    ...extrairPorLinhas(lines)
-  ]);
-  if (precisos.length > 0) return precisos;
+  const porLetras = extrairPorBlocosComLetras(texto);
+  const porLinhas = extrairPorLinhas(lines);
+  const precisos = removerDuplicatas([...porLetras, ...porLinhas]);
+  const dbg = { letras: porLetras.length, linhas: porLinhas.length, palavras: 0, bruto: 0, total: 0 };
+  try { window._debugExtracao = dbg; } catch(_){}
+  if (precisos.length > 0){
+    // Já achou jogos precisos: aceita extras dos modos aproximados SÓ se
+    // não forem fragmentos dos já achados (compartilham <12 números).
+    const extras = [...extrairPorPalavras(words), ...extrairPorTextoBruto(texto)];
+    dbg.palavras = extras.length;
+    const filtrados = extras.filter(j =>
+      Array.isArray(j) && j.length >= 15 && j.length <= 20 &&
+      precisos.every(p => intersecaoTamanho(p, j) < 12)
+    );
+    const final = removerDuplicatas([...precisos, ...filtrados]);
+    dbg.bruto = filtrados.length; dbg.total = final.length;
+    return final;
+  }
 
   // Estratégia 2: Usa PALAVRAS com bounding boxes (agrupa por proximidade Y)
   const jogosPorPalavras = extrairPorPalavras(words);
-  if (jogosPorPalavras.length > 0) return jogosPorPalavras;
+  dbg.palavras = jogosPorPalavras.length;
+  if (jogosPorPalavras.length > 0){ dbg.total = jogosPorPalavras.length; return jogosPorPalavras; }
 
   // Estratégia 3: Texto bruto com múltiplos algoritmos
   const jogosBruto = extrairPorTextoBruto(texto);
+  dbg.bruto = jogosBruto.length; dbg.total = jogosBruto.length;
   return jogosBruto;
+}
+
+function intersecaoTamanho(a, b){
+  const setB = new Set(b);
+  let n = 0;
+  for (const x of a) if (setB.has(x)) n++;
+  return n;
 }
 
 /* Linha de ruído de recibo: cabeçalho, propaganda, data/hora, terminal,
@@ -2209,17 +2229,54 @@ function extrairPorLinhas(lines){
 
 function extrairPorPalavras(words){
   if (!words || !words.length) return [];
-  
+
   // Estratégia A: Agrupa por Y (linhas horizontais)
   const jogosY = agruparPorCoordenada(words, 'y');
-  
+
   // Estratégia B: Agrupa por X (colunas verticais) - para volantes em grade
   const jogosX = agruparPorCoordenada(words, 'x');
-  
+
   // Estratégia C: Grade 5x5 (padrão Lotofácil)
   const jogosGrade = detectarGradeLotofacil(words);
-  
-  return removerDuplicatas([...jogosY, ...jogosX, ...jogosGrade]);
+
+  // Estratégia D: funde faixas Y vizinhas — jogo impresso em 2 linhas
+  // (ex: 8 + 7 números) mesmo sem letra identificada
+  const jogosBandas = fundirBandasY(words);
+
+  return removerDuplicatas([...jogosY, ...jogosX, ...jogosGrade, ...jogosBandas]);
+}
+
+/* Junta faixas horizontais próximas até formar 15-20 números.
+   Cobre recibo com 2 linhas por jogo quando o OCR perde as letras. */
+function fundirBandasY(words){
+  const bandas = {};
+  for (const w of words){
+    if ((w.confidence || 0) < 25) continue;
+    const nums = extrairNumerosValidos(w.text || "");
+    if (!nums.length) continue;
+    const cy = (w.bbox?.y0 + w.bbox?.y1) / 2;
+    if (!cy) continue;
+    const key = Math.round(cy / 15) * 15;
+    (bandas[key] = bandas[key] || []).push(...nums);
+  }
+  const keys = Object.keys(bandas).map(Number).sort((a, b) => a - b);
+  const jogos = [];
+  let acc = [], lastKey = null;
+  function descarregar(){
+    const uniq = [...new Set(acc)].sort((a, b) => a - b);
+    if (uniq.length >= 14 && uniq.length <= 20) jogos.push(uniq);
+    acc = []; lastKey = null;
+  }
+  for (const k of keys){
+    if (lastKey !== null && (k - lastKey) > 45) descarregar(); // quebra: bloco distante
+    acc = acc.concat(bandas[k]);
+    lastKey = k;
+    const uniq = [...new Set(acc)];
+    if (uniq.length >= 14 && uniq.length <= 20){ jogos.push(uniq.sort((a, b) => a - b)); acc = []; lastKey = null; }
+    else if (uniq.length > 20){ descarregar(); }
+  }
+  descarregar();
+  return removerDuplicatas(jogos);
 }
 
 function agruparPorCoordenada(words, eixo){
@@ -2727,10 +2784,16 @@ function processarJogosManuais(texto){
 async function processarJogosExtraidos(jogos, extraidoDiv, status){
   const lista = unirApostas(jogos);
   window._jogosExtraidosIA = lista;
+  let dbgHtml = "";
+  try {
+    const d = window._debugExtracao;
+    const t = window._debugOCRTexto || "";
+    if (d) dbgHtml = `<details style="margin-top:8px; font-size:0.68rem; color:var(--text-soft);"><summary style="cursor:pointer; font-weight:700;">🔍 Diagnóstico da leitura (toque para ver)</summary><div style="margin-top:6px;">Letras: <b>${d.letras ?? 0}</b> · Linhas: <b>${d.linhas ?? 0}</b> · Palavras/grade: <b>${d.palavras ?? 0}</b> · Texto: <b>${d.bruto ?? 0}</b><pre style="white-space:pre-wrap; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:150px; overflow:auto; margin-top:6px;">${String(t).replace(/</g, "&lt;")}</pre></div></details>`;
+  } catch(_){}
   if (extraidoDiv){
     extraidoDiv.style.display = "block";
     extraidoDiv.innerHTML = `<b>✅ ${lista.length} jogo(s) extraído(s):</b>
-      <pre style="white-space:pre-wrap; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${lista.map((n,i)=>`Jogo ${i+1}: ${rotuloAposta(n)}`).join("\n")}</pre>
+      <pre style="white-space:pre-wrap; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${lista.map((n,i)=>`Jogo ${i+1}: ${rotuloAposta(n)}`).join("\n")}</pre>${dbgHtml}
       <button class="chip on" style="margin-top:8px; width:100%; justify-content:center; background:var(--success); border-color:var(--success);" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${lista.length} aposta(s)</button>`;
   }
   if (status) status.textContent = `✅ ${lista.length} jogo(s) extraído(s)! Clique em Confirmar.`;
