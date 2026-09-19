@@ -642,6 +642,7 @@ function analisarFaixas(hits, misses, qtdDezenas){
 const state = {
   grupos: [],
   sorteados: new Set(),
+  concurso: null,
   resultados: [],
   resumo: { bruto: 0, liquido: 0, premiados: 0, ganhou14: false, ganhou15: false },
   filtro: "todos",
@@ -711,13 +712,14 @@ function carregarGruposCustom(){
   }catch(e){ return []; }
 }
 function salvarHistorico(){
-  try { localStorage.setItem(LS_KEY, JSON.stringify({ sorteados: [...state.sorteados], quando: Date.now() })); } catch(_){}
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ sorteados: [...state.sorteados], concurso: state.concurso, quando: Date.now() })); } catch(_){}
 }
 function restaurarHistorico(){
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return;
     const d = JSON.parse(raw);
+    if (d.concurso != null) state.concurso = String(d.concurso);
     if (Array.isArray(d.sorteados)){
       d.sorteados.filter(n => Number.isInteger(n) && n >= 1 && n <= 25).slice(0, 15)
         .forEach(n => state.sorteados.add(n));
@@ -870,6 +872,7 @@ async function buscarResultadoCaixa(){
   }
   const dezenas = dados.listaDezenas.map(s=>parseInt(s,10));
   const concurso = dados.numero || "3782";
+  state.concurso = String(concurso);
   state.sorteados.clear();
   dezenas.forEach(n=> state.sorteados.add(n));
   forcarExibirTodos = true;
@@ -1044,10 +1047,19 @@ async function carregarProximoSorteio(){
     const headerTitle = document.getElementById("headerTitle");
     if (headerTitle) headerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
     document.title = `Lotofácil — Concurso ${j.numero}`;
-    if (j.listaDezenas && j.listaDezenas.length===15 && state.sorteados.size===0){
+    if (j.listaDezenas && j.listaDezenas.length===15 && (state.sorteados.size===0 || String(j.numero) !== String(state.concurso))){
+      const mudou = state.sorteados.size > 0 && String(j.numero) !== String(state.concurso);
+      state.sorteados.clear();
       j.listaDezenas.map(s=>parseInt(s,10)).forEach(n=> state.sorteados.add(n));
+      state.concurso = String(j.numero);
       forcarExibirTodos = true;
       sincronizarUI();
+      salvarHistorico();
+      const resInfo = document.getElementById("resultadoInfo");
+      if (resInfo) resInfo.innerHTML = `✅ <b>Concurso ${j.numero}</b> — <b>${j.listaDezenas.map(s=>String(s).padStart(2,"0")).join(" ")}</b>`;
+      if (mudou) toast(`🔄 Novo concurso ${j.numero} carregado automaticamente!`);
+    } else if (j.numero != null) {
+      state.concurso = String(j.numero);
       salvarHistorico();
     }
     atualizarCronometro();
