@@ -2,6 +2,12 @@
   "functions": {
     "api/nvidia.js": {
       "maxDuration": 30
+    },
+    "api/vision.js": {
+      "maxDuration": 30
+    },
+    "api/sync.js": {
+      "maxDuration": 10
     }
   }
 }

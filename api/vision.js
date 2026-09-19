@@ -1,5 +1,8 @@
 export const config = { runtime: 'edge' };
 
+// Cascata de provedores vision (padrão hackerai: fallback automático).
+// Cada provedor é tentado em ordem; sem chave configurada ele é pulado.
+// Env vars no Vercel: DEEPSEEK_API_KEY, NVIDIA_API_KEY, OPENROUTER_API_KEY
 const PROVIDERS = [
   {
     name: 'deepseek',
@@ -7,6 +10,24 @@ const PROVIDERS = [
     keyEnv: 'DEEPSEEK_API_KEY',
     model: 'deepseek-flash',
     timeout: 8000
+  },
+  {
+    name: 'nvidia',
+    url: 'https://integrate.api.nvidia.com/v1/chat/completions',
+    keyEnv: 'NVIDIA_API_KEY',
+    model: 'meta/llama-3.2-11b-vision-instruct',
+    timeout: 9000
+  },
+  {
+    name: 'openrouter',
+    url: 'https://openrouter.ai/api/v1/chat/completions',
+    keyEnv: 'OPENROUTER_API_KEY',
+    model: 'gpt-4o-mini',
+    timeout: 9000,
+    extraHeaders: {
+      "HTTP-Referer": "https://lotofacil-conferidor.vercel.app",
+      "X-Title": "Lotofacil Conferidor"
+    }
   }
 ];
 
@@ -77,7 +98,7 @@ export default async function handler(req) {
     }
 
     // Todos falharam
-    return new Response(JSON.stringify({ error: "Todos provedores falharam (Nvidia + DeepSeek). Use extração manual." }), {
+    return new Response(JSON.stringify({ error: "Todos provedores falharam (DeepSeek + Nvidia + OpenRouter). Use extração manual." }), {
       status: 502, headers: { "Content-Type": "application/json" }
     });
 

@@ -1,18 +1,20 @@
 # 📋 COMO CONFIGURAR VARIABLES NO VERCEL
 
-## Parte A — IA (NVIDIA_API_KEY, opcional)
+## Parte A — IA (chaves dos provedores vision, em cascata)
+A extração por IA tenta nesta ordem e pula quem não tem chave: **DeepSeek → Nvidia → OpenRouter**.
+
 ### Passo 1 — Acesse o Vercel
 1. Vá em [https://vercel.com](https://vercel.com) e faça login
 2. Clique no projeto **lotofacil-ia** (ou o nome do seu projeto)
 
-### Passo 2 — Adicione a chave NVIDIA API
+### Passo 2 — Adicione as chaves de IA
 1. No menu lateral, clique em **Settings**
 2. Clique em **Environment Variables**
-3. Clique em **+ Add New**
-4. Preencha:
-   - **Key:** `NVIDIA_API_KEY`
-   - **Value:** Cole sua chave da NVIDIA (ex: `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`)
-5. Clique em **Save**
+3. Clique em **+ Add New** para cada uma (adicione pelo menos 1):
+   - **Key:** `DEEPSEEK_API_KEY` — provedor principal (rápido)
+   - **Key:** `NVIDIA_API_KEY` — fallback (ex: `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`)
+   - **Key:** `OPENROUTER_API_KEY` — 2º fallback (`gpt-4o-mini` vision) — crie em [https://openrouter.ai](https://openrouter.ai)
+4. Clique em **Save** em cada uma
 
 ## Parte B — Sync automática entre aparelhos (Upstash Redis)
 Sem isso, a sync automática mostra “não configurado” — o link/arquivo continua funcionando.
