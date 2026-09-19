@@ -402,7 +402,7 @@ footer.app-footer strong{color:var(--primary)}
 
   <aside class="alerta" role="note">
     <span style="font-size:1.05rem;flex:0 0 auto" aria-hidden="true">⚠️</span>
-    <div>
+    <div id="alertaRateioTexto">
       <strong>14 e 15 são rateio.</strong>
       Valores só após apuração Caixa (estimado `15=R$300MI` e `14=R$1.500` até oficial). Concurso especial não acumula: sem `15` desce para `14`. Fixos `11/12/13` não mudam.
     </div>
@@ -553,9 +553,77 @@ const PRIZE_ESTIMADO_15 = 300000000.00;
 const PRIZE_ESTIMADO_14 = 1500.00;
 
 function valorFaixa(pts){
+  // Rateio OFICIAL do concurso apurado tem prioridade; senão, estimativa/fixo.
+  const of = state.rateioOficial;
+  if (of && of.valores && Number(of.valores[pts]) > 0) return Number(of.valores[pts]);
   if (pts === 15) return PRIZES[15] > 0 ? PRIZES[15] : PRIZE_ESTIMADO_15;
   if (pts === 14) return PRIZES[14] > 0 ? PRIZES[14] : PRIZE_ESTIMADO_14;
   return PRIZES[pts] || 0;
+}
+
+/* Rateio oficial da Caixa (listaRateioPremio): faixa 1→15pts … faixa 5→11pts */
+const LS_RATEIO = "lotofacil-rateio-oficial-v1";
+function extrairRateioOficial(dados){
+  try {
+    const lista = dados && dados.listaRateioPremio;
+    if (!Array.isArray(lista) || !lista.length) return null;
+    const mapaFaixa = { 1: 15, 2: 14, 3: 13, 4: 12, 5: 11 };
+    const valores = {}, ganhadores = {};
+    lista.forEach(r => {
+      const pts = mapaFaixa[parseInt(r.faixa, 10)];
+      if (!pts) return;
+      const v = Number(r.valorPremio);
+      if (v > 0) valores[pts] = v;
+      ganhadores[pts] = parseInt(r.numeroDeGanhadores, 10) || 0;
+    });
+    if (!Object.keys(valores).length) return null;
+    return { concurso: String(dados.numero), valores, ganhadores };
+  } catch(_){ return null; }
+}
+function aplicarRateioOficial(dados){
+  const r = extrairRateioOficial(dados);
+  if (!r) return false;
+  // Só vale para o concurso apurado correspondente
+  state.rateioOficial = r;
+  try { localStorage.setItem(LS_RATEIO, JSON.stringify(r)); } catch(_){}
+  atualizarAlertaRateio();
+  return true;
+}
+function limparRateioSeConcursoMudou(concurso){
+  // Evita aplicar rateio oficial de um concurso antigo no novo
+  if (state.rateioOficial && String(state.rateioOficial.concurso) !== String(concurso)){
+    state.rateioOficial = null;
+    try { localStorage.removeItem(LS_RATEIO); } catch(_){}
+    atualizarAlertaRateio();
+  }
+}
+function restaurarRateio(){
+  try {
+    const raw = localStorage.getItem(LS_RATEIO);
+    if (!raw) return;
+    const r = JSON.parse(raw);
+    // Só restaura se for do mesmo concurso marcado (evita rateio velho em concurso novo)
+    if (r && r.valores && String(r.concurso) === String(state.concurso)){
+      state.rateioOficial = r;
+    }
+  } catch(_){}
+}
+function atualizarAlertaRateio(){
+  const el = document.getElementById("alertaRateioTexto");
+  if (!el) return;
+  const of = state.rateioOficial;
+  if (of && of.valores && (of.valores[15] > 0 || of.valores[14] > 0)){
+    const f = (v) => v > 0 ? fmtBRL.format(v) : "—";
+    const g = (n) => (n === 1 ? "1 ganhador" : `${fmtNum.format(n || 0)} ganhadores`);
+    el.innerHTML = `<strong>Rateio OFICIAL Caixa — concurso ${of.concurso}.</strong> ` +
+      `15 pontos: <b>${f(of.valores[15])}</b> (${g(of.ganhadores[15])}) · ` +
+      `14 pontos: <b>${f(of.valores[14])}</b> (${g(of.ganhadores[14])}). ` +
+      `Concurso especial não acumula: sem 15, desce para 14. Fixos 11/12/13 não mudam.`;
+  } else {
+    el.innerHTML = `<strong>14 e 15 são rateio.</strong> ` +
+      `Valores só após apuração Caixa (estimado <b>15=R$300MI</b> e <b>14=R$1.500</b> até oficial). ` +
+      `Concurso especial não acumula: sem 15 desce para 14. Fixos 11/12/13 não mudam.`;
+  }
 }
 
 function numBR(s){ return parseFloat(String(s).replace(/\./g, "").replace(",", ".")) || 0; }
@@ -643,6 +711,7 @@ const state = {
   grupos: [],
   sorteados: new Set(),
   concurso: null,
+  rateioOficial: null,
   resultados: [],
   resumo: { bruto: 0, liquido: 0, premiados: 0, ganhou14: false, ganhou15: false },
   filtro: "todos",
@@ -893,6 +962,7 @@ async function buscarResultadoCaixa(){
     return;
   }
   state.concurso = concurso;
+  limparRateioSeConcursoMudou(concurso);
   state.sorteados.clear();
   dezenas.forEach(n=> state.sorteados.add(n));
   forcarExibirTodos = true;
@@ -933,6 +1003,11 @@ async function buscarResultadoCaixa(){
   const dataApur = dados.dataApuracao ? ` em ${dados.dataApuracao}` : "";
   if (proxInfo) proxInfo.innerHTML = `Concurso <b>${concurso}</b>${dataApur} — <b>${dezenas.map(n => String(n).padStart(2, "0")).join(" ")}</b> • Próximo <b>${proximoConcurso}</b> • Estimativa <b>${fmtBRL.format(estimativa)}</b>`;
   atualizarCronometro();
+  // Rateio OFICIAL do concurso apurado (14/15 passam a valer o oficial, não a estimativa)
+  if (aplicarRateioOficial(dados)){
+    if (info) info.innerHTML += `<br><small>💰 Rateio oficial aplicado: 15=${fmtBRL.format(state.rateioOficial.valores[15] || 0)} · 14=${fmtBRL.format(state.rateioOficial.valores[14] || 0)}</small>`;
+    sincronizarUI();
+  }
 }
 
 // Auto-refresh removido para evitar recarregamento constante
@@ -1070,31 +1145,40 @@ async function carregarProximoSorteio(){
     const headerTitle = document.getElementById("headerTitle");
     if (headerTitle) headerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
     document.title = `Lotofácil — Concurso ${j.numero}`;
+    // Rateio OFICIAL do concurso apurado (vale para 14/15 em vez da estimativa)
+    const rateioNovo = aplicarRateioOficial(j);
     // Auto-preenchimento seguro: só substitui os números marcados quando a API
     // trouxer um concurso ESTRITAMENTE MAIOR que o salvo. Nunca rebaixa.
     if (j.listaDezenas && j.listaDezenas.length===15){
       const savedNum = parseInt(state.concurso, 10);
+      let preencheu = false;
       if (state.sorteados.size===0) {
+        limparRateioSeConcursoMudou(j.numero);
         j.listaDezenas.map(s=>parseInt(s,10)).forEach(n=> state.sorteados.add(n));
         state.concurso = String(j.numero);
         forcarExibirTodos = true;
         sincronizarUI();
         salvarHistorico();
+        preencheu = true;
         const resInfo = document.getElementById("resultadoInfo");
         if (resInfo) resInfo.innerHTML = `✅ <b>Concurso ${j.numero}</b> — <b>${j.listaDezenas.map(s=>String(s).padStart(2,"0")).join(" ")}</b>`;
       } else if (!isNaN(apiNum0) && !isNaN(savedNum) && apiNum0 > savedNum) {
+        limparRateioSeConcursoMudou(j.numero);
         state.sorteados.clear();
         j.listaDezenas.map(s=>parseInt(s,10)).forEach(n=> state.sorteados.add(n));
         state.concurso = String(j.numero);
         forcarExibirTodos = true;
         sincronizarUI();
         salvarHistorico();
+        preencheu = true;
         const resInfo = document.getElementById("resultadoInfo");
         if (resInfo) resInfo.innerHTML = `✅ <b>Concurso ${j.numero}</b> — <b>${j.listaDezenas.map(s=>String(s).padStart(2,"0")).join(" ")}</b>`;
         toast(`🔄 Novo concurso ${j.numero} carregado automaticamente!`);
       }
       // Nos demais casos (API igual, mais antiga ou sem concurso salvo):
       // mantém os números marcados pelo usuário — nunca apaga.
+      // Mas se o rateio oficial acabou de chegar, recalcula os prêmios.
+      if (rateioNovo && !preencheu) sincronizarUI();
     }
     atualizarCronometro();
   }catch(e){
@@ -1614,7 +1698,7 @@ async function exportar(){
 /* ─── SYNC ENTRE APARELHOS (backup localStorage → link/arquivo) ───────── */
 function coletarBackup(){
   const dados = {};
-  const chaves = [LS_KEY, LS_GRUPOS_CUSTOM, LS_DB_KEY, LS_PART_CONCURSO];
+  const chaves = [LS_KEY, LS_GRUPOS_CUSTOM, LS_DB_KEY, LS_PART_CONCURSO, LS_RATEIO];
   chaves.forEach(k => {
     try { const v = localStorage.getItem(k); if (v != null) dados[k] = v; } catch(_){}
   });
@@ -2910,6 +2994,8 @@ function boot(){
     try { if (typeof syncAplicarHash === "function") syncAplicarHash(); } catch(_){}
     importarSyncDoHash();
     restaurarHistorico();
+    restaurarRateio();
+    atualizarAlertaRateio();
     sincronizarUI();
     atualizarCronometro();
     carregarProximoSorteio();
