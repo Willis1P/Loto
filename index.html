@@ -822,9 +822,10 @@ async function buscarResultadoCaixa(){
   if (btn){ btn.disabled=true; btn.textContent="⏳ Buscando no site da Caixa..."; }
   if (info) info.textContent="Consultando servicebus2.caixa.gov.br ...";
 
+  // Usa só o endpoint "último concurso": URL com número fixo fica defasada
+  // e pode sobrescrever os números com um concurso antigo.
   const urls = [
-    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil",
-    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil/3782"
+    "https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil"
   ];
   const proxies = [
     "https://corsproxy.io/?",
@@ -871,8 +872,22 @@ async function buscarResultadoCaixa(){
     return;
   }
   const dezenas = dados.listaDezenas.map(s=>parseInt(s,10));
-  const concurso = dados.numero || "3782";
-  state.concurso = String(concurso);
+  if (dados.numero == null) {
+    if (info) info.textContent="⚠️ Resposta da Caixa sem número do concurso. Marque manualmente.";
+    if (btn){ btn.disabled=false; btn.innerHTML="🎯 Resultado — Buscar Oficial Caixa (auto)"; }
+    return;
+  }
+  const concurso = String(dados.numero);
+  // Proteção contra cache defasado: nunca troca por concurso mais antigo que o salvo.
+  const apiNum = parseInt(concurso, 10);
+  const savedNum = parseInt(state.concurso, 10);
+  if (!isNaN(apiNum) && !isNaN(savedNum) && apiNum < savedNum) {
+    if (info) info.innerHTML=`⚠️ A API retornou o concurso <b>${concurso}</b>, mais antigo que o salvo (<b>${state.concurso}</b>). Mantido o atual — marque manualmente se preciso.`;
+    if (btn){ btn.disabled=false; btn.innerHTML="🎯 Resultado — Buscar Oficial Caixa (auto)"; }
+    toast("⚠️ API com concurso defasado. Nada foi alterado.");
+    return;
+  }
+  state.concurso = concurso;
   state.sorteados.clear();
   dezenas.forEach(n=> state.sorteados.add(n));
   forcarExibirTodos = true;
@@ -1031,36 +1046,50 @@ async function carregarProximoSorteio(){
     const r = await fetch("https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil", {cache:"no-store"});
     if (!r.ok) throw new Error("HTTP "+r.status);
     const j = await r.json();
-    const proxNum = j.numeroConcursoProximo || 3782;
-    let proxDataStr = j.dataProximoConcurso || "17/09/2026";
+    const apiNum0 = parseInt(j.numero, 10);
+    const proxNum = j.numeroConcursoProximo || (!isNaN(apiNum0) ? apiNum0 + 1 : null);
+    let proxDataStr = j.dataProximoConcurso || "";
     const estimativa = j.valorEstimadoProximoConcurso || 2000000;
     const local = j.localSorteio || "ESPAÇO DA SORTE";
-    const [d,m,y] = proxDataStr.split("/").map(Number);
-    let dt = new Date(y, m-1, d, 21,0,0);
-    if (dt <= new Date()){
-      dt = proximoDiaLotofacil(dt);
-      proxDataStr = `${String(dt.getDate()).padStart(2,"0")}/${String(dt.getMonth()+1).padStart(2,"0")}/${dt.getFullYear()}`;
+    let dt = null;
+    if (proxDataStr) {
+      const partes = String(proxDataStr).split("/").map(Number);
+      if (partes.length === 3 && partes.every(n => !isNaN(n))) dt = new Date(partes[2], partes[1] - 1, partes[0], 21, 0, 0);
     }
+    if (!dt || isNaN(dt.getTime())) dt = proximoDiaLotofacil(new Date());
+    if (dt <= new Date()) dt = proximoDiaLotofacil(dt);
+    proxDataStr = `${String(dt.getDate()).padStart(2,"0")}/${String(dt.getMonth()+1).padStart(2,"0")}/${dt.getFullYear()}`;
     proximoAlvo = dt;
-    if (titulo) titulo.textContent = `⏰ Próximo Sorteio — Concurso ${proxNum} — ${proxDataStr} — 21h`;
-    if (info) info.innerHTML = `Concurso <b>${j.numero}</b> em ${j.dataApuracao} — <b>${(j.listaDezenas||[]).join(" ")}</b> • Próximo <b>${proxNum}</b> • Estimativa <b>${fmtBRL.format(estimativa)}</b>`;
+    if (titulo) titulo.textContent = proxNum ? `⏰ Próximo Sorteio — Concurso ${proxNum} — ${proxDataStr} — 21h` : `⏰ Próximo Sorteio — ${proxDataStr} — 21h`;
+    if (info) info.innerHTML = `Concurso <b>${j.numero}</b> em ${j.dataApuracao} — <b>${(j.listaDezenas||[]).join(" ")}</b> • Próximo <b>${proxNum ?? "—"}</b> • Estimativa <b>${fmtBRL.format(estimativa)}</b>`;
     const headerTitle = document.getElementById("headerTitle");
     if (headerTitle) headerTitle.textContent = `Lotofácil — Concurso ${j.numero}`;
     document.title = `Lotofácil — Concurso ${j.numero}`;
-    if (j.listaDezenas && j.listaDezenas.length===15 && (state.sorteados.size===0 || String(j.numero) !== String(state.concurso))){
-      const mudou = state.sorteados.size > 0 && String(j.numero) !== String(state.concurso);
-      state.sorteados.clear();
-      j.listaDezenas.map(s=>parseInt(s,10)).forEach(n=> state.sorteados.add(n));
-      state.concurso = String(j.numero);
-      forcarExibirTodos = true;
-      sincronizarUI();
-      salvarHistorico();
-      const resInfo = document.getElementById("resultadoInfo");
-      if (resInfo) resInfo.innerHTML = `✅ <b>Concurso ${j.numero}</b> — <b>${j.listaDezenas.map(s=>String(s).padStart(2,"0")).join(" ")}</b>`;
-      if (mudou) toast(`🔄 Novo concurso ${j.numero} carregado automaticamente!`);
-    } else if (j.numero != null) {
-      state.concurso = String(j.numero);
-      salvarHistorico();
+    // Auto-preenchimento seguro: só substitui os números marcados quando a API
+    // trouxer um concurso ESTRITAMENTE MAIOR que o salvo. Nunca rebaixa.
+    if (j.listaDezenas && j.listaDezenas.length===15){
+      const savedNum = parseInt(state.concurso, 10);
+      if (state.sorteados.size===0) {
+        j.listaDezenas.map(s=>parseInt(s,10)).forEach(n=> state.sorteados.add(n));
+        state.concurso = String(j.numero);
+        forcarExibirTodos = true;
+        sincronizarUI();
+        salvarHistorico();
+        const resInfo = document.getElementById("resultadoInfo");
+        if (resInfo) resInfo.innerHTML = `✅ <b>Concurso ${j.numero}</b> — <b>${j.listaDezenas.map(s=>String(s).padStart(2,"0")).join(" ")}</b>`;
+      } else if (!isNaN(apiNum0) && !isNaN(savedNum) && apiNum0 > savedNum) {
+        state.sorteados.clear();
+        j.listaDezenas.map(s=>parseInt(s,10)).forEach(n=> state.sorteados.add(n));
+        state.concurso = String(j.numero);
+        forcarExibirTodos = true;
+        sincronizarUI();
+        salvarHistorico();
+        const resInfo = document.getElementById("resultadoInfo");
+        if (resInfo) resInfo.innerHTML = `✅ <b>Concurso ${j.numero}</b> — <b>${j.listaDezenas.map(s=>String(s).padStart(2,"0")).join(" ")}</b>`;
+        toast(`🔄 Novo concurso ${j.numero} carregado automaticamente!`);
+      }
+      // Nos demais casos (API igual, mais antiga ou sem concurso salvo):
+      // mantém os números marcados pelo usuário — nunca apaga.
     }
     atualizarCronometro();
   }catch(e){
