@@ -2642,7 +2642,8 @@ content: [
       { id: "nvidia", rotulo: "Nvidia" },
       { id: "openrouter", rotulo: "OpenRouter" }
     ];
-    let resp = null, provedorOk = "", ultimoErro = "";
+    let resp = null, provedorOk = "";
+    const tentativas = [];
     for (let pi = 0; pi < provedores.length; pi++){
       const pv = provedores[pi];
       try {
@@ -2658,18 +2659,23 @@ content: [
         clearTimeout(tId);
         if (!r.ok){
           const errText = await r.text();
-          let detalhe = errText.slice(0, 200);
-          try{ const j = JSON.parse(errText); detalhe = j.error || detalhe; }catch(_){}
-          throw new Error(`HTTP ${r.status}: ${detalhe}`);
+          let detalhe = errText.slice(0, 200), diag = "";
+          try{
+            const j = JSON.parse(errText);
+            detalhe = j.error || detalhe;
+            if (Array.isArray(j.diagnostico) && j.diagnostico.length) diag = " [" + j.diagnostico.join(" | ").slice(0, 160) + "]";
+          }catch(_){}
+          throw new Error(`HTTP ${r.status}: ${detalhe}${diag}`);
         }
         resp = r; provedorOk = pv.rotulo;
         break;
       } catch(e){
-        ultimoErro = e.name === "AbortError" ? "tempo esgotado (25s)" : String(e.message || e);
-        console.warn(`[IA] ${pv.rotulo} falhou:`, ultimoErro);
+        const motivo = e.name === "AbortError" ? "tempo esgotado (25s)" : String(e.message || e);
+        tentativas.push(`${pv.rotulo}: ${motivo}`.slice(0, 180));
+        console.warn(`[IA] ${pv.rotulo} falhou:`, motivo);
       }
     }
-    if (!resp) throw new Error("Todas as IAs falharam (" + ultimoErro.slice(0, 150) + "). Use extração manual.");
+    if (!resp) throw new Error("Todas as IAs falharam. " + tentativas.join(" ‖ ") + ". Use extração manual.");
     if (status) status.innerHTML = `✅ <b>${provedorOk}</b> respondeu — lendo resultado...`;
 
     // Suporta tanto stream (SSE) quanto JSON direto (stream:false) — corrige Unexpected token '<' quando volta HTML
