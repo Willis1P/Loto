@@ -1,27 +1,8 @@
 export const config = { runtime: 'edge' };
 
-// Cascata de provedores vision (padrão hackerai: fallback automático).
-// O CLIENTE dirige a cascata (um provedor por chamada) porque o plano
-// Hobby limita cada execução a ~10s — 3 tentativas numa chamada só = 504.
-// Cada provedor é tentado com timeout próprio; sem chave, é pulado.
-// Env vars no Vercel: DEEPSEEK_API_KEY, NVIDIA_API_KEY, OPENROUTER_API_KEY
+// Provedor único: OpenRouter (gpt-4o-mini vision).
+// Env var no Vercel: OPENROUTER_API_KEY
 const PROVIDERS = [
-  {
-    id: 'deepseek',
-    name: 'deepseek',
-    url: 'https://api.deepseek.com/chat/completions',
-    keyEnv: 'DEEPSEEK_API_KEY',
-    model: 'deepseek-flash',
-    timeout: 9000
-  },
-  {
-    id: 'nvidia',
-    name: 'nvidia',
-    url: 'https://integrate.api.nvidia.com/v1/chat/completions',
-    keyEnv: 'NVIDIA_API_KEY',
-    model: 'meta/llama-3.2-11b-vision-instruct',
-    timeout: 9000
-  },
   {
     id: 'openrouter',
     name: 'openrouter',

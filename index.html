@@ -2637,46 +2637,36 @@ content: [
     // Motivo: o plano Hobby limita cada execução a ~10s, então a cascata
     // dentro de uma única chamada estourava 504. Aqui cada provedor ganha
     // uma execução própria: DeepSeek → Nvidia → OpenRouter.
-    const provedores = [
-      { id: "deepseek", rotulo: "DeepSeek" },
-      { id: "nvidia", rotulo: "Nvidia" },
-      { id: "openrouter", rotulo: "OpenRouter" }
-    ];
-    let resp = null, provedorOk = "";
-    const tentativas = [];
-    for (let pi = 0; pi < provedores.length; pi++){
-      const pv = provedores[pi];
-      try {
-        if (status) status.innerHTML = `🤖 <b>2/2</b> IA ${pi + 1}/${provedores.length} (${pv.rotulo})...<br><small>Aguarde ~10s</small>`;
-        const ctl = new AbortController();
-        const tId = setTimeout(() => ctl.abort(), 25000);
-        const r = await fetch("/api/vision", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...payload, provider: pv.id }),
-          signal: ctl.signal
-        });
-        clearTimeout(tId);
-        if (!r.ok){
-          const errText = await r.text();
-          let detalhe = errText.slice(0, 200), diag = "";
-          try{
-            const j = JSON.parse(errText);
-            detalhe = j.error || detalhe;
-            if (Array.isArray(j.diagnostico) && j.diagnostico.length) diag = " [" + j.diagnostico.join(" | ").slice(0, 160) + "]";
-          }catch(_){}
-          throw new Error(`HTTP ${r.status}: ${detalhe}${diag}`);
-        }
-        resp = r; provedorOk = pv.rotulo;
-        break;
-      } catch(e){
-        const motivo = e.name === "AbortError" ? "tempo esgotado (25s)" : String(e.message || e);
-        tentativas.push(`${pv.rotulo}: ${motivo}`.slice(0, 180));
-        console.warn(`[IA] ${pv.rotulo} falhou:`, motivo);
+    // Provedor único: OpenRouter (gpt-4o-mini vision).
+    let resp = null;
+    try {
+      if (status) status.innerHTML = `🤖 <b>2/2</b> IA OpenRouter analisando...<br><small>Aguarde ~10s</small>`;
+      const ctl = new AbortController();
+      const tId = setTimeout(() => ctl.abort(), 25000);
+      const r = await fetch("/api/vision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, provider: "openrouter" }),
+        signal: ctl.signal
+      });
+      clearTimeout(tId);
+      if (!r.ok){
+        const errText = await r.text();
+        let detalhe = errText.slice(0, 200), diag = "";
+        try{
+          const j = JSON.parse(errText);
+          detalhe = j.error || detalhe;
+          if (Array.isArray(j.diagnostico) && j.diagnostico.length) diag = " [" + j.diagnostico.join(" | ").slice(0, 160) + "]";
+        }catch(_){}
+        throw new Error(`HTTP ${r.status}: ${detalhe}${diag}`);
       }
+      resp = r;
+    } catch(e){
+      const motivo = e.name === "AbortError" ? "tempo esgotado (25s)" : String(e.message || e);
+      console.warn("[IA] OpenRouter falhou:", motivo);
+      throw new Error(`IA OpenRouter falhou: ${motivo.slice(0, 200)}. Use extração manual.`);
     }
-    if (!resp) throw new Error("Todas as IAs falharam. " + tentativas.join(" ‖ ") + ". Use extração manual.");
-    if (status) status.innerHTML = `✅ <b>${provedorOk}</b> respondeu — lendo resultado...`;
+    if (status) status.innerHTML = `✅ <b>OpenRouter</b> respondeu — lendo resultado...`;
 
     // Suporta tanto stream (SSE) quanto JSON direto (stream:false) — corrige Unexpected token '<' quando volta HTML
     const contentType = resp.headers.get("content-type") || "";
@@ -2745,7 +2735,7 @@ content: [
     if (msg.includes("Failed to fetch") || msg.includes("NetworkError")){
       dica = "🌐 <b>Rede bloqueada.</b> A Function <code>/api/vision</code> pode não estar deployada. Verifique se o arquivo <code>api/vision.js</code> está no GitHub e faça Redeploy no Vercel.";
     } else if (msg.includes("401") || msg.includes("inválida") || msg.includes("não configurada")){
-      dica = "🔑 <b>Chave inválida ou ausente.</b> Confira <code>DEEPSEEK_API_KEY</code> / <code>NVIDIA_API_KEY</code> / <code>OPENROUTER_API_KEY</code> em Vercel → Settings → Environment Variables e faça Redeploy.";
+      dica = "🔑 <b>Chave inválida ou ausente.</b> Confira <code>OPENROUTER_API_KEY</code> em Vercel → Settings → Environment Variables (marque Production + Preview + Development) e faça Redeploy.";
     } else if (msg.includes("402") || msg.includes("créditos")){
       dica = "💳 <b>Sem créditos no provedor.</b> Recarregue a conta ou use a extração manual abaixo.";
     } else if (msg.includes("HTML")){
