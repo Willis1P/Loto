@@ -540,7 +540,7 @@ footer.app-footer strong{color:var(--primary)}
 <script>
 "use strict";
 /* Versão do app (confira no painel IA após o Redeploy) */
-const APP_VERSAO = "2026-09-19-recibo-letras";
+const APP_VERSAO = "2026-09-19-recibo-letras2";
 try {
   document.addEventListener("DOMContentLoaded", () => {
     const v = document.getElementById("appVersao");
@@ -2169,6 +2169,14 @@ function ehLinhaRuidoRecibo(line){
   return /(MEGA|BORA|GARANT|PARTICIPE|SORTE|HORA|TERMINAL|LOTER|CONC | AT[EÉ] |TOTAL|R\$|VALIDADE|CONFIRA|RECIBO|VALOR|CODIGO|QR|HTTP|WWW|MILH|DATA|APURA|AGENCIA|CAIXA ECON|SURPRESINHA|TEIMOSINHA)/.test(t);
 }
 
+/* Remove marca d'água e sufixos que o OCR mistura nas linhas do jogo
+   ("loterias", "CAIXA" na diagonal, "SU" no fim da linha) */
+function limparLinhaJogo(line){
+  return String(line || "")
+    .replace(/\b(LOTERIAS|CAIXA|SU)\b/gi, " ")
+    .replace(/\s+/g, " ").trim();
+}
+
 /* RECIBO: "A 01 03 05 08 09 10 11 14" + "15 16 17 18 20 22 24" = jogo A (15).
    Junta a linha da letra com as continuações só-de-números seguintes.
    Tolerante: letra minúscula, marcador sem quebra de linha, sufixo curto (SU). */
@@ -2187,20 +2195,22 @@ function extrairPorBlocosComLetras(texto){
   for (const crua of linhas){
     const line = String(crua || "").trim();
     if (!line) continue;
-    const mLetra = line.match(/^\s*([A-Za-z])\s+(.+)$/);
+    // letra seguida de espaço OU dígito (exclui "E. LOTÉRICO" pelo ponto)
+    const mLetra = line.match(/^\s*([A-Za-z])(?=[\s\d])(.*)$/);
     if (mLetra){
       if (acc.length) descarregar();
-      const resto = mLetra[2];
+      const resto = limparLinhaJogo(mLetra[2]);
       const nums = extrairNumerosValidos(resto);
       const letrasResto = resto.replace(/[\d\s]/g, "").trim();
-      // letra + números (exclui "E. LOTÉRICO"; aceita sufixo curto tipo "SU")
-      if (nums.length >= 3 && letrasResto.length <= 3) acc = nums.slice();
+      // letra + números (aceita sufixo curto residual)
+      if (nums.length >= 3 && letrasResto.length <= 2) acc = nums.slice();
       continue;
     }
     if (acc.length){
       // continuação: linha (quase) só de números (ex: "15 16 17 18 20 22 24")
-      const nums = extrairNumerosValidos(line);
-      const letrasLinha = line.replace(/[\d\s]/g, "").trim();
+      const limpa = limparLinhaJogo(line);
+      const nums = extrairNumerosValidos(limpa);
+      const letrasLinha = limpa.replace(/[\d\s]/g, "").trim();
       if (nums.length >= 1 && nums.length <= 12 && letrasLinha.length <= 2){ acc = acc.concat(nums); continue; }
       descarregar(); // qualquer outra linha encerra o bloco
     }
