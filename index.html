@@ -413,6 +413,7 @@ footer.app-footer strong{color:var(--primary)}
       <h2 style="font-size:0.95rem;">🤖 IA — Verificar foto/PDF e lançar apostas</h2>
       <span class="counter-pill" style="background:var(--primary); color:#fff;">IA</span>
     </div>
+    <div style="font-size:0.62rem; color:var(--text-soft); margin:-6px 0 8px;" id="appVersao">versão verificando…</div>
     <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">Anexe foto ou PDF do volante/comprovante. A IA extrai os números e lança as apostas automaticamente.</p>
 
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
@@ -538,6 +539,14 @@ footer.app-footer strong{color:var(--primary)}
 
 <script>
 "use strict";
+/* Versão do app (confira no painel IA após o Redeploy) */
+const APP_VERSAO = "2026-09-19-recibo-letras";
+try {
+  document.addEventListener("DOMContentLoaded", () => {
+    const v = document.getElementById("appVersao");
+    if (v) v.textContent = "versão " + APP_VERSAO;
+  });
+} catch(_){}
 /* ═══════════════════════════════════════════════════════════════════════
    LOTOFÁCIL — CONFERIDOR INTELIGENTE v2.3
    - IA multi-provedor Vercel (/api/vision): Nvidia → DeepSeek fallback automático
@@ -2161,9 +2170,13 @@ function ehLinhaRuidoRecibo(line){
 }
 
 /* RECIBO: "A 01 03 05 08 09 10 11 14" + "15 16 17 18 20 22 24" = jogo A (15).
-   Junta a linha da letra com as continuações só-de-números seguintes. */
+   Junta a linha da letra com as continuações só-de-números seguintes.
+   Tolerante: letra minúscula, marcador sem quebra de linha, sufixo curto (SU). */
 function extrairPorBlocosComLetras(texto){
-  const linhas = String(texto || "").split("\n");
+  // Garante quebra antes de marcadores "X 01" mesmo que o OCR junte tudo.
+  // O lookbehind impede quebrar sufixos ("SU") e palavras ("CONC 3778").
+  const quebrado = String(texto || "").replace(/(?<![A-Z0-9])([A-Z])\s+(?=\d{2}(?:\s|$))/g, "\n$1 ");
+  const linhas = quebrado.split("\n");
   const jogos = [];
   let acc = [];
   function descarregar(){
@@ -2174,22 +2187,21 @@ function extrairPorBlocosComLetras(texto){
   for (const crua of linhas){
     const line = String(crua || "").trim();
     if (!line) continue;
-    const mLetra = line.match(/^\s*([A-Z])\s+(.+)$/);
+    const mLetra = line.match(/^\s*([A-Za-z])\s+(.+)$/);
     if (mLetra){
       if (acc.length) descarregar();
       const resto = mLetra[2];
       const nums = extrairNumerosValidos(resto);
       const letrasResto = resto.replace(/[\d\s]/g, "").trim();
-      // letra + espaço + números (exclui "E. LOTÉRICO"; aceita sufixo curto tipo "SU")
-      if (nums.length >= 4 && letrasResto.length <= 3) acc = nums.slice();
+      // letra + números (exclui "E. LOTÉRICO"; aceita sufixo curto tipo "SU")
+      if (nums.length >= 3 && letrasResto.length <= 3) acc = nums.slice();
       continue;
     }
     if (acc.length){
-      // continuação: linha só com números (ex: "15 16 17 18 20 22 24")
-      if (/^[\d\s]+$/.test(line)){
-        const nums = extrairNumerosValidos(line);
-        if (nums.length >= 1 && nums.length <= 12){ acc = acc.concat(nums); continue; }
-      }
+      // continuação: linha (quase) só de números (ex: "15 16 17 18 20 22 24")
+      const nums = extrairNumerosValidos(line);
+      const letrasLinha = line.replace(/[\d\s]/g, "").trim();
+      if (nums.length >= 1 && nums.length <= 12 && letrasLinha.length <= 2){ acc = acc.concat(nums); continue; }
       descarregar(); // qualquer outra linha encerra o bloco
     }
     // fora de bloco: ignora (cabeçalhos, rodapés, propaganda)
