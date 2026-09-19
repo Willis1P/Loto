@@ -880,12 +880,36 @@ async function buscarResultadoCaixa(){
   if (btn){ btn.disabled=false; btn.innerHTML="🎯 Resultado Oficial ✔"; setTimeout(()=>{btn.innerHTML="🎯 Resultado — Buscar Oficial Caixa (auto)";},3500); }
   document.getElementById("jogosGrid").scrollIntoView({behavior:"smooth"});
 
-  // Atualizar proximo concurso
-  const proximoConcurso = parseInt(concurso) + 1;
-  const dataProx = new Date(); dataProx.setDate(dataProx.getDate()+1);
-  while (![1,3,5].includes(dataProx.getDay())) dataProx.setDate(dataProx.getDate()+1);
-  const proxDataStr = dataProx.toLocaleDateString("pt-BR", {day:"2-digit",month:"2-digit",year:"numeric"});
-  if (proxInfo) proxInfo.innerHTML = `🔄 <b>Concurso ${proximoConcurso}</b> — ${proxDataStr} — <b>R$ 5.000.000,00</b>`;
+  // Atualizar cabeçalho + próximo concurso com os mesmos dados da API
+  const proximoConcurso = dados.numeroConcursoProximo || (parseInt(concurso, 10) + 1);
+  let proxDataStr = dados.dataProximoConcurso || "";
+  const estimativa = dados.valorEstimadoProximoConcurso || 5000000;
+  let alvoOk = false;
+  if (proxDataStr) {
+    const partes = String(proxDataStr).split("/").map(Number);
+    if (partes.length === 3 && partes.every(n => !isNaN(n))) {
+      const dtApi = new Date(partes[2], partes[1] - 1, partes[0], 21, 0, 0);
+      if (!isNaN(dtApi.getTime())) {
+        proximoAlvo = dtApi <= new Date() ? proximoDiaLotofacil(dtApi) : dtApi;
+        alvoOk = true;
+      }
+    }
+  }
+  if (!alvoOk) {
+    const dataProx = new Date(); dataProx.setDate(dataProx.getDate() + 1);
+    while (![1, 3, 5].includes(dataProx.getDay())) dataProx.setDate(dataProx.getDate() + 1);
+    dataProx.setHours(21, 0, 0, 0);
+    proximoAlvo = dataProx;
+  }
+  proxDataStr = `${String(proximoAlvo.getDate()).padStart(2, "0")}/${String(proximoAlvo.getMonth() + 1).padStart(2, "0")}/${proximoAlvo.getFullYear()}`;
+  const headerTitle = document.getElementById("headerTitle");
+  if (headerTitle) headerTitle.textContent = `Lotofácil — Concurso ${concurso}`;
+  document.title = `Lotofácil — Concurso ${concurso}`;
+  const cronTitulo = document.getElementById("cronometroTitulo");
+  if (cronTitulo) cronTitulo.textContent = `⏰ Próximo Sorteio — Concurso ${proximoConcurso} — ${proxDataStr} — 21h`;
+  const dataApur = dados.dataApuracao ? ` em ${dados.dataApuracao}` : "";
+  if (proxInfo) proxInfo.innerHTML = `Concurso <b>${concurso}</b>${dataApur} — <b>${dezenas.map(n => String(n).padStart(2, "0")).join(" ")}</b> • Próximo <b>${proximoConcurso}</b> • Estimativa <b>${fmtBRL.format(estimativa)}</b>`;
+  atualizarCronometro();
 }
 
 // Auto-refresh removido para evitar recarregamento constante
