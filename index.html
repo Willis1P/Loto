@@ -2112,17 +2112,70 @@ async function preProcessarImagemOCR(dataUrl){
 }
 
 function parseTextoLotofacilAvancado(texto, lines, words){
-  // Estratégia 1: Usa LINHAS do Tesseract (preserva estrutura visual)
-  const jogosPorLinhas = extrairPorLinhas(lines);
-  if (jogosPorLinhas.length > 0) return jogosPorLinhas;
-  
+  // Estratégia 0: RECIBO DA CAIXA — jogos com letra (A, B, C...) e cada jogo
+  // pode estar em 2 linhas (ex: 8 + 7 números). Maior precisão: vai primeiro.
+  // Estratégia 1: linhas do Tesseract com 15-20 números (volante de mesa).
+  const precisos = removerDuplicatas([
+    ...extrairPorBlocosComLetras(texto),
+    ...extrairPorLinhas(lines)
+  ]);
+  if (precisos.length > 0) return precisos;
+
   // Estratégia 2: Usa PALAVRAS com bounding boxes (agrupa por proximidade Y)
   const jogosPorPalavras = extrairPorPalavras(words);
   if (jogosPorPalavras.length > 0) return jogosPorPalavras;
-  
+
   // Estratégia 3: Texto bruto com múltiplos algoritmos
   const jogosBruto = extrairPorTextoBruto(texto);
   return jogosBruto;
+}
+
+/* Linha de ruído de recibo: cabeçalho, propaganda, data/hora, terminal,
+   concurso, valores, validade, códigos — nunca contém jogo */
+function ehLinhaRuidoRecibo(line){
+  const t = " " + String(line || "").toUpperCase() + " ";
+  if (/^\s*[-–—_.*\s]*$/.test(line)) return true; // linhas de separadores
+  if (/\d{4,}/.test(line)) return true; // anos, terminais, valores, códigos
+  if (/\d\s*:\s*\d/.test(line)) return true; // horários
+  return /(MEGA|BORA|GARANT|PARTICIPE|SORTE|HORA|TERMINAL|LOTER|CONC | AT[EÉ] |TOTAL|R\$|VALIDADE|CONFIRA|RECIBO|VALOR|CODIGO|QR|HTTP|WWW|MILH|DATA|APURA|AGENCIA|CAIXA ECON|SURPRESINHA|TEIMOSINHA)/.test(t);
+}
+
+/* RECIBO: "A 01 03 05 08 09 10 11 14" + "15 16 17 18 20 22 24" = jogo A (15).
+   Junta a linha da letra com as continuações só-de-números seguintes. */
+function extrairPorBlocosComLetras(texto){
+  const linhas = String(texto || "").split("\n");
+  const jogos = [];
+  let acc = [];
+  function descarregar(){
+    const uniq = [...new Set(acc)].sort((a, b) => a - b);
+    if (uniq.length >= 14 && uniq.length <= 20) jogos.push(uniq);
+    acc = [];
+  }
+  for (const crua of linhas){
+    const line = String(crua || "").trim();
+    if (!line) continue;
+    const mLetra = line.match(/^\s*([A-Z])\s+(.+)$/);
+    if (mLetra){
+      if (acc.length) descarregar();
+      const resto = mLetra[2];
+      const nums = extrairNumerosValidos(resto);
+      const letrasResto = resto.replace(/[\d\s]/g, "").trim();
+      // letra + espaço + números (exclui "E. LOTÉRICO"; aceita sufixo curto tipo "SU")
+      if (nums.length >= 4 && letrasResto.length <= 3) acc = nums.slice();
+      continue;
+    }
+    if (acc.length){
+      // continuação: linha só com números (ex: "15 16 17 18 20 22 24")
+      if (/^[\d\s]+$/.test(line)){
+        const nums = extrairNumerosValidos(line);
+        if (nums.length >= 1 && nums.length <= 12){ acc = acc.concat(nums); continue; }
+      }
+      descarregar(); // qualquer outra linha encerra o bloco
+    }
+    // fora de bloco: ignora (cabeçalhos, rodapés, propaganda)
+  }
+  if (acc.length) descarregar();
+  return removerDuplicatas(jogos);
 }
 
 function extrairPorLinhas(lines){
@@ -2245,14 +2298,17 @@ function detectarGradeLotofacil(words){
 }
 
 function extrairPorTextoBruto(texto){
+  // Remove primeiro as linhas de ruído do recibo (no texto ORIGINAL,
+  // antes da normalização apagar as letras)
+  const semRuido = String(texto || "").split("\n").filter(l => !ehLinhaRuidoRecibo(l)).join("\n");
   // Normaliza preservando quebras de linha
-  const limpo = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  const limpo = semRuido.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\d\s\n]/g, " ")
     .replace(/[ \t]+/g, " ")
     .trim();
-  
+
   const jogos = [];
-  
+
   // Tenta por quebras de linha primeiro
   const linhas = limpo.split("\n");
   for (const linha of linhas){
@@ -2263,9 +2319,9 @@ function extrairPorTextoBruto(texto){
     }
   }
   if (jogos.length > 0) return removerDuplicatas(jogos);
-  
-  // Fallback: sliding window mais agressivo no texto todo
-  const allNums = extrairNumerosValidos(limpo);
+
+  // Fallback: sliding window mais agressivo no texto todo (sem as linhas de ruído)
+  const allNums = extrairNumerosValidos(linhas.join("\n"));
   
   if (allNums.length < 14) return [];
   
@@ -2491,7 +2547,13 @@ O QUE EXTRAIR DE CADA APOSTA:
 2. TIPO: "SIMPLES" (aposta individual, 1 jogo) ou "BOLAO" (bolão/grupo, com cotas).
 3. Se BOLAO: COTAS = quantidade de cotas do bolão (número impresso no comprovante) e PESSOAS = quantidade de participantes/pessoas (se visível; se não, use o nº de cotas).
 
-O QUE IGNORAR: cabeçalhos, valores em R$, datas, números do RESULTADO/sorteio, códigos de barras, QR codes.
+LAYOUT DE RECIBO DA CAIXA (MUITO IMPORTANTE):
+- Os jogos vêm marcados com LETRA na frente: A, B, C, D, E, F...
+- Cada jogo pode estar dividido em 2 LINHAS: ex. a linha "A 01 03 05 08 09 10 11 14" (8 números) continua na linha seguinte "15 16 17 18 20 22 24" (7 números).
+- JUNTE as duas linhas da mesma letra até formar os 15 números — cada letra = 1 aposta.
+- Extraia TODAS as letras, sem pular nenhuma.
+
+O QUE IGNORAR: cabeçalhos, propaganda (MEGA-SENA etc.), valores em R$, datas, horas, terminais, números do RESULTADO/sorteio, códigos de barras, QR codes.
 
 Responda APENAS com JSON válido, sem nenhum texto antes ou depois:
 {"apostas": [{"dezenas": [n1,n2,...], "tipo": "SIMPLES", "cotas": 1, "pessoas": 1}, {"dezenas": [...], "tipo": "BOLAO", "cotas": 8, "pessoas": 8}]}
