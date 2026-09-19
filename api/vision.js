@@ -106,6 +106,18 @@ async function tentarProvedor(provider, payload, useStream, diagnostico) {
 
 export default async function handler(req) {
   try {
+    // Diagnóstico rápido no navegador: GET /api/vision mostra quais chaves
+    // o servidor enxerga (só true/false, nunca o valor). Use após o Redeploy.
+    if (req.method === "GET") {
+      const providers = PROVIDERS.map(p => ({
+        id: p.id,
+        model: p.model,
+        hasKey: !!((process.env[p.keyEnv] || "").trim())
+      }));
+      return new Response(JSON.stringify({ ok: true, hint: "hasKey=false = chave ausente no Vercel (Settings → Environment Variables + Redeploy)", providers }), {
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      });
+    }
     const payload = await req.json();
     const useStream = payload.stream === true;
     const erros = [];
