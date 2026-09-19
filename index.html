@@ -435,7 +435,19 @@ footer.app-footer strong{color:var(--primary)}
       <h2 id="tituloSync" style="font-size:0.95rem;">🔄 Sincronizar entre aparelhos</h2>
       <span class="counter-pill" style="background:var(--primary); color:#fff;">SYNC</span>
     </div>
-    <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">Os dados ficam salvos só neste navegador. Para levar tudo (jogos, números marcados, participantes) para outro aparelho ou navegador: gere o link no aparelho de origem e abra no destino.</p>
+    <p style="font-size:0.72rem; color:var(--text-soft); margin-bottom:10px; line-height:1.5;">Os dados ficam salvos só neste navegador. Para ver em outro aparelho automaticamente, use o <b>código de sincronização</b> (precisa de 1 configuração no Vercel — veja o guia). Sem isso, use o link ou o arquivo abaixo.</p>
+    <div style="background:#fff; border:1.5px solid var(--primary); border-radius:10px; padding:10px; margin-bottom:10px;">
+      <div style="font-size:0.72rem; font-weight:800; color:var(--text); margin-bottom:6px;">⚡ Sync automática (outro navegador mostra ao abrir):</div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+        <input type="text" id="syncCode" placeholder="Código ex: LOTO123" maxlength="12" style="flex:1; min-width:130px; padding:9px; border:1.5px solid var(--border); border-radius:8px; font-size:0.8rem; text-transform:uppercase; font-weight:700; letter-spacing:1px;">
+        <button onclick="syncAtivar()" style="padding:9px 12px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:800; font-size:0.75rem; cursor:pointer;">Ativar</button>
+        <button onclick="syncPuxar(true)" style="padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); font-weight:700; font-size:0.75rem; cursor:pointer;">⬇ Puxar agora</button>
+      </div>
+      <label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:0.72rem; color:var(--text); cursor:pointer;">
+        <input type="checkbox" id="syncAuto" checked onchange="syncAlternarAuto(this.checked)" style="width:16px; height:16px;"> Enviar minhas alterações automaticamente
+      </label>
+      <div id="syncAutoStatus" style="margin-top:6px; font-size:0.68rem; color:var(--text-soft);">Sync automática desligada — informe o código e ative.</div>
+    </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
       <button onclick="gerarLinkSync()" style="flex:1; min-width:150px; padding:10px; border:none; border-radius:10px; background:linear-gradient(145deg,var(--primary),var(--primary-dark)); color:#fff; font-weight:800; font-size:0.78rem; cursor:pointer;">🔗 Gerar link de sincronização</button>
       <button onclick="baixarBackup()" style="flex:1; min-width:150px; padding:10px; border:1.5px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); font-weight:700; font-size:0.78rem; cursor:pointer;">💾 Baixar backup (arquivo)</button>
@@ -720,6 +732,7 @@ function salvarGruposCustom(){
       .filter(g => String(g.hash).startsWith("IA_") || g._custom)
       .map(serializarGrupo);
     localStorage.setItem(LS_GRUPOS_CUSTOM, JSON.stringify(custom));
+    try { if (typeof syncMarcar === "function") syncMarcar(); } catch(_){}
   }catch(e){ console.warn("Falha ao salvar grupos custom", e); }
 }
 function carregarGruposCustom(){
@@ -733,6 +746,7 @@ function carregarGruposCustom(){
 }
 function salvarHistorico(){
   try { localStorage.setItem(LS_KEY, JSON.stringify({ sorteados: [...state.sorteados], concurso: state.concurso, quando: Date.now() })); } catch(_){}
+  try { if (typeof syncMarcar === "function") syncMarcar(); } catch(_){}
 }
 function restaurarHistorico(){
   try {
@@ -761,6 +775,7 @@ function getParticipantesDB(){
 }
 function setParticipantesDB(arr){
   try{ localStorage.setItem(LS_DB_KEY, JSON.stringify(arr)); }catch(_){}
+  try { if (typeof syncMarcar === "function") syncMarcar(); } catch(_){}
   const contador = document.getElementById("contadorParticipantesDB");
   if (contador) contador.textContent = `${arr.length} nomes`;
 }
@@ -773,6 +788,7 @@ function getBolaoParticipantes(hash){
 }
 function setBolaoParticipantes(hash, ids){
   try{ localStorage.setItem(LS_BOLAO_KEY+"_"+hash, JSON.stringify(ids)); }catch(_){}
+  try { if (typeof syncMarcar === "function") syncMarcar(); } catch(_){}
 }
 function getParticipantesConcurso(){
   try{ const raw = localStorage.getItem(LS_PART_CONCURSO); if (raw) return JSON.parse(raw); }catch(_){}
@@ -780,6 +796,7 @@ function getParticipantesConcurso(){
 }
 function setParticipantesConcurso(ids){
   try{ localStorage.setItem(LS_PART_CONCURSO, JSON.stringify(ids)); }catch(_){}
+  try { if (typeof syncMarcar === "function") syncMarcar(); } catch(_){}
 }
 function getDivisorBolao(g){
   try{
@@ -1732,6 +1749,139 @@ function importarSyncDoHash(){
   } catch(_){ return false; }
 }
 
+/* ─── SYNC AUTOMÁTICA (código + Upstash Redis via /api/sync) ──────────── */
+const LS_SYNC_META = "loto-sync-meta-v1";
+function syncMetaLer(){
+  try {
+    const raw = localStorage.getItem(LS_SYNC_META);
+    if (raw){ const m = JSON.parse(raw); if (m && typeof m === "object") return m; }
+  } catch(_){}
+  return { code: "", auto: true, rev: 0, updatedAt: 0, deviceId: "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7) };
+}
+function syncMetaSalvar(m){
+  try { localStorage.setItem(LS_SYNC_META, JSON.stringify(m)); } catch(_){}
+}
+function syncStatusAuto(msg){
+  const el = document.getElementById("syncAutoStatus");
+  if (el) el.textContent = msg;
+}
+function syncSnapshotEstado(){
+  // Reusa o formato do backup manual: { v, app, quando, dados }
+  return coletarBackup();
+}
+let syncTimerPush = null;
+function syncMarcar(){
+  // Chamado a cada alteração local; envia com debounce se auto-sync ligada.
+  const m = syncMetaLer();
+  if (!m.code || m.auto === false) return;
+  if (syncTimerPush) clearTimeout(syncTimerPush);
+  syncTimerPush = setTimeout(() => { syncTimerPush = null; syncEmpurrar(); }, 2500);
+}
+async function syncEmpurrar(){
+  const m = syncMetaLer();
+  if (!m.code) return;
+  const rev = Date.now();
+  try {
+    const r = await fetch("/api/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: m.code, rev, deviceId: m.deviceId, state: syncSnapshotEstado() })
+    });
+    const j = await r.json();
+    if (r.status === 501){ syncStatusAuto("⚠️ Sync não configurado no servidor (falta Upstash no Vercel). Use o link/arquivo."); return; }
+    if (j && j.ok){
+      m.rev = rev; m.updatedAt = Date.now(); syncMetaSalvar(m);
+      syncStatusAuto(`✅ Sincronizado às ${new Date().toLocaleTimeString("pt-BR")}. Abra o outro navegador para ver.`);
+    } else if (j && j.reason === "stale" && j.current){
+      // Outro aparelho enviou algo mais novo no meio tempo: adota o dele.
+      aplicarBackup({ dados: (j.current.state && j.current.state.dados) || {} });
+      m.rev = j.current.rev || rev; m.updatedAt = j.current.updatedAt || Date.now(); syncMetaSalvar(m);
+      syncStatusAuto("🔄 Havia novidade do outro aparelho — aplicada.");
+      setTimeout(() => location.reload(), 900);
+    } else {
+      syncStatusAuto("⚠️ Falha ao enviar. Tente de novo.");
+    }
+  } catch(e){
+    syncStatusAuto("⚠️ Sem conexão com o servidor de sync. Os dados seguem salvos aqui.");
+  }
+}
+async function syncPuxar(manual){
+  const codeInput = document.getElementById("syncCode");
+  const m = syncMetaLer();
+  const code = ((codeInput && codeInput.value) || m.code || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+  if (!code || code.length < 4){
+    syncStatusAuto("⚠️ Informe um código com 4+ letras/números.");
+    return;
+  }
+  if (codeInput) codeInput.value = code;
+  m.code = code; syncMetaSalvar(m);
+  syncStatusAuto("⏳ Buscando novidades...");
+  try {
+    const r = await fetch("/api/sync?code=" + encodeURIComponent(code), { cache: "no-store" });
+    const j = await r.json();
+    if (r.status === 501){ syncStatusAuto("⚠️ Sync não configurado no servidor (falta Upstash no Vercel). Use o link/arquivo."); return; }
+    if (!j || !j.ok){ syncStatusAuto("⚠️ Erro ao buscar. Tente de novo."); return; }
+    if (!j.found){ syncStatusAuto("📭 Nada no servidor ainda para este código. Faça uma alteração aqui para enviar."); if (manual) syncEmpurrar(); return; }
+    const snap = j.snapshot || {};
+    if (Number(snap.rev) > Number(m.rev || 0)){
+      aplicarBackup({ dados: (snap.state && snap.state.dados) || {} });
+      m.rev = snap.rev; m.updatedAt = snap.updatedAt || Date.now(); syncMetaSalvar(m);
+      syncStatusAuto("✅ Novidades aplicadas! Recarregando...");
+      toast("✅ Sincronizado com o outro aparelho!");
+      setTimeout(() => location.reload(), 900);
+    } else {
+      syncStatusAuto("✅ Já está atualizado — nada novo no outro aparelho.");
+      if (manual) toast("✅ Já atualizado.");
+    }
+  } catch(e){
+    syncStatusAuto("⚠️ Sem conexão. Tente de novo.");
+  }
+}
+function syncAtivar(){
+  const codeInput = document.getElementById("syncCode");
+  const code = ((codeInput && codeInput.value) || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+  if (!code || code.length < 4){ syncStatusAuto("⚠️ Crie um código com 4+ letras/números (ex: LOTO123). Use o MESMO nos dois aparelhos."); return; }
+  const m = syncMetaLer();
+  m.code = code; if (m.auto == null) m.auto = true;
+  syncMetaSalvar(m);
+  const chk = document.getElementById("syncAuto");
+  if (chk) chk.checked = m.auto !== false;
+  syncStatusAuto("⏳ Código salvo. Verificando servidor...");
+  syncPuxar(false);
+}
+function syncAlternarAuto(on){
+  const m = syncMetaLer();
+  m.auto = !!on; syncMetaSalvar(m);
+  syncStatusAuto(on ? "✅ Envio automático ligado." : "⏸️ Envio automático pausado (puxe manualmente).");
+}
+function syncRestaurarUI(){
+  const m = syncMetaLer();
+  const codeInput = document.getElementById("syncCode");
+  if (codeInput && m.code) codeInput.value = m.code;
+  const chk = document.getElementById("syncAuto");
+  if (chk) chk.checked = m.auto !== false;
+  if (m.code) syncStatusAuto("⏳ Verificando novidades do outro aparelho...");
+}
+async function syncBoot(){
+  syncRestaurarUI();
+  const m = syncMetaLer();
+  if (!m.code) return;
+  await syncPuxar(false);
+  // Se eu tenho algo mais novo que o servidor, envia.
+  try {
+    const r = await fetch("/api/sync?code=" + encodeURIComponent(m.code), { cache: "no-store" });
+    const j = await r.json();
+    if (j && j.ok && (!j.found || Number(m.rev || 0) > Number((j.snapshot || {}).rev || 0))) syncEmpurrar();
+  } catch(_){}
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  try {
+    const m = syncMetaLer();
+    if (m.code) syncPuxar(false);
+  } catch(_){}
+});
+
 /* ─── IA VIA VERCEL FUNCTION ─────────────────────────────────────────── */
 async function pdfParaImagem(dataUrl){
   if (!window.pdfjsLib){
@@ -2645,6 +2795,7 @@ function boot(){
         toast(`🍀 ${totalJogos} jogo(s) em ${state.grupos.length} grupo(s) prontos!`, 3200);
       }
     }, 900);
+    try { if (typeof syncBoot === "function") syncBoot(); } catch(_){}
   } catch (err){
     console.error("[Boot] Erro fatal:", err);
     toast("⚠️ Erro ao carregar. Recarregue a página.");
