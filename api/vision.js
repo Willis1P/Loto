@@ -36,10 +36,11 @@ const PROVIDERS = [
   }
 ];
 
-async function tentarProvedor(provider, payload, useStream) {
-  const apiKey = process.env[provider.keyEnv];
+async function tentarProvedor(provider, payload, useStream, diagnostico) {
+  const apiKey = (process.env[provider.keyEnv] || "").trim();
   if (!apiKey) {
     console.log(`${provider.name}: chave não configurada (${provider.keyEnv})`);
+    if (diagnostico) diagnostico.push(`${provider.name}: sem chave ${provider.keyEnv}`);
     return { skipped: true };
   }
 
@@ -98,6 +99,7 @@ async function tentarProvedor(provider, payload, useStream) {
   } catch (e) {
     clearTimeout(timeoutId);
     console.warn(`${provider.name} falhou:`, e.message);
+    if (diagnostico) diagnostico.push(`${provider.name}: ${e.name === 'AbortError' ? 'timeout' : e.message}`.slice(0, 120));
     return { error: `${provider.name}: ${e.name === 'AbortError' ? 'timeout' : e.message}` };
   }
 }
@@ -107,6 +109,7 @@ export default async function handler(req) {
     const payload = await req.json();
     const useStream = payload.stream === true;
     const erros = [];
+    const diagnostico = [];
 
     // Modo dirigido pelo cliente: tenta UM provedor (cada chamada tem 10s próprios)
     if (payload.provider && payload.provider !== 'auto') {
@@ -116,21 +119,22 @@ export default async function handler(req) {
           status: 400, headers: { "Content-Type": "application/json" }
         });
       }
-      const r = await tentarProvedor(provider, payload, useStream);
+      const r = await tentarProvedor(provider, payload, useStream, diagnostico);
       if (r.ok) return r.response;
-      return new Response(JSON.stringify({ error: r.error || `${provider.name} indisponível` }), {
+      return new Response(JSON.stringify({ error: r.error || `${provider.name} indisponível`, diagnostico }), {
         status: r.skipped ? 501 : 502, headers: { "Content-Type": "application/json" }
       });
     }
 
     // Modo auto (compat): tenta em ordem até o primeiro OK
     for (const provider of PROVIDERS) {
-      const r = await tentarProvedor(provider, payload, useStream);
+      const r = await tentarProvedor(provider, payload, useStream, diagnostico);
       if (r.ok) return r.response;
       if (!r.skipped && r.error) erros.push(r.error);
     }
 
-    return new Response(JSON.stringify({ error: "Todos provedores falharam (DeepSeek + Nvidia + OpenRouter). Use extração manual." + (erros.length ? " Detalhes: " + erros.join(" | ").slice(0, 200) : "") }), {
+    const detalheDiag = diagnostico.length ? " Diagnóstico: " + diagnostico.join(" | ").slice(0, 300) : "";
+    return new Response(JSON.stringify({ error: "Todas IAs falharam." + detalheDiag, diagnostico }), {
       status: 502, headers: { "Content-Type": "application/json" }
     });
 

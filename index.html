@@ -2274,6 +2274,37 @@ function unirJogos(a, b){
   });
   return saida;
 }
+/* Aposta enriquecida: {dezenas, tipo, cotas, pessoas} — foca nos NÚMEROS e na estrutura */
+function normalizarAposta(x){
+  const dezenas = Array.isArray(x) ? x : (x && x.dezenas);
+  const clean = validarJogoExtraido(dezenas);
+  if (!clean) return null;
+  const tipoRaw = String((x && x.tipo) || "").toUpperCase();
+  const tipo = tipoRaw.indexOf("BOL") === 0 ? "BOLAO" : "SIMPLES";
+  const cotas = Math.max(1, parseInt((x && x.cotas) || 1, 10) || 1);
+  const pessoas = Math.max(1, parseInt((x && (x.pessoas ?? x.participantes)) || cotas, 10) || cotas);
+  return { dezenas: clean, tipo, cotas, pessoas };
+}
+function validarApostasExtraidas(lista){
+  if (!Array.isArray(lista)) return [];
+  return unirApostas(lista.map(normalizarAposta).filter(Boolean));
+}
+function unirApostas(a, b){
+  const vistos = new Set(), saida = [];
+  (a || []).concat(b || []).forEach(x => {
+    const n = normalizarAposta(x);
+    if (!n) return;
+    const k = n.dezenas.join(",");
+    if (vistos.has(k)) return;
+    vistos.add(k);
+    saida.push(n);
+  });
+  return saida;
+}
+function rotuloAposta(a){
+  const dz = a.dezenas.map(x => String(x).padStart(2, "0")).join(" ");
+  return a.tipo === "BOLAO" ? `${dz}  [BOLÃO ${a.cotas} cotas · ${a.pessoas} pessoas]` : dz;
+}
 
 async function analisarComIA(){
   const input = document.getElementById("inputIA");
@@ -2369,19 +2400,19 @@ async function analisarComIA(){
     // Usa a primeira página em alta qualidade para IA
     if (status) status.innerHTML = "🤖 <b>2/2</b> Enviando para IA...<br><small>Aguarde 10-30s</small>";
 
-    const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem do volante/comprovante com ATENÇÃO MÁXIMA e extraia TODOS os jogos apostados.
+    const systemPrompt = `Você é um extrator de NÚMEROS de apostas Lotofácil. Ignore todo texto explicativo e foque SÓ nos números e na estrutura da aposta.
 
-REGRAS OBRIGATÓRIAS:
-- Cada jogo da Lotofácil tem 15 a 20 números entre 01 e 25
-- Um volante pode ter MÚLTIPLOS jogos (até 10+ jogos por volante)
-- Procure por TODOS os conjuntos de números marcados (bolinhas preenchidas)
-- Ignore: cabeçalhos, valores em R$, datas, números SORTEADOS (resultado), códigos de barras, QR codes
-- Foque APENAS nos números APOSTADOS (marcados pelo apostador)
-- Números podem estar em linhas, colunas, grades ou tabelas
+O QUE EXTRAIR DE CADA APOSTA:
+1. DEZENAS: todos os números marcados (15 a 20 números, cada um de 01 a 25). Procure bolinhas preenchidas em linhas, colunas, grades ou tabelas.
+2. TIPO: "SIMPLES" (aposta individual, 1 jogo) ou "BOLAO" (bolão/grupo, com cotas).
+3. Se BOLAO: COTAS = quantidade de cotas do bolão (número impresso no comprovante) e PESSOAS = quantidade de participantes/pessoas (se visível; se não, use o nº de cotas).
 
-Responda APENAS com JSON válido: {"jogos": [[n1,n2,...n15-20], [n1,n2,...], ...]}.
-Ordene cada jogo crescente. Se não encontrar jogos, responda {"jogos":[]}.
-Exemplo: {"jogos": [[1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], [2,5,6,8,10,11,13,16,17,19,21,22,24,25,12]]}`;
+O QUE IGNORAR: cabeçalhos, valores em R$, datas, números do RESULTADO/sorteio, códigos de barras, QR codes.
+
+Responda APENAS com JSON válido, sem nenhum texto antes ou depois:
+{"apostas": [{"dezenas": [n1,n2,...], "tipo": "SIMPLES", "cotas": 1, "pessoas": 1}, {"dezenas": [...], "tipo": "BOLAO", "cotas": 8, "pessoas": 8}]}
+Ordene as dezenas de cada aposta em ordem crescente. Se não encontrar nenhuma aposta, responda {"apostas": []}.
+Exemplo: {"apostas": [{"dezenas": [1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], "tipo": "SIMPLES", "cotas": 1, "pessoas": 1}]}`;
 
     const payload = {
       model: "meta/llama-3.2-11b-vision-instruct",
@@ -2489,9 +2520,12 @@ content: [
     if (!jsonMatch) throw new Error("IA não retornou JSON. Resposta: " + conteudo.slice(0, 300));
 
     const parsed = JSON.parse(jsonMatch[0]);
-    const jogosIA = validarJogosExtraidos(Array.isArray(parsed.jogos) ? parsed.jogos : []);
+    // Formato novo (com estrutura): {"apostas": [{dezenas, tipo, cotas, pessoas}]}
+    // Formato legado: {"jogos": [[...]]}
+    const brutoIA = Array.isArray(parsed.apostas) ? parsed.apostas : (Array.isArray(parsed.jogos) ? parsed.jogos : []);
+    const jogosIA = validarApostasExtraidas(brutoIA);
     // Une o parcial do OCR (1-4 jogos) com o resultado da IA — nada se perde.
-    const jogos = unirJogos(jogosOCR, jogosIA);
+    const jogos = unirApostas(jogosOCR.map(a => normalizarAposta(a)), jogosIA);
     if (jogos.length === 0) throw new Error("Nenhum jogo extraído. Tente foto mais nítida ou use extração manual.");
 
     await processarJogosExtraidos(jogos, extraidoDiv, status);
@@ -2538,49 +2572,45 @@ function processarJogosManuais(texto){
     if (uniq.length>=15 && uniq.length<=20) jogos.push(uniq);
   }
   if (jogos.length===0){ toast("⚠️ Nenhum jogo válido (15-20 números por linha)"); return; }
-  window._jogosExtraidosIA = jogos;
   const extraidoDiv = document.getElementById("iaExtraido");
-  if (extraidoDiv){
-    extraidoDiv.style.display = "block";
-    extraidoDiv.innerHTML = `<b>✅ ${jogos.length} jogo(s):</b>
-      <pre style="white-space:pre-wrap; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos.map((n,i)=>`Jogo ${i+1}: ${n.map(x=>String(x).padStart(2,"0")).join(" ")}`).join("\n")}</pre>
-      <button class="chip on" style="margin-top:8px; width:100%; justify-content:center; background:var(--success); border-color:var(--success);" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos.length} aposta(s)</button>`;
-  }
   const status = document.getElementById("iaStatus");
-  if (status) status.textContent = `✅ ${jogos.length} jogo(s) pronto(s)`;
-  toast(`✅ ${jogos.length} jogo(s) pronto(s)`);
+  processarJogosExtraidos(jogos, extraidoDiv, status);
 }
 
-/* Função comum para processar jogos extraídos (OCR ou Nvidia) */
+/* Função comum para processar jogos extraídos (OCR ou IA) */
 async function processarJogosExtraidos(jogos, extraidoDiv, status){
-  window._jogosExtraidosIA = jogos;
+  const lista = unirApostas(jogos);
+  window._jogosExtraidosIA = lista;
   if (extraidoDiv){
     extraidoDiv.style.display = "block";
-    extraidoDiv.innerHTML = `<b>✅ ${jogos.length} jogo(s) extraído(s):</b>
-      <pre style="white-space:pre-wrap; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${jogos.map((n,i)=>`Jogo ${i+1}: ${n.map(x=>String(x).padStart(2,"0")).join(" ")}`).join("\n")}</pre>
-      <button class="chip on" style="margin-top:8px; width:100%; justify-content:center; background:var(--success); border-color:var(--success);" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${jogos.length} aposta(s)</button>`;
+    extraidoDiv.innerHTML = `<b>✅ ${lista.length} jogo(s) extraído(s):</b>
+      <pre style="white-space:pre-wrap; background:#fff; padding:8px; border-radius:8px; border:1px solid var(--border); max-height:180px; overflow:auto;">${lista.map((n,i)=>`Jogo ${i+1}: ${rotuloAposta(n)}`).join("\n")}</pre>
+      <button class="chip on" style="margin-top:8px; width:100%; justify-content:center; background:var(--success); border-color:var(--success);" onclick="confirmarLancamentoIA()">✅ Confirmar e lançar ${lista.length} aposta(s)</button>`;
   }
-  if (status) status.textContent = `✅ ${jogos.length} jogo(s) extraído(s)! Clique em Confirmar.`;
-  toast(`✅ ${jogos.length} jogo(s) extraído(s)`);
+  if (status) status.textContent = `✅ ${lista.length} jogo(s) extraído(s)! Clique em Confirmar.`;
+  toast(`✅ ${lista.length} jogo(s) extraído(s)`);
 }
 
 function confirmarLancamentoIA(){
-  const jogos = window._jogosExtraidosIA;
-  if (!jogos || !jogos.length){ toast("⚠️ Nenhum jogo para lançar"); return; }
+  const bruto = window._jogosExtraidosIA;
+  if (!bruto || !bruto.length){ toast("⚠️ Nenhum jogo para lançar"); return; }
+  const jogos = unirApostas(bruto);
+  if (!jogos.length){ toast("⚠️ Nenhum jogo válido para lançar"); return; }
   let adicionados = 0;
-  jogos.forEach(nums => {
-    const clean = [...new Set(nums.map(n=>parseInt(n,10)).filter(n=>n>=1&&n<=25))].sort((a,b)=>a-b);
-    if (clean.length < 15 || clean.length > 20) return;
+  jogos.forEach(a => {
+    const clean = a.dezenas;
+    const ehBolao = a.tipo === "BOLAO" || clean.length > 15;
+    const cotas = a.tipo === "BOLAO" ? Math.max(2, a.cotas) : 0;
     const existe = state.grupos.some(g => g.jogos.some(j => j.dezenas.length === clean.length && j.dezenas.every((v,i)=>v===clean[i])));
     if (existe) return;
     const hash = "IA_" + Date.now() + "_" + adicionados + "_" + Math.random().toString(36).slice(2,6);
     const grupo = {
-      hash, pagina: 900 + adicionados, tipo: "Simples",
-      ordem: state.grupos.length + 1, cota: 0, totalCotas: 0, valorCota: 0,
+      hash, pagina: 900 + adicionados, tipo: ehBolao ? "Bolão" : "Simples",
+      ordem: state.grupos.length + 1, cota: 0, totalCotas: cotas, valorCota: 0,
       valorTotalGrupo: 0,
-      ehBolao: true,
+      ehBolao,
       _custom: true,
-      jogos: [{ idx: 1, dezenas: clean, set: new Set(clean), qtd: clean.length, ehBolao: true }]
+      jogos: [{ idx: 1, dezenas: clean, set: new Set(clean), qtd: clean.length, ehBolao }]
     };
     state.grupos.push(grupo);
     adicionados++;
