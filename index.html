@@ -2651,13 +2651,13 @@ Ordene dezenas crescente. Se nenhuma aposta clara, {"apostas": []}`;
     // Chama a Function do Vercel — DeepSeek
     let resp = null;
     try {
-      if (status) status.innerHTML = `🤖 <b>2/2</b> IA DeepSeek analisando...<br><small>Aguarde ~10s</small>`;
+      if (status) status.innerHTML = `🤖 <b>2/2</b> IA OpenRouter analisando...<br><small>Aguarde ~10s</small>`;
       const ctl = new AbortController();
       const tId = setTimeout(() => ctl.abort(), 25000);
       const r = await fetch("/api/vision", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, provider: "deepseek" }),
+        body: JSON.stringify({ ...payload, provider: "openrouter" }),
         signal: ctl.signal
       });
       clearTimeout(tId);
@@ -2674,10 +2674,10 @@ Ordene dezenas crescente. Se nenhuma aposta clara, {"apostas": []}`;
       resp = r;
     } catch(e){
       const motivo = e.name === "AbortError" ? "tempo esgotado (25s)" : String(e.message || e);
-      console.warn("[IA] DeepSeek falhou:", motivo);
-      throw new Error(`IA DeepSeek falhou: ${motivo.slice(0, 200)}. Use extração manual.`);
+      console.warn("[IA] OpenRouter falhou:", motivo);
+      throw new Error(`IA OpenRouter falhou: ${motivo.slice(0, 200)}. Use extração manual.`);
     }
-    if (status) status.innerHTML = `✅ <b>DeepSeek</b> respondeu — lendo resultado...`;
+    if (status) status.innerHTML = `✅ <b>OpenRouter</b> respondeu — lendo resultado...`;
 
     // Suporta tanto stream (SSE) quanto JSON direto (stream:false) — corrige Unexpected token '<' quando volta HTML
     const contentType = resp.headers.get("content-type") || "";
@@ -2746,7 +2746,7 @@ Ordene dezenas crescente. Se nenhuma aposta clara, {"apostas": []}`;
     if (msg.includes("Failed to fetch") || msg.includes("NetworkError")){
       dica = "🌐 <b>Rede bloqueada.</b> A Function <code>/api/vision</code> pode não estar deployada. Verifique se o arquivo <code>api/vision.js</code> está no GitHub e faça Redeploy no Vercel.";
     } else if (msg.includes("401") || msg.includes("inválida") || msg.includes("não configurada")){
-      dica = "🔑 <b>Chave inválida ou ausente.</b> Confira <code>DEEPSEEK_API_KEY</code> em Vercel → Settings → Environment Variables (marque Production + Preview + Development) e faça Redeploy.";
+      dica = "🔑 <b>Chave inválida ou ausente.</b> Confira <code>OPENROUTER_API_KEY</code> em Vercel → Settings → Environment Variables (marque Production + Preview + Development) e faça Redeploy.";
     } else if (msg.includes("402") || msg.includes("créditos")){
       dica = "💳 <b>Sem créditos no provedor.</b> Recarregue a conta ou use a extração manual abaixo.";
     } else if (msg.includes("HTML")){
