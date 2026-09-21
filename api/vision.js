@@ -9,26 +9,25 @@ const PROVIDER = {
   timeout: 8000
 };
 
-export default async function handler(req) {
+// Vercel Edge: export fetch (Web API)
+export async function fetch(request) {
   try {
-    // GET para diagnóstico
-    if (req.method === "GET") {
+    if (request.method === "GET") {
       const hasKey = !!((process.env[PROVIDER.keyEnv] || "").trim());
       return new Response(JSON.stringify({ 
         ok: true, 
-        hint: "hasKey=false = chave ausente no Vercel (Settings → Environment Variables + Redeploy)",
         providers: [{ id: PROVIDER.id, model: PROVIDER.model, hasKey }]
       }), {
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
       });
     }
 
-    const payload = await req.json();
+    const payload = await request.json();
     const useStream = payload.stream === true;
 
     const apiKey = (process.env[PROVIDER.keyEnv] || "").trim();
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: `deepseek: chave não configurada (${PROVIDER.keyEnv})` }), {
+      return new Response(JSON.stringify({ error: `deepseek: chave não configurada` }), {
         status: 500, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
       });
     }
@@ -76,7 +75,7 @@ export default async function handler(req) {
         data = JSON.parse(responseText);
       } catch (parseError) {
         console.error("deepseek resposta não é JSON:", responseText.slice(0, 200));
-        return new Response(JSON.stringify({ error: "deepseek: resposta inválida (não JSON)" }), {
+        return new Response(JSON.stringify({ error: "deepseek: resposta inválida" }), {
           status: 502, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
         });
       }
