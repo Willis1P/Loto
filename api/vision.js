@@ -1,19 +1,15 @@
 export const config = { runtime: 'edge' };
 
-// Provedor único: OpenRouter (gpt-4o-mini vision).
-// Env var no Vercel: OPENROUTER_API_KEY
+// Provedor único: DeepSeek (deepseek-flash vision).
+// Env var no Vercel: DEEPSEEK_API_KEY
 const PROVIDERS = [
   {
-    id: 'openrouter',
-    name: 'openrouter',
-    url: 'https://openrouter.ai/api/v1/chat/completions',
-    keyEnv: 'OPENROUTER_API_KEY',
-    model: 'gpt-4o-mini',
-    timeout: 9000,
-    extraHeaders: {
-      "HTTP-Referer": "https://lotofacil-conferidor.vercel.app",
-      "X-Title": "Lotofacil Conferidor"
-    }
+    id: 'deepseek',
+    name: 'deepseek',
+    url: 'https://api.deepseek.com/chat/completions',
+    keyEnv: 'DEEPSEEK_API_KEY',
+    model: 'deepseek-flash',
+    timeout: 9000
   }
 ];
 

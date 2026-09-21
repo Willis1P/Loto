@@ -2557,12 +2557,12 @@ async function analisarComIA(){
       if (paginas.length > 1 && status) status.textContent = `📄 PDF com ${paginas.length} páginas — OCR vai ler todas.`;
     }
     const imgDataUrl = paginas[0];
-    // Comprime imagem agressivamente para caber no Vercel 10s (limite duro do Hobby)
+    // Comprime imagem com qualidade para visão IA (não para Vercel 10s)
     const img = new Image();
     img.src = imgDataUrl;
     await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error("Falha ao ler a imagem. Tente outro arquivo.")); });
     const canvas = document.createElement("canvas");
-    const maxW = 600, maxH = 600;  // 600px = seguro para 10s
+    const maxW = 1200, maxH = 1200;  // 1200px = alta qualidade para visão
     let w = img.width, h = img.height;
     if (w > maxW || h > maxH){
       const ratio = Math.min(maxW/w, maxH/h);
@@ -2570,7 +2570,7 @@ async function analisarComIA(){
     }
     canvas.width = w; canvas.height = h;
     canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-    const comprimido = canvas.toDataURL("image/jpeg", 0.4);  // 0.4 = mínimo aceitável
+    const comprimido = canvas.toDataURL("image/jpeg", 0.7);  // 0.7 = qualidade alta para OCR/visão
     const base64 = comprimido.split(",")[1];
     const mime = "image/jpeg";
 
@@ -2619,56 +2619,45 @@ async function analisarComIA(){
     // Usa a primeira página em alta qualidade para IA
     if (status) status.innerHTML = "🤖 <b>2/2</b> Enviando para IA...<br><small>Aguarde 10-30s</small>";
 
-    const systemPrompt = `Você é um extrator de NÚMEROS de apostas Lotofácil. Ignore todo texto explicativo e foque SÓ nos números e na estrutura da aposta.
+const systemPrompt = `Você é um extrator EXATO de números de apostas Lotofácil. 
+REGRAS RÍGIDAS:
+1. Olhe CADA bolinha preenchida na imagem. Conte uma a uma.
+2. Cada aposta = 15 números entre 01 e 25. Se vir 16, 17, 18, 19 ou 20 números, inclua todos.
+3. No recibo da Caixa: jogos marcados com LETRA (A, B, C...). Cada letra = 1 aposta completa.
+   - Se uma letra tem números em 2 linhas, JUNTE as duas linhas até fechar 15+ números.
+4. NÃO invente números. Se não tiver certeza de um número, NÃO o inclua.
+5. IGNORE: cabeçalhos, valores R$, datas, números do RESULTADO/sorteio, códigos de barras, QR codes.
+6. Se a imagem for nítida, a extração deve ser PERFEITA.
 
-O QUE EXTRAIR DE CADA APOSTA:
-1. DEZENAS: todos os números marcados (15 a 20 números, cada um de 01 a 25). Procure bolinhas preenchidas em linhas, colunas, grades ou tabelas.
-2. TIPO: "SIMPLES" (aposta individual, 1 jogo) ou "BOLAO" (bolão/grupo, com cotas).
-3. Se BOLAO: COTAS = quantidade de cotas do bolão (número impresso no comprovante) e PESSOAS = quantidade de participantes/pessoas (se visível; se não, use o nº de cotas).
-
-LAYOUT DE RECIBO DA CAIXA (MUITO IMPORTANTE):
-- Os jogos vêm marcados com LETRA na frente: A, B, C, D, E, F...
-- Cada jogo pode estar dividido em 2 LINHAS: ex. a linha "A 01 03 05 08 09 10 11 14" (8 números) continua na linha seguinte "15 16 17 18 20 22 24" (7 números).
-- JUNTE as duas linhas da mesma letra até formar os 15 números — cada letra = 1 aposta.
-- Extraia TODAS as letras, sem pular nenhuma.
-
-O QUE IGNORAR: cabeçalhos, propaganda (MEGA-SENA etc.), valores em R$, datas, horas, terminais, números do RESULTADO/sorteio, códigos de barras, QR codes.
-
-Responda APENAS com JSON válido, sem nenhum texto antes ou depois:
-{"apostas": [{"dezenas": [n1,n2,...], "tipo": "SIMPLES", "cotas": 1, "pessoas": 1}, {"dezenas": [...], "tipo": "BOLAO", "cotas": 8, "pessoas": 8}]}
-Ordene as dezenas de cada aposta em ordem crescente. Se não encontrar nenhuma aposta, responda {"apostas": []}.
-Exemplo: {"apostas": [{"dezenas": [1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], "tipo": "SIMPLES", "cotas": 1, "pessoas": 1}]}`;
+Responda APENAS JSON válido, sem texto extra:
+{"apostas": [{"dezenas": [n1,n2,...], "tipo": "SIMPLES", "cotas": 1, "pessoas": 1}, ...]}
+Ordene dezenas crescente. Se nenhuma aposta clara, {"apostas": []}`;
 
     const payload = {
-      model: "meta/llama-3.2-11b-vision-instruct",
+      model: "deepseek-flash",
       messages: [{
         role: "user",
-content: [
+        content: [
           { type: "text", text: systemPrompt },
-          { type: "image_url", image_url: { url: `data:${mime};base64,${base64}`, detail: "low" } }
+          { type: "image_url", image_url: { url: `data:${mime};base64,${base64}`, detail: "high" } }
         ]
       }],
-      temperature: 0.05,
+      temperature: 0.01,
       max_tokens: 1024,
       seed: 0,
-      stream: false,
-      reasoning_effort: "low"
+      stream: false
     };
 
-    // Chama a Function do Vercel UM provedor por vez (cascata no cliente).
-    // Motivo: o plano Hobby limita cada execução a ~10s, então a cascata
-    // dentro de uma única chamada estourava 504. Aqui cada provedor ganha
-    // uma execução própria: DeepSeek → Nvidia → OpenRouter.
-    // Provedor único: OpenRouter (gpt-4o-mini vision).
+    // Chama a Function do Vercel — DeepSeek
     let resp = null;
     try {
-      if (status) status.innerHTML = `🤖 <b>2/2</b> IA OpenRouter analisando...<br><small>Aguarde ~10s</small>`;
+      if (status) status.innerHTML = `🤖 <b>2/2</b> IA DeepSeek analisando...<br><small>Aguarde ~10s</small>`;
       const ctl = new AbortController();
       const tId = setTimeout(() => ctl.abort(), 25000);
       const r = await fetch("/api/vision", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, provider: "openrouter" }),
+        body: JSON.stringify({ ...payload, provider: "deepseek" }),
         signal: ctl.signal
       });
       clearTimeout(tId);
@@ -2685,10 +2674,10 @@ content: [
       resp = r;
     } catch(e){
       const motivo = e.name === "AbortError" ? "tempo esgotado (25s)" : String(e.message || e);
-      console.warn("[IA] OpenRouter falhou:", motivo);
-      throw new Error(`IA OpenRouter falhou: ${motivo.slice(0, 200)}. Use extração manual.`);
+      console.warn("[IA] DeepSeek falhou:", motivo);
+      throw new Error(`IA DeepSeek falhou: ${motivo.slice(0, 200)}. Use extração manual.`);
     }
-    if (status) status.innerHTML = `✅ <b>OpenRouter</b> respondeu — lendo resultado...`;
+    if (status) status.innerHTML = `✅ <b>DeepSeek</b> respondeu — lendo resultado...`;
 
     // Suporta tanto stream (SSE) quanto JSON direto (stream:false) — corrige Unexpected token '<' quando volta HTML
     const contentType = resp.headers.get("content-type") || "";
@@ -2757,7 +2746,7 @@ content: [
     if (msg.includes("Failed to fetch") || msg.includes("NetworkError")){
       dica = "🌐 <b>Rede bloqueada.</b> A Function <code>/api/vision</code> pode não estar deployada. Verifique se o arquivo <code>api/vision.js</code> está no GitHub e faça Redeploy no Vercel.";
     } else if (msg.includes("401") || msg.includes("inválida") || msg.includes("não configurada")){
-      dica = "🔑 <b>Chave inválida ou ausente.</b> Confira <code>OPENROUTER_API_KEY</code> em Vercel → Settings → Environment Variables (marque Production + Preview + Development) e faça Redeploy.";
+      dica = "🔑 <b>Chave inválida ou ausente.</b> Confira <code>DEEPSEEK_API_KEY</code> em Vercel → Settings → Environment Variables (marque Production + Preview + Development) e faça Redeploy.";
     } else if (msg.includes("402") || msg.includes("créditos")){
       dica = "💳 <b>Sem créditos no provedor.</b> Recarregue a conta ou use a extração manual abaixo.";
     } else if (msg.includes("HTML")){
