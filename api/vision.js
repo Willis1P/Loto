@@ -9,30 +9,27 @@ const PROVIDERS = [
     url: 'https://api.deepseek.com/chat/completions',
     keyEnv: 'DEEPSEEK_API_KEY',
     model: 'deepseek-flash',
-    timeout: 9000
+    timeout: 8000
   }
 ];
 
-async function tentarProvedor(provider, payload, useStream, diagnostico) {
+async function tentarProvedor(provider, payload, useStream) {
   const apiKey = (process.env[provider.keyEnv] || "").trim();
   if (!apiKey) {
-    console.log(`${provider.name}: chave não configurada (${provider.keyEnv})`);
-    if (diagnostico) diagnostico.push(`${provider.name}: sem chave ${provider.keyEnv}`);
-    return { skipped: true };
+    return { error: `${provider.name}: chave não configurada (${provider.keyEnv})` };
   }
 
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${apiKey}`,
-    "Accept": useStream ? "text/event-stream" : "application/json",
-    ...(provider.extraHeaders || {})
+    "Accept": useStream ? "text/event-stream" : "application/json"
   };
 
   const providerPayload = {
     model: provider.model,
     messages: payload.messages,
-    temperature: payload.temperature ?? 0.05,
-    max_tokens: payload.max_tokens ?? 768,
+    temperature: payload.temperature ?? 0.01,
+    max_tokens: payload.max_tokens ?? 1024,
     stream: useStream
   };
 
@@ -58,34 +55,26 @@ async function tentarProvedor(provider, payload, useStream, diagnostico) {
     console.log(`${provider.name} OK`);
 
     if (useStream) {
-      return {
-        ok: true,
-        streamed: true,
-        response: new Response(resp.body, {
-          headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "Access-Control-Allow-Origin": "*" }
-        })
-      };
+      return new Response(resp.body, {
+        headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "Access-Control-Allow-Origin": "*" }
+      });
     }
     const data = await resp.json();
-    return {
-      ok: true,
-      response: new Response(JSON.stringify(data), {
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-      })
-    };
+    return new Response(JSON.stringify(data), {
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+    });
   } catch (e) {
     clearTimeout(timeoutId);
     console.warn(`${provider.name} falhou:`, e.message);
-    if (diagnostico) diagnostico.push(`${provider.name}: ${e.name === 'AbortError' ? 'timeout' : e.message}`.slice(0, 120));
     return { error: `${provider.name}: ${e.name === 'AbortError' ? 'timeout' : e.message}` };
   }
 }
 
-export default async function handler(req) {
+// Vercel Edge Function: export fetch (Web API style)
+export async function fetch(request) {
   try {
-    // Diagnóstico rápido no navegador: GET /api/vision mostra quais chaves
-    // o servidor enxerga (só true/false, nunca o valor). Use após o Redeploy.
-    if (req.method === "GET") {
+    // GET para diagnóstico
+    if (request.method === "GET") {
       const providers = PROVIDERS.map(p => ({
         id: p.id,
         model: p.model,
@@ -95,12 +84,11 @@ export default async function handler(req) {
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
       });
     }
-    const payload = await req.json();
-    const useStream = payload.stream === true;
-    const erros = [];
-    const diagnostico = [];
 
-    // Modo dirigido pelo cliente: tenta UM provedor (cada chamada tem 10s próprios)
+    const payload = await request.json();
+    const useStream = payload.stream === true;
+
+    // Modo dirigido pelo cliente: tenta UM provedor
     if (payload.provider && payload.provider !== 'auto') {
       const provider = PROVIDERS.find(p => p.id === payload.provider || p.name === payload.provider);
       if (!provider) {
@@ -108,22 +96,20 @@ export default async function handler(req) {
           status: 400, headers: { "Content-Type": "application/json" }
         });
       }
-      const r = await tentarProvedor(provider, payload, useStream, diagnostico);
-      if (r.ok) return r.response;
-      return new Response(JSON.stringify({ error: r.error || `${provider.name} indisponível`, diagnostico }), {
-        status: r.skipped ? 501 : 502, headers: { "Content-Type": "application/json" }
+      const r = await tentarProvedor(provider, payload, useStream);
+      if (r instanceof Response) return r;
+      return new Response(JSON.stringify({ error: r.error || `${provider.name} indisponível` }), {
+        status: 502, headers: { "Content-Type": "application/json" }
       });
     }
 
-    // Modo auto (compat): tenta em ordem até o primeiro OK
+    // Modo auto: tenta em ordem até o primeiro OK
     for (const provider of PROVIDERS) {
-      const r = await tentarProvedor(provider, payload, useStream, diagnostico);
-      if (r.ok) return r.response;
-      if (!r.skipped && r.error) erros.push(r.error);
+      const r = await tentarProvedor(provider, payload, useStream);
+      if (r instanceof Response) return r;
     }
 
-    const detalheDiag = diagnostico.length ? " Diagnóstico: " + diagnostico.join(" | ").slice(0, 300) : "";
-    return new Response(JSON.stringify({ error: "Todas IAs falharam." + detalheDiag, diagnostico }), {
+    return new Response(JSON.stringify({ error: "Todas IAs falharam." }), {
       status: 502, headers: { "Content-Type": "application/json" }
     });
 
