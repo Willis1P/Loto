@@ -16,6 +16,7 @@ const PROVIDERS = [
 async function tentarProvedor(provider, payload, useStream) {
   const apiKey = (process.env[provider.keyEnv] || "").trim();
   if (!apiKey) {
+    console.log(`${provider.name}: chave não configurada (${provider.keyEnv})`);
     return { error: `${provider.name}: chave não configurada (${provider.keyEnv})` };
   }
 
@@ -46,26 +47,35 @@ async function tentarProvedor(provider, payload, useStream) {
     });
     clearTimeout(timeoutId);
 
+    const responseText = await resp.text();
+    
     if (!resp.ok) {
-      const errText = await resp.text();
-      console.warn(`${provider.name} erro ${resp.status}:`, errText.slice(0, 200));
-      return { error: `${provider.name}: HTTP ${resp.status} — ${errText.slice(0, 150)}` };
+      console.warn(`${provider.name} erro ${resp.status}:`, responseText.slice(0, 200));
+      return { error: `${provider.name}: HTTP ${resp.status} — ${responseText.slice(0, 150)}` };
     }
 
     console.log(`${provider.name} OK`);
 
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error(`${provider.name} resposta não é JSON:`, responseText.slice(0, 200));
+      return { error: `${provider.name}: resposta inválida (não JSON)` };
+    }
+
     if (useStream) {
-      return new Response(resp.body, {
+      return new Response(responseText, {
         headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "Access-Control-Allow-Origin": "*" }
       });
     }
-    const data = await resp.json();
+    
     return new Response(JSON.stringify(data), {
       headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
     });
   } catch (e) {
     clearTimeout(timeoutId);
-    console.warn(`${provider.name} falhou:`, e.message);
+    console.error(`${provider.name} exceção:`, e.message, e.stack);
     return { error: `${provider.name}: ${e.name === 'AbortError' ? 'timeout' : e.message}` };
   }
 }
