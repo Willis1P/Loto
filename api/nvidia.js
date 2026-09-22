@@ -23,7 +23,7 @@ export default async function handler(req) {
     };
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 7000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const resp = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
@@ -35,7 +35,19 @@ export default async function handler(req) {
 
     if (!resp.ok) {
       const errText = await resp.text();
-      return new Response(JSON.stringify({ error: "NVIDIA retornou: " + errText.slice(0,300) }), { status: resp.status, headers: { "Content-Type": "application/json" } });
+      let statusCode = resp.status;
+      let userMsg = "";
+      
+      if (statusCode === 401) userMsg = "🔑 Chave NVIDIA_API_KEY inválida ou expirada. Atualize no Vercel.";
+      else if (statusCode === 402) userMsg = "💳 Créditos Nvidia esgotados. Adicione créditos ou use extração manual.";
+      else if (statusCode === 429) userMsg = "⏱️ Rate limit excedido. Aguarde ou use extração manual.";
+      else if (statusCode >= 500) userMsg = "🔧 Erro no servidor Nvidia. Tente novamente.";
+      else userMsg = `Erro ${statusCode}: ${errText.slice(0, 200)}`;
+      
+      return new Response(JSON.stringify({ error: userMsg, code: statusCode }), { 
+        status: statusCode, 
+        headers: { "Content-Type": "application/json" } 
+      });
     }
 
     if (useStream) {
@@ -45,7 +57,7 @@ export default async function handler(req) {
       return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
   } catch(e) {
-    const msg = e.name === 'AbortError' ? "Tempo esgotado (Vercel 10s). Tente imagem menor ou use extração manual." : e.message;
+    const msg = e.name === 'AbortError' ? "Tempo esgotado (Vercel 30s). Tente imagem menor ou use extração manual." : e.message;
     return new Response(JSON.stringify({ error: msg }), { status: 504, headers: { "Content-Type": "application/json" } });
   }
 }

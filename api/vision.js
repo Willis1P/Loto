@@ -1,134 +1,82 @@
 export const config = { runtime: 'edge' };
 
-const FREE_VISION_MODELS = [
-  { id: 'google/gemini-flash-1.5', name: 'Gemini 1.5 Flash', vision: true },
-  { id: 'google/gemini-flash-1.5-8b', name: 'Gemini 1.5 Flash 8B', vision: true },
-  { id: 'meta-llama/llama-3.2-11b-vision-instruct:free', name: 'Llama 3.2 11B Vision (free)', vision: true },
-];
-
-const PROVIDERS = [
-  {
-    id: 'openrouter',
-    name: 'OpenRouter (free vision models)',
-    url: 'https://openrouter.ai/api/v1/chat/completions',
-    keyEnv: 'OPENROUTER_API_KEY',
-    models: FREE_VISION_MODELS,
-    timeout: 8000,
-    extraHeaders: {
-      'HTTP-Referer': 'https://loto-coral.vercel.app',
-      'X-Title': 'Lotofácil Conferidor'
-    }
-  }
-];
-
-// Handler padrão (evita conflito com fetch global)
-export default async function handler(request) {
+export default async function handler(req) {
   try {
-    if (request.method === "GET") {
-      const status = await Promise.all(PROVIDERS.map(async (p) => {
-        const hasKey = !!((process.env[p.keyEnv] || "").trim());
-        return {
-          id: p.id,
-          hasKey,
-          models: p.models.map(m => ({ id: m.id, name: m.name, vision: m.vision }))
-        };
-      }));
-      return new Response(JSON.stringify({ ok: true, providers: status }), {
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-      });
-    }
+    const payload = await req.json();
+    const { model, messages, temperature, max_tokens, stream } = payload;
+    const useStream = stream === true;
 
-    const payload = await request.json();
-    const useStream = payload.stream === true;
-    const requestedModel = payload.model;
-
-    for (const provider of PROVIDERS) {
-      const apiKey = (process.env[provider.keyEnv] || "").trim();
-      if (!apiKey) {
-        console.log(`${provider.name}: chave não configurada (${provider.keyEnv})`);
-        continue;
-      }
-
-      let modelId = requestedModel;
-      if (!modelId) {
-        const visionModel = provider.models.find(m => m.vision);
-        modelId = visionModel?.id || provider.models[0]?.id;
-      }
-      if (!modelId) continue;
-
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "Accept": useStream ? "text/event-stream" : "application/json",
-        ...(provider.extraHeaders || {})
-      };
-
-      const providerPayload = {
-        model: modelId,
-        messages: payload.messages,
-        temperature: payload.temperature ?? 0.01,
-        max_tokens: payload.max_tokens ?? 1024,
-        stream: useStream
-      };
-
-      console.log(`Tentando ${provider.name} com ${modelId}...`);
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), provider.timeout);
-
+    // Tenta Nvidia primeiro
+    const nvidiaKey = process.env.NVIDIA_API_KEY;
+    if (nvidiaKey) {
       try {
-        // USA globalThis.fetch para evitar recursão com export fetch
-        const resp = await globalThis.fetch(provider.url, {
+        const nvidiaResp = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
           method: "POST",
-          headers,
-          body: JSON.stringify(providerPayload),
-          signal: controller.signal
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${nvidiaKey}`,
+            Accept: useStream ? "text/event-stream" : "application/json"
+          },
+          body: JSON.stringify({
+            model: model || "meta/llama-3.2-11b-vision-instruct",
+            messages,
+            temperature: temperature ?? 0,
+            max_tokens: max_tokens ?? 1024,
+            stream: useStream
+          }),
+          signal: AbortSignal.timeout(8000)
         });
-        clearTimeout(timeoutId);
 
-        const responseText = await resp.text();
-        
-        if (!resp.ok) {
-          console.warn(`${provider.name} (${modelId}) erro ${resp.status}:`, responseText.slice(0, 200));
-          continue;
+        if (nvidiaResp.ok) {
+          if (useStream) {
+            return new Response(nvidiaResp.body, {
+              headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "Access-Control-Allow-Origin": "*" }
+            });
+          }
+          const data = await nvidiaResp.json();
+          return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
         }
-
-        console.log(`${provider.name} (${modelId}) OK`);
-
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error(`${provider.name} resposta não é JSON:`, responseText.slice(0, 200));
-          continue;
-        }
-
-        if (useStream) {
-          return new Response(responseText, {
-            headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "Access-Control-Allow-Origin": "*" }
-          });
-        }
-        
-        return new Response(JSON.stringify(data), {
-          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-        });
+        console.warn("[Vision] Nvidia falhou:", nvidiaResp.status, await nvidiaResp.text());
       } catch (e) {
-        clearTimeout(timeoutId);
-        console.error(`${provider.name} (${modelId}) exceção:`, e.message, e.stack);
-        continue;
+        console.warn("[Vision] Nvidia erro:", e.message);
       }
     }
 
-    return new Response(JSON.stringify({ 
-      error: "Todos provedores gratuitos falharam. Use extração local (Tesseract) ou manual.",
-      hint: "Configure OPENROUTER_API_KEY no Vercel para modelos grátis com vision, ou use OCR local."
-    }), {
-      status: 502, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-    });
+    // Fallback DeepSeek (OpenRouter)
+    const openRouterKey = process.env.OPENROUTER_API_KEY;
+    if (openRouterKey) {
+      const dr = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${openRouterKey}`,
+          "HTTP-Referer": "https://lotofacil.app",
+          "X-Title": "Lotofácil Conferidor"
+        },
+        body: JSON.stringify({
+          model: "deepseek/deepseek-chat-v3-0324:free",
+          messages: messages.map(m => ({
+            role: m.role,
+            content: Array.isArray(m.content) ? m.content.map(c => c.type === "text" ? c.text : "[image]").join(" ") : m.content
+          })),
+          temperature: temperature ?? 0,
+          max_tokens: max_tokens ?? 1024,
+          stream: useStream
+        }),
+        signal: AbortSignal.timeout(10000)
+      });
 
+      if (dr.ok) {
+        if (useStream) return new Response(dr.body, { headers: { "Content-Type": "text/event-stream", "Access-Control-Allow-Origin": "*" } });
+        const data = await dr.json();
+        return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+      }
+      console.warn("[Vision] OpenRouter falhou:", dr.status, await dr.text());
+    }
+
+    return new Response(JSON.stringify({ error: "Nenhum provedor de IA configurado (NVIDIA_API_KEY ou OPENROUTER_API_KEY)" }), { status: 503, headers: { "Content-Type": "application/json" } });
   } catch (e) {
-    console.error("handler error:", e.message, e.stack);
-    return new Response(JSON.stringify({ error: e.message }), { 
-      status: 500, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } 
-    });
+    const msg = e.name === 'TimeoutError' || e.name === 'AbortError' ? "Timeout (8-10s). Tente imagem menor." : e.message;
+    return new Response(JSON.stringify({ error: msg }), { status: 504, headers: { "Content-Type": "application/json" } });
   }
 }

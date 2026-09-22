@@ -325,6 +325,7 @@ footer.app-footer strong{color:var(--primary)}
 </style>
 <!-- Tesseract.js OCR local (offline, sem timeout, sem API key) -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script async src="https://docs.opencv.org/4.9.0/opencv.js"></script>
 </head>
 <body>
 <div style="position:relative; width:100%; overflow:hidden; background:#1a0033; border-bottom:4px solid #ff00a0; box-shadow:0 8px 28px rgba(255,0,160,0.35);">
@@ -2541,8 +2542,9 @@ function rotuloAposta(a){
    Mais preciso que OCR para volantes marcados à mão
    ======================================================================== */
 
-async function lerVolantePorGrade(file) {
-  if (status) status.innerHTML = "📷 <b>Lendo volante...</b> detectando grade 5x5";
+async function lerVolantePorGrade(file, statusElement = null) {
+  const status = statusElement;
+  if (status) status.innerHTML = "⚡️ <b>Lendo volante...</b> detectando grade 5x5";
   try {
     const img = await carregarImagem(file);
     const { canvas, ctx } = desenharEmCanvas(img, 1200);
@@ -2696,8 +2698,9 @@ function analisarGrade(canvas) {
    Para comprovantes, PDFs, volantes complexos
    ======================================================================== */
 
-async function extrairComNvidia(imgDataUrl) {
-  if (!status) return [];
+async function extrairComNvidia(imgDataUrl, statusElement = null) {
+  const status = statusElement;
+  if (!status) { /* no-op */ }
   status.innerHTML = "🤖 <b>Enviando para NVIDIA (Llama 3.2 11B Vision)...</b><br><small>Aguarde 10-30s</small>";
 
   // Comprime para 800px / 0.5 quality
@@ -2705,15 +2708,22 @@ async function extrairComNvidia(imgDataUrl) {
   img.src = imgDataUrl;
   await new Promise(r => img.onload = r);
   const canvas = document.createElement("canvas");
-  const maxW = 800, maxH = 800;
+  // Compressão adaptativa: mantém < 180KB para Vercel 30s
+  let quality = 0.7;
+  let maxDim = 1024;
   let w = img.width, h = img.height;
-  if (w > maxW || h > maxH) {
-    const ratio = Math.min(maxW/w, maxH/h);
+  if (w > maxDim || h > maxDim) {
+    const ratio = Math.min(maxDim/w, maxDim/h);
     w *= ratio; h *= ratio;
   }
   canvas.width = w; canvas.height = h;
   canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-  const comprimido = canvas.toDataURL("image/jpeg", 0.5);
+  // Ajusta quality até < 180KB
+  let comprimido = canvas.toDataURL("image/jpeg", quality);
+  while (comprimido.length > 180000 && quality > 0.3) {
+    quality -= 0.1;
+    comprimido = canvas.toDataURL("image/jpeg", quality);
+  }
   const base64 = comprimido.split(",")[1];
   const mime = "image/jpeg";
 
@@ -2814,6 +2824,21 @@ async function analisarComIA(){
       if (paginas.length > 1 && status) status.textContent = `📄 PDF com ${paginas.length} páginas — OCR vai ler todas.`;
     }
     const imgDataUrl = paginas[0];
+
+    // 1\ufe0f\u20e3 GRADE VISUAL (OpenCV) \u2014 PRIMEIRA TENTATIVA
+    let jogosGrade = [];
+    try {
+      if (status) status.innerHTML = "\u26b2\ufe0f <b>1/3</b> Detectando grade 5\u00d75 (OpenCV)...";
+      jogosGrade = await lerVolantePorGrade(imgDataUrl, status);
+      if (jogosGrade.length > 0 && jogosGrade[0].length >= 15) {
+        if (status) status.innerHTML = "\u2705 <b>Grade 5\u00d75</b> encontrou ${jogosGrade[0].length} n\u00fameros!";
+        await processarJogosExtraidos([jogosGrade], extraidoDiv, status);
+        return;
+      }
+    } catch (e) {
+      console.warn("Grade falhou:", e);
+    }
+
     // Comprime imagem com qualidade para visão IA (não para Vercel 10s)
     const img = new Image();
     img.src = imgDataUrl;
@@ -2854,7 +2879,7 @@ async function analisarComIA(){
       console.log("[AUTO] OCR encontrou:", jogosOCR.length, "jogos");
 
       // SUCESSO OCR: 5+ jogos = confia no OCR (rápido, offline)
-      if (jogosOCR.length >= 3){
+      if (jogosOCR.length >= 5){
         if (status) status.innerHTML = `✅ <b>OCR Local</b> encontrou ${jogosOCR.length} jogo(s)!`;
         await processarJogosExtraidos(jogosOCR, extraidoDiv, status);
         return;
@@ -2864,7 +2889,7 @@ async function analisarComIA(){
       if (status) status.innerHTML = "🤖 <b>2/2</b> Enviando para NVIDIA (Llama 3.2 11B Vision)...<br><small>Aguarde 10-30s</small>";
 
       try {
-        const jogosNvidia = await extrairComNvidia(imgDataUrl);
+        const jogosNvidia = await extrairComNvidia(imgDataUrl, status);
         if (jogosNvidia.length > 0) {
           if (status) status.innerHTML = `✅ <b>NVIDIA</b> extraiu ${jogosNvidia.length} jogo(s)!`;
           await processarJogosExtraidos(jogosNvidia, extraidoDiv, status);
@@ -3072,7 +3097,7 @@ document.getElementById('btnLerVolante')?.addEventListener('click', async () => 
   if (extraidoDiv) { extraidoDiv.style.display = 'none'; extraidoDiv.textContent = ''; }
 
   try {
-    const marcados = await lerVolantePorGrade(file);
+    const marcados = await lerVolantePorGrade(file, status);
     // Aplica no grid do app
     state.selecionados = new Set(marcados);
     renderGrid();
@@ -3145,8 +3170,8 @@ function confirmarLancamentoIA(){
   if (!jogos.length){ toast("⚠️ Nenhum jogo válido para lançar"); return; }
   let adicionados = 0;
   jogos.forEach(a => {
-    const clean = a.dezenas;
-    const ehBolao = a.tipo === "BOLAO" || clean.length > 15;
+    const clean = [...new Set(a.dezenas.map(n=>parseInt(n)))].sort((a,b)=>a-b);
+    const ehBolao = a.tipo === "BOLAO";
     const cotas = a.tipo === "BOLAO" ? Math.max(2, a.cotas) : 0;
     const existe = state.grupos.some(g => g.jogos.some(j => j.dezenas.length === clean.length && j.dezenas.every((v,i)=>v===clean[i])));
     if (existe) return;
