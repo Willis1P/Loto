@@ -2596,7 +2596,7 @@ async function analisarComIA(){
 
       console.log("[AUTO] OCR encontrou:", jogosOCR.length, "jogos");
 
-      // SUCESSO OCR: 3+ jogos = confia no OCR (rápido, offline)
+      // SUCESSO OCR: 5+ jogos = confia no OCR (rápido, offline)
       if (jogosOCR.length >= 3){
         if (status) status.innerHTML = `✅ <b>OCR Local</b> encontrou ${jogosOCR.length} jogo(s)!`;
         await processarJogosExtraidos(jogosOCR, extraidoDiv, status);
@@ -2621,8 +2621,150 @@ async function analisarComIA(){
       if (fallbackSempre) fallbackSempre.scrollIntoView({behavior:"smooth", block:"center"});
       return;
     }
+    // Usa a primeira página em alta qualidade para IA
+    if (status) status.innerHTML = "🤖 <b>2/2</b> Enviando para IA...<br><small>Aguarde 10-30s</small>";
 
+const systemPrompt = `Você é um extrator EXATO de números de apostas Lotofácil. 
+REGRAS RÍGIDAS:
+1. Olhe CADA bolinha preenchida na imagem. Conte uma a uma.
+2. Cada aposta = 15 números entre 01 e 25. Se vir 16, 17, 18, 19 ou 20 números, inclua todos.
+3. No recibo da Caixa: jogos marcados com LETRA (A, B, C...). Cada letra = 1 aposta completa.
+   - Se uma letra tem números em 2 linhas, JUNTE as duas linhas até fechar 15+ números.
+4. NÃO invente números. Se não tiver certeza de um número, NÃO o inclua.
+5. IGNORE: cabeçalhos, valores R$, datas, números do RESULTADO/sorteio, códigos de barras, QR codes.
+6. Se a imagem for nítida, a extração deve ser PERFEITA.
 
+Responda APENAS JSON válido, sem texto extra:
+{"apostas": [{"dezenas": [n1,n2,...], "tipo": "SIMPLES", "cotas": 1, "pessoas": 1}, ...]}
+Ordene dezenas crescente. Se nenhuma aposta clara, {"apostas": []}`;
+
+    const payload = {
+      messages: [{
+        role: "user",
+        content: [
+          { type: "text", text: systemPrompt },
+          { type: "image_url", image_url: { url: `data:${mime};base64,${base64}`, detail: "high" } }
+        ]
+      }],
+      temperature: 0.01,
+      max_tokens: 1024,
+      seed: 0,
+      stream: false
+    };
+
+    // Chama a Function do Vercel — DeepSeek
+    let resp = null;
+    try {
+      if (status) status.innerHTML = `🤖 <b>2/2</b> IA OpenRouter analisando...<br><small>Aguarde ~10s</small>`;
+      const ctl = new AbortController();
+      const tId = setTimeout(() => ctl.abort(), 25000);
+      const r = await fetch("/api/vision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, provider: "openrouter" }),
+        signal: ctl.signal
+      });
+      clearTimeout(tId);
+      if (!r.ok){
+        const errText = await r.text();
+        let detalhe = errText.slice(0, 200), diag = "";
+        try{
+          const j = JSON.parse(errText);
+          detalhe = j.error || detalhe;
+          if (Array.isArray(j.diagnostico) && j.diagnostico.length) diag = " [" + j.diagnostico.join(" | ").slice(0, 160) + "]";
+        }catch(_){}
+        throw new Error(`HTTP ${r.status}: ${detalhe}${diag}`);
+      }
+      resp = r;
+    } catch(e){
+      const motivo = e.name === "AbortError" ? "tempo esgotado (25s)" : String(e.message || e);
+      console.warn("[IA] OpenRouter falhou:", motivo);
+      throw new Error(`IA OpenRouter falhou: ${motivo.slice(0, 200)}. Use extração manual.`);
+    }
+    if (status) status.innerHTML = `✅ <b>OpenRouter</b> respondeu — lendo resultado...`;
+
+    // Suporta tanto stream (SSE) quanto JSON direto (stream:false) — corrige Unexpected token '<' quando volta HTML
+    const contentType = resp.headers.get("content-type") || "";
+    let conteudo = "";
+    if (contentType.includes("text/event-stream")){
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const linhas = buffer.split("\n\n");
+        buffer = linhas.pop();
+        for (const linha of linhas){
+          if (linha.startsWith("data: ")){
+            const dados = linha.slice(6).trim();
+            if (dados === "[DONE]") continue;
+            try {
+              const j = JSON.parse(dados);
+              const delta = j.choices?.[0]?.delta?.content || j.choices?.[0]?.message?.content || "";
+              conteudo += delta;
+              if (status) status.textContent = `⏳ Extraindo... ${conteudo.length} chars`;
+            } catch(_){}
+          }
+        }
+      }
+      if (buffer) {
+        const linhas = buffer.split("\n\n");
+        for (const linha of linhas){
+          if (linha.startsWith("data: ")){
+            const dados = linha.slice(6).trim();
+            if (dados === "[DONE]") continue;
+            try { conteudo += JSON.parse(dados).choices?.[0]?.delta?.content || JSON.parse(dados).choices?.[0]?.message?.content || ""; }catch(_){}
+          }
+        }
+      }
+    } else {
+      // JSON direto (stream:false) — backend retorna {choices:[{message:{content}}]}
+      const j = await resp.json();
+      conteudo = j.choices?.[0]?.message?.content || j.choices?.[0]?.delta?.content || "";
+      if (!conteudo && j.error) throw new Error(j.error);
+    }
+
+    if (!conteudo){
+      throw new Error("IA não retornou conteúdo. Use extração manual.");
+    }
+
+    const jsonMatch = conteudo.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("IA não retornou JSON. Resposta: " + conteudo.slice(0, 300));
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    // Formato novo (com estrutura): {"apostas": [{dezenas, tipo, cotas, pessoas}]}
+    // Formato legado: {"jogos": [[...]]}
+    const brutoIA = Array.isArray(parsed.apostas) ? parsed.apostas : (Array.isArray(parsed.jogos) ? parsed.jogos : []);
+    const jogosIA = validarApostasExtraidas(brutoIA);
+    // Une o parcial do OCR (1-4 jogos) com o resultado da IA — nada se perde.
+    const jogos = unirApostas(jogosOCR.map(a => normalizarAposta(a)), jogosIA);
+    if (jogos.length === 0) throw new Error("Nenhum jogo extraído. Tente foto mais nítida ou use extração manual.");
+
+    await processarJogosExtraidos(jogos, extraidoDiv, status);
+  } catch(e){
+    console.error("IA erro", e);
+    const msg = String(e.message || "");
+    let dica = "";
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError")){
+      dica = "🌐 <b>Rede bloqueada.</b> A Function <code>/api/vision</code> pode não estar deployada. Verifique se o arquivo <code>api/vision.js</code> está no GitHub e faça Redeploy no Vercel.";
+    } else if (msg.includes("401") || msg.includes("inválida") || msg.includes("não configurada")){
+      dica = "🔑 <b>Chave inválida ou ausente.</b> Confira <code>OPENROUTER_API_KEY</code> em Vercel → Settings → Environment Variables (marque Production + Preview + Development) e faça Redeploy.";
+    } else if (msg.includes("402") || msg.includes("créditos")){
+      dica = "💳 <b>Sem créditos no provedor.</b> Recarregue a conta ou use a extração manual abaixo.";
+    } else if (msg.includes("HTML")){
+      dica = "🌐 <b>Function retornou HTML.</b> Veja logs em Vercel → Deployments → Functions.";
+    } else {
+      dica = "ℹ️ Tente foto mais nítida ou use extração manual.";
+    }
+        if (status) {
+      status.innerHTML = `❌ <b>Erro:</b> ${msg.slice(0, 220)}<br><br>${dica}<br><small style="color:var(--text-soft);">Role até <b>✏️ Ou cole manualmente</b> abaixo (sempre visível).</small>`;
+      const fallbackSempre = document.getElementById("fallbackManualSempre");
+      if (fallbackSempre) fallbackSempre.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+    toast("❌ Falha na IA — use extração manual");
+  }
 }
 
 
@@ -2641,16 +2783,13 @@ function mostrarManual(){
     fallback.scrollIntoView({behavior:'smooth', block:'center'});
     fallback.focus();
   }
-
 }
 
-function usarExtracaoManul(){{
+function usarExtracaoManual(){
   const ta = document.getElementById("fallbackManual");
   if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números"); return; }
   processarJogosManuais(ta.value);
 }
-}
-
 function usarExtracaoManualSempre(){
   const ta = document.getElementById("fallbackManualSempre");
   if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números primeiro"); return; }
