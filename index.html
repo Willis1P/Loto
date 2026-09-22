@@ -2641,13 +2641,16 @@ function mostrarManual(){
     fallback.scrollIntoView({behavior:'smooth', block:'center'});
     fallback.focus();
   }
+
 }
 
-function usarExtracaoManual(){{
+function usarExtracaoManul(){{
   const ta = document.getElementById("fallbackManual");
   if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números"); return; }
   processarJogosManuais(ta.value);
 }
+}
+
 function usarExtracaoManualSempre(){
   const ta = document.getElementById("fallbackManualSempre");
   if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números primeiro"); return; }
