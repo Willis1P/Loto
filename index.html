@@ -2596,7 +2596,7 @@ async function analisarComIA(){
 
       console.log("[AUTO] OCR encontrou:", jogosOCR.length, "jogos");
 
-      // SUCESSO OCR: 5+ jogos = confia no OCR (rápido, offline)
+      // SUCESSO OCR: 3+ jogos = confia no OCR (rápido, offline)
       if (jogosOCR.length >= 3){
         if (status) status.innerHTML = `✅ <b>OCR Local</b> encontrou ${jogosOCR.length} jogo(s)!`;
         await processarJogosExtraidos(jogosOCR, extraidoDiv, status);
@@ -2606,12 +2606,10 @@ async function analisarComIA(){
       // OCR achou poucos (1-2) ou nenhum: mostra o que achou e oferece extração manual
       if (jogosOCR.length > 0){
         if (status) status.innerHTML = `⚠️ OCR achou só ${jogosOCR.length} jogo(s). <br><button class="chip" onclick="usarOCRParcial()">Usar esses ${jogosOCR.length} jogo(s)</button> <button class="chip" style="background:var(--bg);" onclick="mostrarManual()">✏️ Completar manual</button>`;
-        // Guarda parcial para botão "Usar esses"
         window._jogosOCRParcial = jogosOCR;
       } else {
         if (status) status.innerHTML = `⚠️ OCR não achou jogos claros. <br><button class="chip" onclick="mostrarManual()">✏️ Extrair manual</button>`;
       }
-      // Scroll para extração manual
       const fallbackSempre = document.getElementById("fallbackManualSempre");
       if (fallbackSempre) fallbackSempre.scrollIntoView({behavior:"smooth", block:"center"});
       return;
@@ -2624,13 +2622,28 @@ async function analisarComIA(){
       return;
     }
 
-    // Chama a Function do Vercel — DeepSeek
-    let resp = null;
-    try {
-      }
+
 }
 
-function usarExtracaoManual(){
+
+function usarOCRParcial(){
+  const jogos = window._jogosOCRParcial;
+  if (!jogos || !jogos.length){ toast('⚠️ Nenhum jogo parcial'); return; }
+  const extraidoDiv = document.getElementById('iaExtraido');
+  const status = document.getElementById('iaStatus');
+  processarJogosExtraidos(jogos, extraidoDiv, status);
+  window._jogosOCRParcial = null;
+}
+
+function mostrarManual(){
+  const fallback = document.getElementById('fallbackManualSempre');
+  if (fallback) {
+    fallback.scrollIntoView({behavior:'smooth', block:'center'});
+    fallback.focus();
+  }
+}
+
+function usarExtracaoManual(){{
   const ta = document.getElementById("fallbackManual");
   if (!ta || !ta.value.trim()){ toast("⚠️ Cole os números"); return; }
   processarJogosManuais(ta.value);
@@ -2654,22 +2667,7 @@ function processarJogosManuais(texto){
   processarJogosExtraidos(jogos, extraidoDiv, status);
 }
 
-function usarOCRParcial(){
-  const jogos = window._jogosOCRParcial;
-  if (!jogos || !jogos.length){ toast("⚠️ Nenhum jogo parcial"); return; }
-  await processarJogosExtraidos(jogos, document.getElementById("iaExtraido"), document.getElementById("iaStatus"));
-  window._jogosOCRParcial = null;
-}
-
-function mostrarManual(){
-  const fallback = document.getElementById("fallbackManualSempre");
-  if (fallback) {
-    fallback.scrollIntoView({behavior:"smooth", block:"center"});
-    fallback.focus();
-  }
-}
-
-/* Função comum para processar jogos extraídos (OCR ou Manual) */
+/* Função comum para processar jogos extraídos (OCR ou IA) */
 async function processarJogosExtraidos(jogos, extraidoDiv, status){
   const lista = unirApostas(jogos);
   window._jogosExtraidosIA = lista;
