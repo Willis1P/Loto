@@ -2189,7 +2189,8 @@ function extrairPorBlocosComLetras(texto){
   let acc = [];
   function descarregar(){
     const uniq = [...new Set(acc)].sort((a, b) => a - b);
-    if (uniq.length >= 14 && uniq.length <= 20) jogos.push(uniq);
+    // Lotofácil: exatamente 15 números únicos (padrão) ou 15-20 (teimosinha)
+    if (uniq.length === 15 || (uniq.length >= 15 && uniq.length <= 20)) jogos.push(uniq);
     acc = [];
   }
   for (const crua of linhas){
@@ -2211,7 +2212,9 @@ function extrairPorBlocosComLetras(texto){
       const limpa = limparLinhaJogo(line);
       const nums = extrairNumerosValidos(limpa);
       const letrasLinha = limpa.replace(/[\d\s]/g, "").trim();
-      if (nums.length >= 1 && nums.length <= 12 && letrasLinha.length <= 2){ acc = acc.concat(nums); continue; }
+      // Só continua se: 1-12 números novos, sem letras, e não duplica números já no acc
+      const novos = nums.filter(n => !acc.includes(n));
+      if (novos.length >= 1 && novos.length <= 12 && letrasLinha.length <= 2 && acc.length + novos.length <= 20){ acc = acc.concat(novos); continue; }
       descarregar(); // qualquer outra linha encerra o bloco
     }
     // fora de bloco: ignora (cabeçalhos, rodapés, propaganda)
@@ -2286,7 +2289,8 @@ function fundirBandasY(words){
   let acc = [], lastKey = null;
   function descarregar(){
     const uniq = [...new Set(acc)].sort((a, b) => a - b);
-    if (uniq.length >= 14 && uniq.length <= 20) jogos.push(uniq);
+    // Lotofácil: exatamente 15 números únicos (padrão) ou 15-20 (teimosinha)
+    if (uniq.length === 15 || (uniq.length >= 15 && uniq.length <= 20)) jogos.push(uniq);
     acc = []; lastKey = null;
   }
   for (const k of keys){
@@ -2443,7 +2447,7 @@ function extrairPorTextoBruto(texto){
   return removerDuplicatas(jogos);
 }
 
-function extrairNumerosValidos(str){
+function extrairNumerosValidos(str, contexto){
   // Regex mais robusta: pega 01-25, 1-25, ignora O/I/l confusões comuns
   const matches = str.match(/\b(?:0?[1-9]|1\d|2[0-5]|[OIl]?[1-9]|1[OIl]|2[OIl])\b/gi) || [];
   const nums = [];
@@ -2465,12 +2469,17 @@ function removerDuplicatas(jogos){
   const unicos = [];
   const chaves = new Set();
   for (const j of jogos){
-    const key = j.join(",");
+    // Valida: jogo deve ter 15 números únicos (padrão) ou 15-20 (teimosinha)
+    const uniq = [...new Set(j)].sort((a,b)=>a-b);
+    if (uniq.length < 15 || uniq.length > 20) continue;
+    // Todos os números devem ser 1-25
+    if (!uniq.every(n => n >= 1 && n <= 25)) continue;
+    const key = uniq.join(",");
     if (!chaves.has(key)){
       chaves.add(key);
-      unicos.push(j);
+      unicos.push(uniq);
     }
-}
+  }
   return unicos;
 }
 
