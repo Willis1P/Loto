@@ -2690,6 +2690,98 @@ function analisarGrade(canvas) {
 }
 
 
+
+/* ========================================================================
+   EXTRAÇÃO VIA NVIDIA API (Llama 3.2 11B Vision)
+   Para comprovantes, PDFs, volantes complexos
+   ======================================================================== */
+
+async function extrairComNvidia(imgDataUrl) {
+  if (!status) return [];
+  status.innerHTML = "🤖 <b>Enviando para NVIDIA (Llama 3.2 11B Vision)...</b><br><small>Aguarde 10-30s</small>";
+
+  // Comprime para 800px / 0.5 quality
+  const img = new Image();
+  img.src = imgDataUrl;
+  await new Promise(r => img.onload = r);
+  const canvas = document.createElement("canvas");
+  const maxW = 800, maxH = 800;
+  let w = img.width, h = img.height;
+  if (w > maxW || h > maxH) {
+    const ratio = Math.min(maxW/w, maxH/h);
+    w *= ratio; h *= ratio;
+  }
+  canvas.width = w; canvas.height = h;
+  canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+  const comprimido = canvas.toDataURL("image/jpeg", 0.5);
+  const base64 = comprimido.split(",")[1];
+  const mime = "image/jpeg";
+
+  const systemPrompt = `Você é um extrator de apostas Lotofácil. Analise a imagem do volante/comprovante com ATENÇÃO MÁXIMA e extraia TODOS os jogos apostados.
+
+REGRAS OBRIGATÓRIAS:
+- Cada jogo da Lotofácil tem 15 a 20 números entre 01 e 25
+- Um volante pode ter MÚLTIPLOS jogos (até 10+ jogos por volante)
+- Procure por TODOS os conjuntos de números marcados (bolinhas preenchidas)
+- Ignore: cabeçalhos, valores em R$, datas, números SORTEADOS (resultado), códigos de barras, QR codes
+- Foque APENAS nos números APOSTADOS (marcados pelo apostador)
+- Números podem estar em linhas, colunas, grades ou tabelas
+
+Responda APENAS com JSON válido: {"jogos": [[n1,n2,...n15-20], [n1,n2,...], ...]}.
+Ordene cada jogo crescente. Se não encontrar jogos, responda {"jogos":[]}.
+Exemplo: {"jogos": [[1,3,4,5,7,9,12,14,15,18,20,21,23,24,25], [2,5,6,8,10,11,13,16,17,19,21,22,24,25,12]]}`;
+
+  const payload = {
+    model: "meta/llama-3.2-11b-vision-instruct",
+    messages: [{
+      role: "user",
+      content: [
+        { type: "text", text: systemPrompt },
+        { type: "image_url", image_url: { url: `data:${mime};base64,${base64}`, detail: "high" } }
+      ]
+    }],
+    temperature: 0.05,
+    max_tokens: 1024,
+    seed: 0,
+    stream: false,
+    reasoning_effort: "low"
+  };
+
+  try {
+    const resp = await fetch("/api/nvidia", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error(`HTTP ${resp.status}: ${errText.slice(0,200)}`);
+    }
+
+    const data = await resp.json();
+    const conteudo = data.choices?.[0]?.message?.content || "";
+    
+    if (!conteudo) throw new Error("NVIDIA não retornou conteúdo");
+
+    const jsonMatch = conteudo.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("NVIDIA não retornou JSON: " + conteudo.slice(0,300));
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    const jogos = Array.isArray(parsed.jogos) ? parsed.jogos : [];
+    
+    // Valida cada jogo
+    const validos = jogos.map(j => [...new Set(j.map(n=>parseInt(n))).sort((a,b)=>a-b)])
+      .filter(j => j.length >= 15 && j.length <= 20 && j.every(n=>n>=1 && n<=25));
+    
+    return validos;
+  } catch (e) {
+    console.error("NVIDIA erro:", e);
+    throw e;
+  }
+}
+
+
 async function analisarComIA(){
   const input = document.getElementById("inputIA");
   const status = document.getElementById("iaStatus");
@@ -2768,12 +2860,28 @@ async function analisarComIA(){
         return;
       }
 
-      // OCR achou poucos (1-2) ou nenhum: mostra o que achou e oferece extração manual
+      // OCR achou poucos (1-2) ou nenhum: TENTA NVIDIA ANTES do manual
+      if (status) status.innerHTML = "🤖 <b>2/2</b> Enviando para NVIDIA (Llama 3.2 11B Vision)...<br><small>Aguarde 10-30s</small>";
+
+      try {
+        const jogosNvidia = await extrairComNvidia(imgDataUrl);
+        if (jogosNvidia.length > 0) {
+          if (status) status.innerHTML = `✅ <b>NVIDIA</b> extraiu ${jogosNvidia.length} jogo(s)!`;
+          await processarJogosExtraidos(jogosNvidia, extraidoDiv, status);
+          return;
+        }
+        if (status) status.innerHTML = "⚠️ NVIDIA não achou jogos claros → extração manual";
+      } catch(e) {
+        console.warn("NVIDIA falhou:", e);
+        if (status) status.innerHTML = `⚠️ NVIDIA erro (${e.message}) → extração manual`;
+      }
+
+      // OCR + NVIDIA falharam: oferece manual
       if (jogosOCR.length > 0){
         if (status) status.innerHTML = `⚠️ OCR achou só ${jogosOCR.length} jogo(s). <br><button class="chip" onclick="usarOCRParcial()">Usar esses ${jogosOCR.length} jogo(s)</button> <button class="chip" style="background:var(--bg);" onclick="mostrarManual()">✏️ Completar manual</button>`;
         window._jogosOCRParcial = jogosOCR;
       } else {
-        if (status) status.innerHTML = `⚠️ OCR não achou jogos claros. <br><button class="chip" onclick="mostrarManual()">✏️ Extrair manual</button>`;
+        if (status) status.innerHTML = `⚠️ OCR + NVIDIA não acharam jogos claros. <br><button class="chip" onclick="mostrarManual()">✏️ Extrair manual</button>`;
       }
       const fallbackSempre = document.getElementById("fallbackManualSempre");
       if (fallbackSempre) fallbackSempre.scrollIntoView({behavior:"smooth", block:"center"});
